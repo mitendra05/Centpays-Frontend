@@ -1573,6 +1573,11 @@ td:last-child {
 	margin-bottom: 10px;
 }
 
+.bcksettlement{
+	margin: -10px -5px;
+	margin-bottom: 5px;
+}
+
 /* ---------------------------  Create Settlements  --------------------------- */
 .create-settlement-container {
 	width: 100%;
@@ -2020,15 +2025,6 @@ td:last-child {
 	outline: 1px solid var(--primary);
 }
 
-.prewive-list-table table {
-	border-collapse: collapse;
-	text-align: center;
-	margin: 10px 0;
-	outline: 1px solid var(--black);
-	border-radius: 10px;
-	width: 100%;
-}
-
 .prewive-list-table table th {
 	font-size: 1rem;
 	font-weight: 600;
@@ -2141,7 +2137,6 @@ td {
 	text-align: center;
 	margin: 10px 0;
 	outline: 1px solid var(--black);
-	border-radius: 10px;
 	width: 100%;
 }
 
@@ -2261,10 +2256,8 @@ td {
 .attachment-div {
 	display: flex;
 	align-items: center;
-	background-color: rgb(121, 75, 222, 0.3);
 	width: fit-content;
 	border-radius: 5px;
-	padding: 5px;
 }
 
 .attachment-div img {
@@ -2276,9 +2269,42 @@ td {
 
 .attachment-div label {
 	color: var(--primary-dark);
-	font-size: 0.7rem;
+	font-size: 0.8rem;
 }
 
+.sendInvoice{
+	position: absolute;
+	bottom: 20px;
+	right: 25px;
+}
+
+.file-attach{
+	position: absolute;
+	bottom: 50px;
+	left: 20px;
+}
+
+.file-input {
+	display: none;
+  }
+  
+.file-input-label {
+	display: inline-block;
+	padding:0px 5px;
+	border-radius: 5px;
+	cursor: pointer;
+	margin-right: 10px;
+	margin-left: -1px;
+	justify-content: center;
+  }
+
+.file-name {
+	max-width: 200px;
+	overflow: hidden; 
+	text-overflow: ellipsis; 
+	white-space: nowrap; 
+	display: inline-block;
+  }
 /* ----------------------------  Transaction Report  ---------------------------- */
 
 /* / TRANSACTION MONITORING / */
@@ -2689,6 +2715,7 @@ border-bottom: none !important;
 
 /* / tooltip / */
 
+/* ..............custom-tooltip........... */
 .custom-tooltip {
 	background-color: rgba(255, 255, 255, 0.9);
 	border: 1px solid #ccc;
@@ -2795,6 +2822,7 @@ border-bottom: none !important;
 	list-style-type: disc;
 	padding-left: 20px;
 }
+
 
 /* / ......................Message Box..................... / */
 
@@ -3122,12 +3150,11 @@ border-bottom: none !important;
 	}
 
 	.prewive-list-table table {
-		display: block;
-		outline: 1px solid var(--black);
-		border-radius: 10px;
-		background-color: #0056b3;
-		width: 100% !important;
-		margin: 10px 0 !important;
+		border-collapse: collapse;
+		text-align: center;
+		margin: 10px 0;
+		border: 1px solid var(--black);
+		width: 100%;
 	}
 
 	.prewive-list-table table th,
@@ -3220,7 +3247,6 @@ border-bottom: none !important;
 		margin-right: 50px !important;
 	}
 }
-
 /* / ...................user modal....................... / */
 
 .user-modal {
@@ -3926,7 +3952,7 @@ width: 100px;
 }
 
 .right-section-middle-body {
-	padding: 20px;
+	padding: 20px 5px;
 }
 
 .right-section-middle-body p {
@@ -4001,6 +4027,7 @@ width: 100px;
 
 .rates-table td:nth-child(3) {
 	font-size: 13px;
+	width: 300px;
 	color: rgb(108, 103, 119, .8)
 }
 
@@ -4047,6 +4074,13 @@ width: 100px;
 .bckbtn {
 	margin-right: 10px;
 }
+
+.Info-btn{
+	display: flex;
+	align-items: center;
+	gap: 5px;
+}
+
 
 /* ............dashboard weekly card....... */
 

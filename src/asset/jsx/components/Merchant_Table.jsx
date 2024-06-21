@@ -7,7 +7,10 @@ import MerchantForm from "./Merchant_Form";
 
 //SVG icons
 import { RightSign, Oops, LeftSign } from "../../media/icon/SVGicons";
-import searchImg from "../../media/image/search-transaction.png"
+import searchImg from "../../media/image/search-transaction.png";
+import ScrollTableToBottomButton from "./ScrollTableToBottom";
+import ScrollTableToTopButton from "./ScrollTableToTop";
+
 
 class Table extends Component {
   constructor(props) {
@@ -117,6 +120,7 @@ class Table extends Component {
     const {
       highlightedOptions,
       errorMessage,
+      messageType,
       searchText,
       noResultsFound,
       rowsPerPage,
@@ -136,6 +140,7 @@ class Table extends Component {
         {errorMessage && (
           <MessageBox
             message={errorMessage}
+            messageType={messageType}
             onClose={() => this.setState({ errorMessage: "" })}
           />
         )}
@@ -175,10 +180,11 @@ class Table extends Component {
                         {item.heading}
                       </th>
                     ))}
+                      <th>{<ScrollTableToBottomButton/>}</th>
                     {showMerchants && <th></th>}
                   </tr>
                 </thead>
-              )}
+              )}              
               {!noResultsFound ? (
                 <tbody>
                   {paginatedData.map((row, index) => (
@@ -220,6 +226,7 @@ class Table extends Component {
                   </tr>
                 </tbody>
               )}
+              <ScrollTableToTopButton/>
             </table>
           </div>
           {!noResultsFound && (
@@ -239,16 +246,19 @@ class Table extends Component {
                 <button
                   onClick={() => this.handlePageChange(-1)}
                   disabled={currentPage === 1}
+                  className={currentPage === 1 ? 'disabled-button' : ''}
                 >
                   <LeftSign />
                 </button>
                 <button
                   onClick={() => this.handlePageChange(1)}
                   disabled={currentPage === totalPages}
+                  className={currentPage === totalPages ? 'disabled-button' : ''}
                 >
                   <RightSign />
                 </button>
               </div>
+
             </div>
           )}
         </div>

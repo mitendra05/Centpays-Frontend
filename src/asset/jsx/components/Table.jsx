@@ -22,14 +22,26 @@ class Table extends Component {
     };
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.searchCriteria !== this.props.searchCriteria || prevProps.dataToRender !== this.props.dataToRender) {
+      this.setState({ expandedRows: [] });
+    }
+  }
+  
+
   toggleRow = (id) => {
     this.setState((prevState) => {
       const { expandedRows } = prevState;
-      return {
-        expandedRows: expandedRows.includes(id)
-          ? expandedRows.filter((rowId) => rowId !== id)
-          : [...expandedRows, id]
-      };
+      const index = expandedRows.indexOf(id);
+      const newExpandedRows = [...expandedRows];
+  
+      if (index === -1) {
+        newExpandedRows.push(id);
+      } else {
+        newExpandedRows.splice(index, 1);
+      }
+  
+      return { expandedRows: newExpandedRows };
     });
   };
 
@@ -95,7 +107,7 @@ class Table extends Component {
   };
 
   render() {
-    const { headerLabels, dataToRender, onViewClick } = this.props;
+    const { headerLabels, dataToRender, onViewClick, shouldRenderRightSign, shouldRenderScrollButtons, } = this.props;
     const { expandedRows, currentPage, rowsPerPage, showTotalAmount } = this.state;
 
     const startIndex = (currentPage - 1) * rowsPerPage;
@@ -119,7 +131,7 @@ class Table extends Component {
                   {headerLabels.slice(0, 7).map((item, index) => (
                     <th className="p1" key={index}>{item.heading}</th>
                   ))}
-                  <th>{<ScrollTableToBottomButton/>}</th>
+                  <th>{shouldRenderScrollButtons && <ScrollTableToBottomButton />}</th>
                 </tr>
               </thead>
               <tbody>
@@ -133,17 +145,19 @@ class Table extends Component {
                       {headerLabels.slice(0, 7).map((collabel, labelIndex) => (
                         <td key={labelIndex}>
                           {collabel.id === 1 || collabel.id === 2 ? (
-                        <CopyToClipboard text={row[collabel.label]} />
-                      ) : (
-                        collabel.id === 5
-                          ? this.getStatusText(row[collabel.label])
-                          : row[collabel.label]
-                      )}
-                    </td>
+                            <CopyToClipboard text={row[collabel.label]} />
+                          ) : (
+                            collabel.id === 5
+                              ? this.getStatusText(row[collabel.label])
+                              : row[collabel.label]
+                          )}
+                        </td>
                       ))}
-                      <td onClick={() => onViewClick(row)}>
-                        <RightSign className="icon2" />
-                      </td>
+                      {shouldRenderRightSign && (
+                        <td onClick={() => onViewClick(row)}>
+                          <RightSign className="icon2" />
+                        </td>
+                      )}
                     </tr>
                     {expandedRows.includes(startIndex + index) && (
                       <tr className="p2">
@@ -167,19 +181,19 @@ class Table extends Component {
                     )}
                   </React.Fragment>
                 ))}
-                <ScrollTableToTopButton/>
+                {shouldRenderScrollButtons && <ScrollTableToTopButton />}
                 <tr className="p2 total-amount-row">
                   <td className="txn-amount-blank" colSpan={4}></td>
                   <td className="txn-amount-head" colSpan={4}>Subtotal</td>
                   <td className="txn-amount-value">{totalAmountCurrentPage.toFixed(2)}</td>
                 </tr>
                 {showTotalAmount && (
-                         <tr className="p2 total-amount-row">
-                         <td className="txn-amount-blank" colSpan={4}></td>
-                         <td className="txn-amount-head" colSpan={4}>Total</td>
-                         <td className="txn-amount-value">{totalAmountAllPages.toFixed(2)}</td>
-                       </tr>
-                      )}
+                  <tr className="p2 total-amount-row">
+                    <td className="txn-amount-blank" colSpan={4}></td>
+                    <td className="txn-amount-head" colSpan={4}>Total</td>
+                    <td className="txn-amount-value">{totalAmountAllPages.toFixed(2)}</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -196,13 +210,22 @@ class Table extends Component {
               <p>
                 {`${startIndex + 1}-${Math.min(endIndex, dataToRender.length)} of ${dataToRender.length}`}
               </p>
-              <button onClick={() => this.handlePageChange('prev')} disabled={currentPage === 1}>
+              <button
+                onClick={() => this.handlePageChange('prev')}
+                disabled={currentPage === 1}
+                className={currentPage === 1 ? 'disabled-button' : ''}
+              >
                 <LeftSign />
               </button>
-              <button onClick={() => this.handlePageChange('next')} disabled={currentPage === totalPages}>
+              <button
+                onClick={() => this.handlePageChange('next')}
+                disabled={currentPage === totalPages}
+                className={currentPage === totalPages ? 'disabled-button' : ''}
+              >
                 <RightSign />
               </button>
             </div>
+
           </div>
         </div>
       </>

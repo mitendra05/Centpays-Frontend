@@ -16,13 +16,12 @@ class ListSettlement extends Component {
     this.state = {
       sidebaropen: true,
       headerLabels: [
-        { id: 1, heading: "# Client", label: "client_id" },
+        { id: 1, heading: "Client", label: "company_name" },
         { id: 2, heading: "Status", label: "status" },
-        { id: 3, heading: "Client", label: "company_name" },
-        { id: 4, heading: "Email", label: "email" },
-        { id: 5, heading: "Country", label: "country" },
-        { id: 6, heading: "Skype ID", label: "skype_id" },
-        { id: 7, heading: "URL", label: "website_url" },
+        { id: 3, heading: "Email", label: "email" },
+        { id: 4, heading: "Country", label: "country" },
+        { id: 5, heading: "Skype ID", label: "skype_id" },
+        { id: 6, heading: "URL", label: "website_url" },
       ],
       apiData: [],
       showMerchants: true,
