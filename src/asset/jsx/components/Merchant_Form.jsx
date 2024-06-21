@@ -5,6 +5,7 @@ import MessageBox from "./Message_box";
 
 //SVG icons
 import { LeftArrow, RightArrow, Reset, Close } from "../../media/icon/SVGicons";
+import CustomTooltip from "./Custom-tooltip";
 
 class MerchantForm extends Component {
   constructor(props) {
@@ -22,16 +23,14 @@ class MerchantForm extends Component {
     };
   }
 
-  componentDidUpdate(prevState) {
-    if (
-      prevState.isAddMerchantPanelOpen !== this.state.isAddMerchantPanelOpen
-    ) {
-      if (this.state.isAddMerchantPanelOpen) {
-        document.body.style.overflow = "hidden";
-      } else {
-        document.body.style.overflow = "auto";
-      }
+  componentDidMount() {
+    if (this.props.isAddMerchantPanelOpen) {
+      document.body.style.overflow = "hidden";
     }
+  }
+  
+  componentWillUnmount() {
+    document.body.style.overflow = "auto";
   }
 
   handleInputChange = (event) => {
@@ -191,15 +190,17 @@ class MerchantForm extends Component {
   };
   
   render() {
-  const {handleAddMerchant} = this.props
+    const {handleAddMerchant,submitButtonText,heading} = this.props
     const {
       errorMessage,
+      messageType
     } = this.state;
     return (
       <>
         {errorMessage && (
           <MessageBox
             message={errorMessage}
+            messageType={messageType}
             onClose={() => this.setState({ errorMessage: "" })}
           />
         )}
@@ -208,7 +209,7 @@ class MerchantForm extends Component {
                 <div className="sendPanel">
                   <div className="sendPanel-header">
                     {" "}
-                    <h5>Add New Merchant</h5>
+                    <h5>{heading || 'Add New Merchant'}</h5>
                     <Close
                       className="icon"
                       onClick={() => handleAddMerchant(false)}
@@ -374,16 +375,21 @@ class MerchantForm extends Component {
                             </div>
                           </div>
                           <div className="add-merchant-form-bottom">
+                          <CustomTooltip title="Reset">
                           <button
                           className="add-merchant-panel-btn"
                               onClick={this.handleReset}
                             >
+                              
                               <Reset/>
+                             
                             </button>
+                            </CustomTooltip>
+                            <CustomTooltip title="Next">
                             <button type="submit" className="add-merchant-panel-btn">
                               <RightArrow/>
                             </button>
-                            
+                            </CustomTooltip>
                           </div>
                         </form>
                       </div>
@@ -543,21 +549,27 @@ class MerchantForm extends Component {
                             </div>
                           </div>
                           <div className="add-merchant-form-bottom">
+                          <CustomTooltip title="Reset">
                             <button
                             className="add-merchant-panel-btn"
                               onClick={this.handleReset}
                             >
                               <Reset/>
                             </button>
+                            </CustomTooltip>
+                            <CustomTooltip title="Previous">
                             <button
                             className="add-merchant-panel-btn"
                               onClick={this.handleBack}
                             >
                               <LeftArrow/>
                             </button>
+                            </CustomTooltip>
+                            <CustomTooltip title="Next">
                             <button type="submit" className="add-merchant-panel-btn">
                              <RightArrow/>
                             </button>
+                            </CustomTooltip>
                           </div>
                         </form>
                       </div>
@@ -607,20 +619,24 @@ class MerchantForm extends Component {
                             </div>
                           </div>
                           <div className="add-merchant-form-bottom">
+                          <CustomTooltip title="Reset">
                             <button
                             className="add-merchant-panel-btn"
                               onClick={this.handleReset}
                             >
                               <Reset/>
                             </button>
+                            </CustomTooltip>
+                            <CustomTooltip title="Previous">
                             <button
                             className="add-merchant-panel-btn"
                               onClick={this.handleBack}
                             >
                               <LeftArrow/>
                             </button>
+                            </CustomTooltip>
                             <button type="submit" className="btn-primary">
-                              Submit
+                              {submitButtonText || 'Submit'}
                             </button>
                           </div>
                         </form>

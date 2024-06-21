@@ -86,7 +86,6 @@ class Table extends Component {
         this.setState({ ratesdata: result });
       }
     } catch (error) {
-      console.error();
       this.setState({ errorMessage: "Error fetching rates data:", error });
     }
   };
@@ -124,15 +123,13 @@ class Table extends Component {
       );
 
       const result = await response.json();
-      console.log("result", result);
-      this.setState({ errorMessage: result.error });
+      this.setState({ errorMessage: "Status update successfully",messageType:"success" });
       this.setState({ isEditStatusModal: false });
       this.props.showSettlementRecord(this.props.company_name);
     } catch (error) {
       this.setState({ errorMessage: "Error updating status data:", error });
     }
   };
-
   getStatusImage(status) {
     switch (status) {
       case "Success":
@@ -218,12 +215,11 @@ class Table extends Component {
         }
       );
       const excelData = await response.json();
-      console.log("result", excelData);
       this.setState({ errorMessage: excelData.error });
       this.jsonToExcel(excelData, company_name);
       this.setState({ fromDate: "", toDate: "", isGenerateExcelModal: false })
     } catch (error) {
-      this.setState({ errorMessage: "Error updating status data:", error });
+      this.setState({ errorMessage: "Error updating status data:", messageType:"fail" });
     }
   }
 
@@ -255,6 +251,7 @@ class Table extends Component {
       noResultsFound,
       rows,
       currentPage,
+      messageType
     } = this.state;
     const dataToRender =
       highlightedOptions.length > 0 ? highlightedOptions : this.props.apiData;
@@ -267,6 +264,7 @@ class Table extends Component {
         {errorMessage && (
           <MessageBox
             message={errorMessage}
+            messageType={messageType}
             onClose={() => this.setState({ errorMessage: "" })}
           />
         )}
@@ -411,7 +409,7 @@ class Table extends Component {
         )}
         <div className="Table-container">
           <div className="table-Header">
-            
+
             {showRates && (
               <Link to={`/createsettlement`}>
                 <button className="btn-primary"><PlusSymbol className="white-icon" /> Create Invoice</button>
@@ -504,27 +502,35 @@ class Table extends Component {
                 )}
               </tbody>
             </table>
-            <ScrollTableToTopButton/>
+            <ScrollTableToTopButton />
           </div>
           <div className="table-Footer">
-          <div className="table-footer-rows-div">
-            <label htmlFor="noRows">Rows per page</label>
-            <select id="noRows" value={this.state.rows} onChange={this.handleRowsChange}>
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-            </select>
-          </div>
+            <div className="table-footer-rows-div">
+              <label htmlFor="noRows">Rows per page</label>
+              <select id="noRows" value={this.state.rows} onChange={this.handleRowsChange}>
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+              </select>
+            </div>
             <div className="table-footer-buttons-div">
-            <p>
-              {`${startIdx + 1}-${Math.min(endIdx, dataToRender.length)} of ${dataToRender.length}`}
-            </p>
-            <button onClick={() => this.handlePageChange('prev')} disabled={currentPage === 1}>
-              <LeftSign />
-            </button>
-            <button onClick={() => this.handlePageChange('next')} disabled={currentPage === totalPages}>
-              <RightSign />
-            </button>
+              <p>
+                {`${startIdx + 1}-${Math.min(endIdx, dataToRender.length)} of ${dataToRender.length}`}
+              </p>
+              <button
+                onClick={() => this.handlePageChange('prev')}
+                disabled={currentPage === 1}
+                className={currentPage === 1 ? 'disabled-button' : ''}
+              >
+                <LeftSign />
+              </button>
+              <button
+                onClick={() => this.handlePageChange('next')}
+                disabled={currentPage === totalPages}
+                className={currentPage === totalPages ? 'disabled-button' : ''}
+              >
+                <RightSign />
+              </button>
             </div>
           </div>
         </div>

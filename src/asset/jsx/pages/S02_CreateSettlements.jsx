@@ -9,7 +9,15 @@ import Modal from "../components/Modal";
 // images
 import companyLogo from "../../media/image/centpays_full_logo.png";
 
-import { LeftSign, Close, Send, Attachment, Create } from "../../media/icon/SVGicons";
+import {
+  LeftSign,
+  Close,
+  Send,
+  Attachment,
+  Create,
+  LeftArrow,
+  Folder,
+} from "../../media/icon/SVGicons";
 
 class CreateSettlement extends Component {
   constructor(props) {
@@ -17,8 +25,8 @@ class CreateSettlement extends Component {
     this.state = {
       sidebaropen: true,
       isNoteOpen: false,
-      isEdited: false, //gentrate pdf screen
-      isPreview: false, //preview screen
+      isEdited: false,
+      isPreview: false,
       apiPreview: [],
       apiGenerate: [],
       rows: [
@@ -62,6 +70,12 @@ class CreateSettlement extends Component {
       dropdownValue: "Default",
       AppCount: " ",
       DecCount: " ",
+      fromEmail: '',
+      toEmail: '',
+      subject: '',
+      message: '',
+      fileName: 'No File Chosen',
+      attachment: null,
     };
   }
 
@@ -190,7 +204,11 @@ class CreateSettlement extends Component {
     }));
   };
 
-  handlePreview = () => {
+  handleBack = () => {
+    window.history.back();
+  };
+
+  handlePreview = async () => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
     const {
       fromDate,
@@ -263,6 +281,7 @@ class CreateSettlement extends Component {
         );
       }
     });
+
     if (dropdownValue === "Full Changes") {
       const apiPreview = amounts ? this.calculateforManual(amounts) : {};
       apiPreview.total_fee = amounts[0].totalfee;
@@ -270,50 +289,47 @@ class CreateSettlement extends Component {
       this.setState({ apiPreview });
     } else if (dropdownValue === "Partial Change") {
       const apiPreview = this.calculateForSemiManually();
-
       this.setState({ apiPreview });
-    } else if (dropdownValue === "Full Changes") {
-      this.setState({ apiPreview: previewData, isPreview: true });
     } else {
-      fetch(`${backendURL}/previewsettlement`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(previewData),
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Error in Fetching data. Please try again later.");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          if (data.settlement_record) {
-            const AppCount =
-              data.settlement_record.usd_app_count ||
-              data.settlement_record.eur_app_count;
-
-            const DecCount =
-              data.settlement_record.usd_dec_count ||
-              data.settlement_record.eur_dec_count;
-
-            this.setState({
-              apiPreview: data.settlement_record,
-              AppCount: AppCount,
-              DecCount: DecCount,
-            });
-          } else {
-            throw new Error("Data is empty or undefined.");
-          }
-        })
-        .catch((error) => {
-          this.setState({
-            errorMessage: error.message,
-            messageType: "Fail",
-          });
+      try {
+        const response = await fetch(`${backendURL}/previewsettlement`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(previewData),
         });
+
+        if (!response.ok) {
+          throw new Error("Error in Fetching data. Please try again later.");
+        }
+
+        const data = await response.json();
+
+        if (data.settlement_record) {
+          const AppCount =
+            data.settlement_record.usd_app_count ||
+            data.settlement_record.eur_app_count;
+
+          const DecCount =
+            data.settlement_record.usd_dec_count ||
+            data.settlement_record.eur_dec_count;
+
+          this.setState({
+            apiPreview: data.settlement_record,
+            AppCount: AppCount,
+            DecCount: DecCount,
+          });
+        } else {
+          throw new Error("Data is empty or undefined.");
+        }
+      } catch (error) {
+        this.setState({
+          errorMessage: error.message,
+          messageType: "Fail",
+        });
+      }
     }
 
     this.setState({ isPreview: true });
@@ -323,7 +339,7 @@ class CreateSettlement extends Component {
     this.setState({ isSendPanelOpen: !this.state.isSendPanelOpen });
   };
 
-  componentDidUpdate(prevState) {
+  componentDidUpdate(prevProps, prevState) {
     if (prevState.isSendPanelOpen !== this.state.isSendPanelOpen) {
       if (this.state.isSendPanelOpen) {
         document.body.style.overflow = "hidden";
@@ -334,30 +350,33 @@ class CreateSettlement extends Component {
   }
 
   handleSend = async (e) => {
+  
     const backendURL = process.env.REACT_APP_BACKEND_URL;
-    const { fromEmail, toEmail, subject, message, attachment } = this.state;
+    const { fromEmail, toEmail, ccEmail, subject, message, attachment, token } = this.state;
+  
     const formData = new FormData();
-
     formData.append("fromEmail", fromEmail);
     formData.append("toEmail", toEmail);
+    formData.append("ccEmail", ccEmail);
     formData.append("subject", subject);
     formData.append("message", message);
     formData.append("attachment", attachment);
-
-    const { token } = this.state;
+  
     try {
       const response = await fetch(`${backendURL}/sendemail`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: formData,
       });
+  
       if (response.ok) {
-        window.alert("email sent");
+        window.alert("Email sent successfully!");
       } else {
-        window.alert("email not sent");
+        const errorResponse = await response.json(); // Assuming your backend returns JSON error messages
+        console.error("Error response:", errorResponse);
+        window.alert("Failed to send email. Please try again.");
       }
     } catch (error) {
       console.error("Error:", error);
@@ -625,8 +644,16 @@ class CreateSettlement extends Component {
   };
 
   handleSaveBack = () => {
-    this.setState({isEdited: false, isPreview: false, company_name:"", fromDate:"", toDate:"", currencyData:null, rateData:null})
-  }
+    this.setState({
+      isEdited: false,
+      isPreview: false,
+      company_name: "",
+      fromDate: "",
+      toDate: "",
+      currencyData: null,
+      rateData: null,
+    });
+  };
 
   handleGenerate = async () => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
@@ -710,6 +737,8 @@ class CreateSettlement extends Component {
       if (row.currency === "EUR" || row.currency === "USD") {
         calculateCurrencyTotalsSettlements(
           row.currency,
+          row.noApp,
+          row.noDec,
           row.noRef,
           row.amtRef,
           row.noChar,
@@ -745,15 +774,17 @@ class CreateSettlement extends Component {
         body: JSON.stringify(settlementData),
       })
         .then((response) => {
-          if (response.settlement_record) {
-            const recordId = response.settlement_record._id;
-            console.log("Saved Report ID:", recordId);
+          if (!response.ok) {
             this.setState({
-              recordId,
-              apiGenerate: response.settlement_record,
-              isModalOpen: true,
-              modalMessage: "Settlement saved successfully"
-            }, () => {
+              errorMessage: "Error in Fetching data. Please try again later.",
+              messageType: "Fail",
+            });
+          }
+          return response.json();
+        })
+        .then((data) => {
+          if (data.settlement_record) {
+            this.setState({ apiGenerate: data.settlement_record }, () => {
               if (!this.state.isPreview) {
                 this.generatePDF();
               }
@@ -783,14 +814,11 @@ class CreateSettlement extends Component {
 
   handleSendInputChange = (event) => {
     const { id, value, files } = event.target;
-    if (id === "attachment") {
-      this.setState({
-        [id]: files[0],
-      });
+
+    if (id === 'attachment' && files.length > 0) {
+      this.setState({ fileName: files[0].name, attachment: files[0] });
     } else {
-      this.setState({
-        [id]: value,
-      });
+      this.setState({ [id]: value });
     }
   };
 
@@ -1038,7 +1066,8 @@ class CreateSettlement extends Component {
                 <div className="create-settelment-rates-block preview-TA-Countainer">
                   <div className="total-amount-countainer ">
                     <p>
-                      Total Amount - {apiPreview.total_vol}{` `}
+                      Total Amount - {apiPreview.total_vol}
+                      {` `}
                       {ratedata.currency}
                     </p>
                   </div>
@@ -1151,7 +1180,7 @@ class CreateSettlement extends Component {
               <div className=" create-settlement-right-container">
                 <div className="row-cards create-settlement-right-header">
                   <button className="btn-primary btn1 disabled-button">
-                    <Create className="btn-icon black-icon"/>
+                    <Create className="btn-icon black-icon" />
                     <p>Generate</p>
                   </button>
                   <div className="right-header-second-row">
@@ -1173,8 +1202,8 @@ class CreateSettlement extends Component {
                         acceptbtnname="View"
                         onAccept={() => {
                           this.setState({ isModalOpen: false });
-                          const { recordId } = this.state; 
-                          window.location.href = `/previewreport/${recordId}`;;
+                          const { recordId } = this.state;
+                          window.location.href = `/previewreport/${recordId}`;
                         }}
                         onDecline={() => this.setState({ isModalOpen: false })}
                         onClose={() => this.setState({ isModalOpen: false })}
@@ -1185,7 +1214,7 @@ class CreateSettlement extends Component {
                     className="btn-primary btn3"
                     onClick={this.handleSaveBack}
                   >
-                    <LeftSign className="white-icon"/>
+                    <LeftSign className="white-icon" />
                     <p>Back</p>
                   </button>
                 </div>
@@ -1359,7 +1388,8 @@ class CreateSettlement extends Component {
                 <div className="create-settelment-rates-block preview-TA-Countainer">
                   <div className="total-amount-countainer ">
                     <p>
-                      Total Amount - {apiGenerate.total_vol}{` `}
+                      Total Amount - {apiGenerate.total_vol}
+                      {` `}
                       {ratedata.currency}
                     </p>
                   </div>
@@ -1472,7 +1502,7 @@ class CreateSettlement extends Component {
               <div className=" create-settlement-right-container">
                 <div className="row-cards create-settlement-right-header">
                   <button className="btn-primary btn1">
-                    <Create className="btn-icon white-icon"/>
+                    <Create className="btn-icon white-icon" />
                     <p>Generate</p>
                   </button>
                   <div className="right-header-second-row">
@@ -1497,7 +1527,6 @@ class CreateSettlement extends Component {
                     <div className="overlay"></div>
                     <div className="sendPanel">
                       <div className="sendPanel-header">
-                        {" "}
                         <h5>Send Invoice</h5>
                         <Close
                           className="icon"
@@ -1531,6 +1560,18 @@ class CreateSettlement extends Component {
                         </div>
                         <div className="input-group">
                           <input
+                            type="email"
+                            id="ccEmail"
+                            className="inputFeild auth-input"
+                            required
+                            onChange={this.handleSendInputChange}
+                          />
+                          <label htmlFor="toEmail" className="inputLabel">
+                            CC
+                          </label>
+                        </div>
+                        <div className="input-group">
+                          <input
                             type="text"
                             id="subject"
                             className="inputFeild auth-input"
@@ -1551,26 +1592,38 @@ class CreateSettlement extends Component {
                             Message
                           </label>
                         </div>
-                        <div>
+                        <div className="file-attach">
                           <div className="attachment-div">
-                            <Attachment className="primary-color-icon"/>
+                            <Attachment className="primary-color-icon" />
                             <label>Attach Report</label>
                           </div>
-
-                          <input
-                            type="file"
-                            id="attachment"
-                            onChange={this.handleSendInputChange}
-                          />
+                          <div>
+                            <input
+                              type="file"
+                              id="attachment"
+                              className="file-input"
+                              onChange={this.handleSendInputChange}
+                            />
+                            <label
+                              htmlFor="attachment"
+                              className="file-input-label btn-secondary"
+                            >
+                              <Folder className="icon2 yellow-icon" />
+                            </label>
+                            <span className="p2 file-name">
+                              {this.state.fileName}
+                            </span>
+                          </div>
                         </div>
                       </div>
-
-                      <button
-                        className="btn-primary"
-                        onClick={() => this.handleSend()}
-                      >
-                        Send
-                      </button>
+                      <div className="sendInvoice">
+                        <button
+                          className="btn-primary"
+                          onClick={this.handleSend}
+                        >
+                          Send
+                        </button>
+                      </div>
                       {/* <button
                         className="btn-secondary"
                         onClick={() => this.handleSendSettlement()}
@@ -1664,6 +1717,13 @@ class CreateSettlement extends Component {
           >
             <div className="create-settlement-container">
               <div className="row-cards create-settlement-left-container">
+                <div className="bcksettlement">
+                  <LeftArrow
+                    className="icon2"
+                    onClick={this.handleBack}
+                  ></LeftArrow>
+                </div>
+
                 <div className="create-settlement-left-container-header">
                   <div className="settlement-header-left">
                     <img
@@ -1914,9 +1974,7 @@ class CreateSettlement extends Component {
                           <div className="list-block-column-removebutton">
                             {index !== 0 && (
                               <div onClick={() => this.removeRow(index)}>
-                                <Close
-                                  className="icon"
-                                />
+                                <Close className="icon" />
                               </div>
                             )}
                           </div>
@@ -1946,7 +2004,8 @@ class CreateSettlement extends Component {
                       </div>
                     ) : isEditing ? (
                       <p>
-                        Total Amount - {apiPreview.total_vol}{` `}
+                        Total Amount - {apiPreview.total_vol}
+                        {` `}
                         {ratedata.currency}
                       </p>
                     ) : (
@@ -1971,7 +2030,11 @@ class CreateSettlement extends Component {
                     </div>
                     <div className="create-settelment-rates-list-rates">
                       <div className="create-settelment-rates-list-FeeRates">
-                       {ratedata == null ? <p>Fee Rates{` (${ratedata.currency})`}</p> : <p>Fee Rates</p>} 
+                        {ratedata == null ? (
+                          <p>Fee Rates{` (${ratedata.currency})`}</p>
+                        ) : (
+                          <p>Fee Rates</p>
+                        )}
                         <ul>
                           <li>{ratedata.MDR}</li>
                           <li>{ratedata.txn_app}</li>
@@ -2218,7 +2281,8 @@ class CreateSettlement extends Component {
               <div className=" create-settlement-right-container">
                 <div className="row-cards create-settlement-right-header create-settlement-right-header-top">
                   <select
-                    className="custom-select"
+                    type="select"
+                    className="inputFeild select-input"
                     value={this.state.dropdownValue}
                     onChange={this.handleDropdownChange}
                   >
@@ -2243,7 +2307,7 @@ class CreateSettlement extends Component {
                     className="btn-primary btn1"
                     onClick={this.handleGenerate}
                   >
-                    <Create className="btn-icon white-icon"/>
+                    <Create className="btn-icon white-icon" />
                     <p>Generate</p>
                   </button>
                   <div className="right-header-second-row">
