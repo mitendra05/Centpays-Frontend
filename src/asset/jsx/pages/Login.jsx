@@ -359,7 +359,7 @@ class Login extends Component {
 								<div className="logo-container">
 									<img className="logo" src={fullLogo} alt="Centpays"></img>
 								</div>
-								<h4>Welcome to Centpays!👋🏻</h4>
+								<h4>Welcome to Our Gateway!👋🏻</h4>
 								<p className="p2">
 									Please sign-in to your account and start the adventure
 								</p>
