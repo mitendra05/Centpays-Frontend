@@ -18,11 +18,11 @@ class ListSettlement extends Component {
 		this.state = {
 			sidebaropen: true,
 			headerLabels: [
-				{ id: 1, heading: "# Client", label: "client_id" },
+				
+				{ id: 1, heading: "Client", label: "company_name" },
 				{ id: 2, heading: "Status", label: "status" },
-				{ id: 3, heading: "Client", label: "company_name" },
-				{ id: 4, heading: "Type", label: "type" },
-				{ id: 5, heading: "Issued On", label: "last_settled_date" },
+				{ id: 3, heading: "Type", label: "type" },
+				{ id: 4, heading: "Issued On", label: "last_settled_date" },
 			],
 			apiData: [],
 			listData: [],
