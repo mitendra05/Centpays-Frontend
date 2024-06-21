@@ -2,7 +2,7 @@ import React, { Component } from "react";
 
 //images
 
-import { Search, DarkMode, LightMode, Notification, ShortCut, Close, } from "../../media/icon/SVGicons";
+import { Search, DarkMode, LightMode, Notification, ShortCut, Close, Logout } from "../../media/icon/SVGicons";
 
 import user from "../../media/icon/user-profile.png";
 import bank from "../../media/icon/company-black.png";
@@ -25,7 +25,6 @@ import apidoc from "../../media/icon/ApiDocument.png";
 import gateway from "../../media/icon/bank-card-dark.png";
 import managemerchant from "../../media/icon/merchManage.png";
 import managesetting from "../../media/icon/user-setting.png";
-import logout from "../../media/icon/logout-light.png";
 import puser from "../../media/icon/user.png";
 import dollar from "../../media/icon/doller-dark.png";
 
@@ -253,6 +252,11 @@ class Header extends Component {
         }
       };    
 
+      handleLogout = () => {
+       window.location.href = `/`
+       localStorage.clear()
+      }
+
     render() {
         const {
             theme,
@@ -404,9 +408,9 @@ class Header extends Component {
                                 <h5>Pricing</h5>
                             </div>
 
-                            <button className="btn-primary userbtn">
+                            <button className="btn-primary userbtn" onClick={this.handleLogout}>
                                 {" "}
-                                Logout <img src={logout} alt="logout" className="icon icon2" />
+                                Logout <Logout className="white-icon" />
                             </button>
                         </div>
                     </div>
