@@ -80,10 +80,16 @@ class ViewMerchant extends Component {
 	}
 
 	componentDidMount() {
-		const {company_name} = this.state;
-		let date = new Date().toISOString();
-		date = date.split("T")[0]
+		const { company_name: stateCompanyName } = this.state;
+
+		const role = localStorage.getItem("role");
+		const localStorageCompanyName = localStorage.getItem("company_name");
+
+		const company_name = role === "merchant" ? localStorageCompanyName : stateCompanyName;
+	  
+		let date = new Date().toISOString().split("T")[0];
 		const backendURL = process.env.REACT_APP_BACKEND_URL;
+
 		this.fetchData(
 		  `${backendURL}/viewclient?company_name=${company_name}`,
 		  "overviewData",
@@ -96,40 +102,48 @@ class ViewMerchant extends Component {
 			});
 		  }
 		);
-		// this.fetchData(`${backendURL}/approvalratio?merchant=${company_name}&fromDate=${date}&toDate=${date}`,'approvalData');
-		this.fetchData(`${backendURL}/volumesum?company_name=${company_name}`,'volumeData');
+
+		this.fetchData(
+		  `${backendURL}/approvalratio?merchant=${company_name}&fromDate=${date}&toDate=${date}`,
+		  "approvalData"
+		);
+
+		this.fetchData(
+		  `${backendURL}/volumesum?company_name=${company_name}`,
+		  "volumeData"
+		);
 	  }
 	
 	  fetchData = async (url, dataVariable, callback = null, Body) => {
 		const { token } = this.state;
 		try {
-		  const response = await fetch(url, {
-			method: "GET",
-			headers: {
-			  Authorization: `Bearer ${token}`,
-			  "Content-Type": "application/json",
-			},
-			body: JSON.stringify(Body),
-		  });
-	
-		  if (response.ok) {
-			const data = await response.json();
-			this.setState({ [dataVariable]: data }, () => {
-			  if (callback) callback(data);
+			const response = await fetch(url, {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(Body),
 			});
-		  } else {
-			this.setState({
-			  errorMessage: "Error in Fetching data. Please try again later.",
-			  messageType: "fail",
-			});
-		  }
+
+			if (response.ok) {
+				const data = await response.json();
+				this.setState({ [dataVariable]: data }, () => {
+					if (callback) callback(data);
+				});
+			} else {
+				this.setState({
+					errorMessage: "Error in Fetching data. Please try again later.",
+					messageType: "fail",
+				});
+			}
 		} catch (error) {
-		  this.setState({
-			errorMessage: "An unexpected error occurred. Please try again later.",
-			messageType: "",
-		  });
+			this.setState({
+				errorMessage: "An unexpected error occurred. Please try again later.",
+				messageType: "",
+			});
 		}
-	  };
+	};
 	
 	  updateMerchantStatus = async (statusText, idforEdit) => {
 		const backendURL = process.env.REACT_APP_BACKEND_URL;
@@ -162,7 +176,15 @@ class ViewMerchant extends Component {
 	
 	  fetchRatesData = async () => {
 		const backendURL = process.env.REACT_APP_BACKEND_URL;
-		const { token, company_name } = this.state;
+		const { token } = this.state;
+	  
+		// Retrieve role and potentially company_name from local storage
+		const role = localStorage.getItem("role");
+		const localStorageCompanyName = localStorage.getItem("company_name");
+	  
+		// Determine the company_name to use based on the role
+		const company_name = role === "merchant" ? localStorageCompanyName : this.state.company_name;
+	  
 		try {
 		  const response = await fetch(
 			`${backendURL}/ratetables?company_name=${company_name}`,
@@ -174,7 +196,7 @@ class ViewMerchant extends Component {
 			  },
 			}
 		  );
-	
+	  
 		  if (response.ok) {
 			const data = await response.json();
 			if (data && data._id) {
@@ -198,7 +220,7 @@ class ViewMerchant extends Component {
 			messageType: "",
 		  });
 		}
-	  };	
+	  };
 
 	  handleSave = async () => {
 		const backendURL = process.env.REACT_APP_BACKEND_URL;
@@ -1127,7 +1149,7 @@ class ViewMerchant extends Component {
 				</>
 			);
 		}
-		else if(userRole === "merchant"){
+		else if (userRole === "merchant") {
 			return (
 				<>
 					{errorMessage && (
@@ -1141,8 +1163,8 @@ class ViewMerchant extends Component {
 					<Sidebar />
 					<div
 						className={`main-screen ${this.state.sidebaropen
-								? "collapsed-main-screen"
-								: "expanded-main-screen"
+							? "collapsed-main-screen"
+							: "expanded-main-screen"
 							}  `}
 					>
 						<div className="view-merchant-container">
@@ -1154,8 +1176,8 @@ class ViewMerchant extends Component {
 									<h5>{this.state.company_name}</h5>
 									<div
 										className={`status-div ${statusText === "Active"
-												? "success-status"
-												: "pending-status"
+											? "success-status"
+											: "pending-status"
 											}`}
 									>
 										<p>{statusText}</p>
@@ -1168,7 +1190,7 @@ class ViewMerchant extends Component {
 													this.handleBackArrowclick("showApprovalRatio")
 												}
 											></LeftSign>
-	
+
 											<div className="approval-div-section">
 												<div>
 													<div className="creditcard-div">
@@ -1196,7 +1218,7 @@ class ViewMerchant extends Component {
 													this.handleBackArrowclick("showTotalVolume")
 												}
 											/>
-	
+
 											<div className="approval-div-section">
 												<div>
 													<div className="creditcard-div">
@@ -1224,7 +1246,7 @@ class ViewMerchant extends Component {
 													this.handleBackArrowclick("showSettledVolume")
 												}
 											/>
-	
+
 											<div className="approval-div-section">
 												<div>
 													<div className="creditcard-div">
@@ -1255,72 +1277,59 @@ class ViewMerchant extends Component {
 												<div className="p2 icons-div">
 													<User className="merchant-icon" />
 													Username:&nbsp;
-													{/* <p>{overviewData.username}</p> */}
+													<p>{overviewData.username}</p>
 												</div>
 											</li>
 											<li>
 												<div className="p2 icons-div">
 													<Id className="merchant-icon"></Id>
 													Merchant ID:&nbsp;
-													{/* <p>{overviewData.merchant_id}</p> */}
+													<p>{overviewData.merchant_id}</p>
 												</div>
 											</li>
 											<li>
 												<div className="p2 icons-div">
 													<URL className="merchant-icon" />
 													Website URL:&nbsp;
-													{/* <p>{overviewData.website_url}</p> */}
+													<p>{overviewData.website_url}</p>
 												</div>
 											</li>
 											<li>
 												<div className="p2 icons-div">
 													<Industry className="merchant-icon" />
 													Industry:&nbsp;
-													{/* <p>{overviewData.industry}</p> */}
+													<p>{overviewData.industry}</p>
 												</div>
 											</li>
 										</ul>
-	
+
 										<p className="p2">CONTACTS</p>
 										<ul>
 											<li>
 												<div className="p2 icons-div">
 													<Phone className="merchant-icon" />
 													Phone No:&nbsp;
-													{/* <p>{overviewData.phone_number}</p> */}
+													<p>{overviewData.phone_number}</p>
 												</div>
 											</li>
 											<li>
 												<div className="p2 icons-div">
 													<Email className="merchant-icon" />
 													Email:&nbsp;
-													{/* <p>{overviewData.email}</p> */}
+													<p>{overviewData.email}</p>
 												</div>
 											</li>
 											<li>
 												<div className="p2 icons-div">
 													<Skype className="merchant-icon" />
 													Skype:&nbsp;
-													{/* <p>{overviewData.skype_id}</p> */}
+													<p>{overviewData.skype_id}</p>
 												</div>
 											</li>
 										</ul>
 									</div>
 								</div>
 								<div className="left-section-bottom">
-									<button
-										className="btn-primary"
-										onClick={() => this.handleAddMerchant()}
-										disabled={isSuspended}
-									>
-										Edit
-									</button>
-									<button
-										className={`btn-secondary ${statusText === 'Active' ? 'btn-suspend' : 'btn-activate'}`}
-										onClick={this.handleStatusChange}
-									>
-										{buttonLabel}
-									</button>
 								</div>
 							</div>
 							<div className="right-section">
@@ -1338,40 +1347,40 @@ class ViewMerchant extends Component {
 													<li>
 														<div className="p2 icons-div">
 															Country:&nbsp;
-															{/* <p>{overviewData.country}</p> */}
+															<p>{overviewData.country}</p>
 														</div>
 													</li>
 													<li>
 														<div className="p2 icons-div">
 															City:&nbsp;
-															{/* <p>{overviewData.city}</p> */}
+															<p>{overviewData.city}</p>
 														</div>
 													</li>
 													<li>
 														<div className="p2 icons-div">
 															Street Address1:&nbsp;
-															{/* <p>{overviewData.street_address}</p> */}
+															<p>{overviewData.street_address}</p>
 														</div>
 													</li>
 												</ul>
-	
+
 												<ul>
 													<li>
 														<div className="p2 icons-div">
 															State:&nbsp;
-															{/* <p>{overviewData.state}</p> */}
+															<p>{overviewData.state}</p>
 														</div>
 													</li>
 													<li>
 														<div className="p2 icons-div">
 															Postal Code:&nbsp;
-															{/* <p>{overviewData.postal_code}</p> */}
+															<p>{overviewData.postal_code}</p>
 														</div>
 													</li>
 													<li>
 														<div className="p2 icons-div">
 															Street Address2:&nbsp;
-															{/* <p>{overviewData.street_address2}</p> */}
+															<p>{overviewData.street_address2}</p>
 														</div>
 													</li>
 												</ul>
@@ -1381,39 +1390,39 @@ class ViewMerchant extends Component {
 												<BusinessInfo className="merchant-icon" />
 												<p>BUSINESS INFO</p>
 											</div>
-	
+
 											<div className="overview-details">
 												<ul>
 													<li>
 														<div className="p2 icons-div">
 															Type:&nbsp;
-															{/* <p>{overviewData.business_type}</p> */}
+															<p>{overviewData.business_type}</p>
 														</div>
 													</li>
 													<li>
 														<div className="p2 icons-div">
 															Sub Category:&nbsp;
-															{/* <p>{overviewData.business_subcategory}</p> */}
+															<p>{overviewData.business_subcategory}</p>
 														</div>
 													</li>
 													<li>
 														<div className="p2 icons-div">
 															Pay In:&nbsp;
-															{/* <p>{overviewData.merchant_pay_in}</p> */}
+															<p>{overviewData.merchant_pay_in}</p>
 														</div>
 													</li>
-	
+
 													<li>
 														<div className="p2 icons-div">
 															Settlement Charge:&nbsp;
-															{/* <p>{overviewData.settlement_charge}</p> */}
+															<p>{overviewData.settlement_charge}</p>
 														</div>
 													</li>
-	
+
 													<li>
 														<div className="p2 icons-div">
 															Expected Chargeback Percentage:&nbsp;
-															{/* <p>{overviewData.expected_chargeback_percentage}</p> */}
+															<p>{overviewData.expected_chargeback_percentage}</p>
 														</div>
 													</li>
 												</ul>
@@ -1421,34 +1430,34 @@ class ViewMerchant extends Component {
 													<li>
 														<div className="p2 icons-div">
 															Category:&nbsp;
-															{/* <p>{overviewData.business_category}</p> */}
+															<p>{overviewData.business_category}</p>
 														</div>
 													</li>
-	
+
 													<li>
 														<div className="p2 icons-div">
 															Registered On:&nbsp;
-															{/* <p>{overviewData.buiness_registered_on}</p> */}
+															<p>{overviewData.buiness_registered_on}</p>
 														</div>
 													</li>
-	
+
 													<li>
 														<div className="p2 icons-div">
 															Pay Out:&nbsp;
-															{/* <p>{overviewData.merchant_pay_out}</p> */}
+															<p>{overviewData.merchant_pay_out}</p>
 														</div>
 													</li>
-	
+
 													<li>
 														<div className="p2 icons-div">
 															Turnover:&nbsp;
-															{/* <p>{overviewData.turnover}</p> */}
+															<p>{overviewData.turnover}</p>
 														</div>
 													</li>
 													<li>
 														<div className="p2 icons-div">
 															Industries ID:&nbsp;
-															{/* <p>{overviewData.industries_id}</p> */}
+															<p>{overviewData.industries_id}</p>
 														</div>
 													</li>
 												</ul>
@@ -1458,13 +1467,13 @@ class ViewMerchant extends Component {
 												<DirectorInfo className="merchant-icon" />
 												<p>DIRECTOR INFO</p>
 											</div>
-	
+
 											<div className="overview-details">
 												<ul>
 													<li>
 														<div className="p2 icons-div">
 															First Name:&nbsp;
-															{/* <p>{overviewData.director_first_name}</p> */}
+															<p>{overviewData.director_first_name}</p>
 														</div>
 													</li>
 												</ul>
@@ -1472,14 +1481,14 @@ class ViewMerchant extends Component {
 													<li>
 														<div className="p2 icons-div">
 															Last Name:&nbsp;
-															{/* <p>{overviewData.director_last_name}</p> */}
+															<p>{overviewData.director_last_name}</p>
 														</div>
 													</li>
 												</ul>
 											</div>
 										</div>
 									)}
-									{/* Rates section */}
+									{/ Rates section /}
 									{this.state.ratesInfo && (
 										<div className="right-section-middle-body">
 											<h5>Current Prices</h5>
@@ -1601,7 +1610,7 @@ class ViewMerchant extends Component {
 																		value={ratesData.RR_remark}
 																		onChange={this.handleChange}
 																		className="editable-input"
-	
+
 																	/>
 																) : (
 																	`${ratesData.RR_remark}`
@@ -1669,7 +1678,7 @@ class ViewMerchant extends Component {
 																	`${ratesData.settlement_fee} %`
 																)}
 															</td>
-	
+
 															<td>
 																{isEditing ? (
 																	<input
@@ -1717,19 +1726,11 @@ class ViewMerchant extends Component {
 												</table>
 											</div>
 											<div className="rates-table-button-container">
-												<button
-													className="btn-primary"
-													onClick={
-														isEditing ? this.handleSave : this.handleEditClick
-													}
-												>
-													{isEditing ? "Update" : "Edit"}
-												</button>
 											</div>
 										</div>
 									)}
-	
-									{/* Settlement section */}
+
+									{/ Settlement section /}
 									{this.state.settlementInfo && (
 										<div className="right-section-middle-body">
 											<div className="settlements-container">
@@ -1794,7 +1795,7 @@ class ViewMerchant extends Component {
 				</>
 			);
 		}
-		
+
 	}
 }
 

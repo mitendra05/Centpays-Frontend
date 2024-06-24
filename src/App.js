@@ -38,13 +38,13 @@ import DocumentCategory from "./asset/jsx/pages/MS06_DocumentCategories";
 import Bank from "./asset/jsx/pages/MS07_Bank";
 
 //Manage Merchant
-
 import AllMerchant from "./asset/jsx/pages/M02_AllMerchant";
 import ViewMerchant from "./asset/jsx/pages/M03_ViewMerchant";
 import Whitelisted from "./asset/jsx/pages/M03_Whitelisted";
 import PaymentLink from "./asset/jsx/pages/M04_PaymentLink";
 import Adduser from "./asset/jsx/pages/AddUser";
 import AllUser from "./asset/jsx/pages/AllUser";
+import MerchantSettings from "./asset/jsx/pages/Merchant_Settings";
 
 import AQTest from "./asset/jsx/pages/AQTest"
 
@@ -118,6 +118,8 @@ function App() {
           ></Route>
           <Route path="/whitelisted" element={<Whitelisted />}></Route>
           <Route path="/paymentlink" element={<PaymentLink />}></Route>
+          <Route path="/merchantsetting" element={<MerchantSettings />}></Route>
+
 
           {/* Manage User Routes */}
           <Route path="/alluser" element={<AllUser />}></Route>

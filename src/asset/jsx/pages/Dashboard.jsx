@@ -32,6 +32,7 @@ class Dashboard extends Component {
 		this.state = {
 			sidebaropen: true,
 			userName: localStorage.getItem("name"),
+			merchantName: localStorage.getItem("company_name"),
 			card1_data: {},
 			card2_data: {},
 			card9_Data: {},
@@ -88,28 +89,38 @@ class Dashboard extends Component {
 			this.fetchData();
 			this.fetchDatacard10();
 		}, 300000);
+		this.fetchTableData();
+		this.interval = setInterval(this.fetchTableData, 2000);
 	}
 
 	componentWillUnmount() {
 		clearInterval(this.interval);
 	  }
 	
-	  fetchTableData = async () => {
-		try {
-		  const backendURL = process.env.REACT_APP_BACKEND_URL;
-		  const response = await fetch(`${backendURL}/latest100`);
-	  
-		  if (!response.ok) {
-			throw new Error('Failed to fetch data');
-		  }
-	  
-		  const data = await response.json();
-		  this.setState({ tableData: data });
-		} catch (error) {
-		  this.setState({ error: error.message});
+	  fetchTableData = () => {
+		const backendURL = process.env.REACT_APP_BACKEND_URL;
+		const role = localStorage.getItem("role");
+		const company_name = localStorage.getItem("company_name");
+		
+		let url = `${backendURL}/latest100`;
+		if (role === "merchant") {
+		  url += `?merchant=${company_name}`;
 		}
+
+		fetch(url)
+		  .then(response => {
+			if (!response.ok) {
+			  throw new Error('Failed to fetch data');
+			}
+			return response.json();
+		  })
+		  .then(data => {
+			this.setState({ data, loading: false });
+		  })
+		  .catch(error => {
+			this.setState({ error: error.message, loading: false });
+		  });
 	  };
-		  
 
 	handleCurrencyChange = (selectedCurrency) => {
 		this.setState({ currency: selectedCurrency }, () => {
@@ -128,7 +139,12 @@ class Dashboard extends Component {
 	};
 
 	fetchDataBasedOnlocalStorage = () => {
-		const { currency, merchant, startDate, endDate } = this.state;
+		const { currency, startDate, endDate } = this.state;
+
+		const role = localStorage.getItem("role");
+		const company_name = localStorage.getItem("company_name");
+		const merchant = role === "merchant" ? company_name : this.state.merchant;
+
 		const fromDate = startDate.toISOString().split("T")[0];
 		const toDate = endDate.toISOString().split("T")[0];
 		const backendURL = process.env.REACT_APP_BACKEND_URL;
@@ -204,7 +220,11 @@ class Dashboard extends Component {
 
 	fetchData = async () => {
 		const backendURL = process.env.REACT_APP_BACKEND_URL;
-		const { currency, merchant, startDate, token, endDate } = this.state;
+		const { currency, startDate, token, endDate } = this.state;
+
+		const role = localStorage.getItem("role");
+		const company_name = localStorage.getItem("company_name");
+		const merchant = role === "merchant" ? company_name : this.state.merchant;
 		const fromDate = startDate.toISOString().split("T")[0];
 		const toDate = endDate.toISOString().split("T")[0];
 		try {
@@ -262,7 +282,12 @@ class Dashboard extends Component {
 
 	fetchDatacard10 = async () => {
 		const backendURL = process.env.REACT_APP_BACKEND_URL;
-		const { currency, merchant, token } = this.state;
+		const { currency, token } = this.state;
+
+		// Retrieve role and company_name from local storage
+		const role = localStorage.getItem("role");
+		const company_name = localStorage.getItem("company_name");
+		const merchant = role === "merchant" ? company_name : this.state.merchant;
 		try {
 			const response = await fetch(
 				`${backendURL}/dashboard/successlast6Months?currency=${currency}&merchant=${merchant}`,
@@ -1484,7 +1509,7 @@ class Dashboard extends Component {
 				</>
 			);
 		}
-		else if(userRole === "employee"){
+		else if (userRole === "employee") {
 			return (
 				<>
 					{errorMessage && (
@@ -1494,7 +1519,7 @@ class Dashboard extends Component {
 							onClose={() => this.setState({ errorMessage: "" })}
 						/>
 					)}
-	
+
 					<Header
 						onCurrencyChange={this.handleCurrencyChange}
 						onMerchantChange={this.handleMerchantChange}

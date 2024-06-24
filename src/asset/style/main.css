@@ -2251,6 +2251,8 @@ td {
 .textarea {
 	height: 200px;
 	overflow-y: auto;
+	padding: 10px; 
+    box-sizing: border-box; 
 }
 
 .attachment-div {
@@ -3833,8 +3835,9 @@ hr {
 	height: 86vh;
 	margin-right: 20px;
 	padding: 20px;
-
+    margin-bottom: 20px;
 }
+
 
 .left-section-top {
 	display: flex;
@@ -4623,4 +4626,10 @@ width: 100px;
 	animation: zoom 0.3s ease-in-out;
   }
   
+  .MerchantSetting-main-screen{
+	width: 99%;
+	padding: 20px;
+	border-radius: 15px;
+	background-color: var(--white);
+  }
   

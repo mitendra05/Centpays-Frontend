@@ -23,6 +23,18 @@ class MerchantForm extends Component {
     };
   }
 
+  componentDidUpdate(prevState) {
+    if (
+      prevState.isAddMerchantPanelOpen !== this.state.isAddMerchantPanelOpen
+    ) {
+      if (this.state.isAddMerchantPanelOpen) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "auto";
+      }
+    }
+  }
+
   componentDidMount() {
     if (this.props.isAddMerchantPanelOpen) {
       document.body.style.overflow = "hidden";
@@ -375,7 +387,7 @@ class MerchantForm extends Component {
                             </div>
                           </div>
                           <div className="add-merchant-form-bottom">
-                          <CustomTooltip title="Reset">
+                          <CustomTooltip title="Reset" topMargin={-70}>
                           <button
                           className="add-merchant-panel-btn"
                               onClick={this.handleReset}
@@ -385,7 +397,7 @@ class MerchantForm extends Component {
                              
                             </button>
                             </CustomTooltip>
-                            <CustomTooltip title="Next">
+                            <CustomTooltip title="Next" topMargin={-70}>
                             <button type="submit" className="add-merchant-panel-btn">
                               <RightArrow/>
                             </button>
@@ -549,7 +561,7 @@ class MerchantForm extends Component {
                             </div>
                           </div>
                           <div className="add-merchant-form-bottom">
-                          <CustomTooltip title="Reset">
+                          <CustomTooltip title="Reset" topMargin={-70}>
                             <button
                             className="add-merchant-panel-btn"
                               onClick={this.handleReset}
@@ -557,7 +569,7 @@ class MerchantForm extends Component {
                               <Reset/>
                             </button>
                             </CustomTooltip>
-                            <CustomTooltip title="Previous">
+                            <CustomTooltip title="Previous" topMargin={-70}>
                             <button
                             className="add-merchant-panel-btn"
                               onClick={this.handleBack}
@@ -565,7 +577,7 @@ class MerchantForm extends Component {
                               <LeftArrow/>
                             </button>
                             </CustomTooltip>
-                            <CustomTooltip title="Next">
+                            <CustomTooltip title="Next" topMargin={-70}>
                             <button type="submit" className="add-merchant-panel-btn">
                              <RightArrow/>
                             </button>
@@ -619,7 +631,7 @@ class MerchantForm extends Component {
                             </div>
                           </div>
                           <div className="add-merchant-form-bottom">
-                          <CustomTooltip title="Reset">
+                          <CustomTooltip title="Reset" topMargin={-70}>
                             <button
                             className="add-merchant-panel-btn"
                               onClick={this.handleReset}
@@ -627,7 +639,7 @@ class MerchantForm extends Component {
                               <Reset/>
                             </button>
                             </CustomTooltip>
-                            <CustomTooltip title="Previous">
+                            <CustomTooltip title="Previous" topMargin={-70}>
                             <button
                             className="add-merchant-panel-btn"
                               onClick={this.handleBack}
