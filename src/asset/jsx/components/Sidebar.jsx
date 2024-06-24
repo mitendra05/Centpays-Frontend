@@ -22,6 +22,7 @@ class Sidebar extends Component {
 				dashboard: true,
 			},
 			userRole: localStorage.getItem("role"),
+			companyName: localStorage.getItem("company_name")
 		};
 	}
 
@@ -35,7 +36,7 @@ class Sidebar extends Component {
 	}
 
 	render() {
-		const { sidebaropen, menuOpen, userRole } = this.state;
+		const { sidebaropen, menuOpen, userRole, companyName } = this.state;
 		const currentPath = window.location.pathname;
 
 		if(userRole==="admin"){
@@ -261,7 +262,7 @@ class Sidebar extends Component {
 									<li>
 										<div className={`menu-item ${currentPath === '/settlements' ? 'sidebaractive' : ''}`}>
 											<ManageSettlement className='icon menu-item-icon-color' />
-											<Link to={`/previewsettlement/${"Delasport"}`}>
+											<Link to={`/previewsettlement/${companyName}`}>
 												<div className="menu-item-collapsive" onClick={() => this.handleMenuClick('manageSettlement')}>
 													<p>Settlement<i style={{ color: 'red' }}>*</i></p>
 												</div>
@@ -272,7 +273,7 @@ class Sidebar extends Component {
 									<li>
 										<div className={`menu-item ${currentPath === '/allmerchant' ? 'sidebaractive' : ''}`}>
 											<ManageMerchant className='icon menu-item-icon-color' />
-											<Link to={`/viewmerchant/${"Delasport"}`}>
+											<Link to={`/viewmerchant/${companyName}`}>
 												<div className="menu-item-collapsive" onClick={() => this.handleMenuClick('manageMerchant')}>
 													<p>Your Profile<i style={{ color: 'red' }}>*</i></p>
 												</div>
@@ -287,15 +288,13 @@ class Sidebar extends Component {
 											</div>
 										</div>
 									</li>
-									<li>
+									<li className="menuitem-disable">
 										<div className={`menu-item ${menuOpen.manageUser ? 'sidebaractive' : ''}`}>
 											<ManageUser className='icon menu-item-icon-color' />
-											<Link to="/merchantsetting" >
-												<div className="menu-item-collapsive" onClick={() => this.handleMenuClick('merchantsetting')}>
-													<p>Settings</p>
-													{menuOpen.manageUser === true ? <DownSign className='icon' /> : <RightSign className='icon' />}
-												</div>
-											</Link>
+											<div className="menu-item-collapsive" onClick={() => this.handleMenuClick('manageUser')}>
+												<p>Settings</p>
+												{menuOpen.manageUser === true ? <DownSign className='icon' /> : <RightSign className='icon' />}
+											</div>
 										</div>
 									</li>
 									
