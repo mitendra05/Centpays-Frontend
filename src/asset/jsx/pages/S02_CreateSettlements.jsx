@@ -205,8 +205,15 @@ class CreateSettlement extends Component {
   };
 
   handleBack = () => {
-    window.history.back();
-  };
+    if (!this.state.isPreview && !this.state.isEdited) {
+      window.history.back();
+    } else {
+      this.setState({
+        isPreview: false,
+        isEdited: false,
+      });
+    }
+  };  
 
   handlePreview = async () => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
@@ -975,6 +982,12 @@ class CreateSettlement extends Component {
           >
             <div className="create-settlement-container">
               <div className="row-cards create-settlement-left-container">
+              <div className="bcksettlement">
+                  <LeftArrow
+                    className="icon2"
+                    onClick={this.handleBack}
+                  ></LeftArrow>
+                </div>
                 <div className="create-settlement-left-container-header">
                   <div className="settlement-header-left">
                     <img
@@ -1305,6 +1318,12 @@ class CreateSettlement extends Component {
           >
             <div className="create-settlement-container">
               <div className="row-cards create-settlement-left-container">
+              <div className="bcksettlement">
+                  <LeftArrow
+                    className="icon2"
+                    onClick={this.handleBack}
+                  ></LeftArrow>
+                </div>
                 <div className="create-settlement-left-container-header">
                   <div className="settlement-header-left">
                     <img

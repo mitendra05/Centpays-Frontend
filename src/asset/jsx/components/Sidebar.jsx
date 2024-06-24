@@ -287,13 +287,15 @@ class Sidebar extends Component {
 											</div>
 										</div>
 									</li>
-									<li className="menuitem-disable">
+									<li>
 										<div className={`menu-item ${menuOpen.manageUser ? 'sidebaractive' : ''}`}>
 											<ManageUser className='icon menu-item-icon-color' />
-											<div className="menu-item-collapsive" onClick={() => this.handleMenuClick('manageUser')}>
-												<p>Settings</p>
-												{menuOpen.manageUser === true ? <DownSign className='icon' /> : <RightSign className='icon' />}
-											</div>
+											<Link to="/merchantsetting" >
+												<div className="menu-item-collapsive" onClick={() => this.handleMenuClick('merchantsetting')}>
+													<p>Settings</p>
+													{menuOpen.manageUser === true ? <DownSign className='icon' /> : <RightSign className='icon' />}
+												</div>
+											</Link>
 										</div>
 									</li>
 									
