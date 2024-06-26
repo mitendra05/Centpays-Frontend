@@ -1,15 +1,24 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
-import * as XLSX from 'xlsx';
+import * as XLSX from "xlsx";
 
 // component
 import Modal from "./Modal";
 import MessageBox from "./Message_box";
-import ScrollTableToBottomButton from "./ScrollTableToBottom";
-import ScrollTableToTopButton from "./ScrollTableToTop";
-
+import ScrollTopAndBottomButton from "./ScrollUpAndDown";
+import searchImg from "../../media/image/search-transaction.png";
 //SVG icons
-import { Excel, RateIcon, RightSign, LeftSign, More, CheckMark, MailStatus, PlusSymbol } from "../../media/icon/SVGicons";
+import {
+  Excel,
+  RateIcon,
+  RightSign,
+  LeftSign,
+  More,
+  CheckMark,
+  MailStatus,
+  PlusSymbol,
+  Oops,
+} from "../../media/icon/SVGicons";
 
 class Table extends Component {
   constructor(props) {
@@ -21,7 +30,7 @@ class Table extends Component {
       isGenerateExcelModal: false,
       idforEdit: "",
       statusforEdit: "",
-      searchText: '',
+      searchText: "",
       highlightedOptions: [],
       noResultsFound: false,
       errorMessage: "",
@@ -37,18 +46,17 @@ class Table extends Component {
 
   // handle Functions
 
-
   handleRowsChange = (event) => {
     this.setState({
       rows: parseInt(event.target.value),
-      currentPage: 1
+      currentPage: 1,
     });
   };
 
   handlePageChange = (direction) => {
     this.setState((prevState) => {
       const { currentPage } = prevState;
-      const newPage = direction === 'next' ? currentPage + 1 : currentPage - 1;
+      const newPage = direction === "next" ? currentPage + 1 : currentPage - 1;
       return { currentPage: newPage };
     });
   };
@@ -107,23 +115,23 @@ class Table extends Component {
     const { token } = this.state;
     console.log(this.state.idforEdit, this.state.statusforEdit);
     try {
-      const response = await fetch(
-        `${backendURL}/updatesettlements`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            id: this.state.idforEdit,
-            status: this.state.statusforEdit,
-          }),
-        }
-      );
+      const response = await fetch(`${backendURL}/updatesettlements`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          id: this.state.idforEdit,
+          status: this.state.statusforEdit,
+        }),
+      });
 
       const result = await response.json();
-      this.setState({ errorMessage: "Status update successfully",messageType:"success" });
+      this.setState({
+        errorMessage: "Status update successfully",
+        messageType: "success",
+      });
       this.setState({ isEditStatusModal: false });
       this.props.showSettlementRecord(this.props.company_name);
     } catch (error) {
@@ -185,13 +193,13 @@ class Table extends Component {
     this.setState({
       searchText,
       highlightedOptions: filteredOptions,
-      noResultsFound: filteredOptions.length === 0
+      noResultsFound: filteredOptions.length === 0,
     });
   };
 
   handleExcelModalToggle = () => {
-    this.setState({ isGenerateExcelModal: !this.state.isGenerateExcelModal })
-  }
+    this.setState({ isGenerateExcelModal: !this.state.isGenerateExcelModal });
+  };
 
   handleGenerateExcel = async () => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
@@ -199,37 +207,37 @@ class Table extends Component {
     const { company_name } = this.props;
     const { token } = this.state;
     try {
-      const response = await fetch(
-        `${backendURL}/dailySettlement`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            fromDate,
-            toDate,
-            company_name
-          }),
-        }
-      );
+      const response = await fetch(`${backendURL}/dailySettlement`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          fromDate,
+          toDate,
+          company_name,
+        }),
+      });
       const excelData = await response.json();
       this.setState({ errorMessage: excelData.error });
       this.jsonToExcel(excelData, company_name);
-      this.setState({ fromDate: "", toDate: "", isGenerateExcelModal: false })
+      this.setState({ fromDate: "", toDate: "", isGenerateExcelModal: false });
     } catch (error) {
-      this.setState({ errorMessage: "Error updating status data:", messageType:"fail" });
+      this.setState({
+        errorMessage: "Error updating status data:",
+        messageType: "fail",
+      });
     }
-  }
+  };
 
   jsonToExcel = (data, fileName) => {
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.json_to_sheet(data);
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-    const buffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([buffer], { type: 'application/octet-stream' });
-    const link = document.createElement('a');
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    const buffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([buffer], { type: "application/octet-stream" });
+    const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = `${fileName}.xlsx`;
     document.body.appendChild(link);
@@ -238,8 +246,7 @@ class Table extends Component {
   };
 
   render() {
-    const { headerLabels, showRates, showReport, company_name } =
-      this.props;
+    const { headerLabels, showRates, showReport, company_name } = this.props;
     const {
       isRatesModal,
       ratesdata,
@@ -251,7 +258,7 @@ class Table extends Component {
       noResultsFound,
       rows,
       currentPage,
-      messageType
+      messageType,
     } = this.state;
     const dataToRender =
       highlightedOptions.length > 0 ? highlightedOptions : this.props.apiData;
@@ -376,32 +383,26 @@ class Table extends Component {
             modalBody={
               <div>
                 <div className="edit-status">
-
                   <label for="fromDate">From</label>
 
-                  <input type="date"
+                  <input
+                    type="date"
                     className="inputFeild "
                     value={this.state.fromDate}
                     onChange={(e) =>
                       this.setState({ fromDate: e.target.value })
                     }
-                  >
-                  </input>
-
+                  ></input>
                 </div>
 
                 <div className="edit-status">
-
                   <label for="toDate">To</label>
-                  <input type="date"
+                  <input
+                    type="date"
                     className="inputFeild"
                     value={this.state.toDate}
-                    onChange={(e) =>
-                      this.setState({ toDate: e.target.value })
-                    }
-                  >
-                  </input>
-
+                    onChange={(e) => this.setState({ toDate: e.target.value })}
+                  ></input>
                 </div>
               </div>
             }
@@ -409,18 +410,27 @@ class Table extends Component {
         )}
         <div className="Table-container">
           <div className="table-Header">
-
             {showRates && (
               <Link to={`/createsettlement`}>
-                <button className="btn-primary"><PlusSymbol className="white-icon" /> Create Invoice</button>
+                <button className="btn-primary">
+                  <PlusSymbol className="white-icon" /> Create Invoice
+                </button>
               </Link>
             )}
             {showReport && (
               <div className="table-header-buttons">
                 <Link to={`/createsettlement?company_name=${company_name}`}>
-                  <button className="btn-primary"><PlusSymbol className="white-icon" />  Create Invoice</button>
+                  <button className="btn-primary">
+                    <PlusSymbol className="white-icon" /> Create Invoice
+                  </button>
                 </Link>
-                <button className="btn-primary" onClick={() => this.handleExcelModalToggle()}><Excel className="white-icon" />Generate Excel</button>
+                <button
+                  className="btn-primary"
+                  onClick={() => this.handleExcelModalToggle()}
+                >
+                  <Excel className="white-icon" />
+                  Generate Excel
+                </button>
               </div>
             )}
             <input
@@ -433,24 +443,24 @@ class Table extends Component {
           </div>
 
           <div className="table-Body">
+            {!noResultsFound && <ScrollTopAndBottomButton />}
+
             <table>
               <thead>
                 <tr>
                   <th className="p1">S.No.</th>
                   {headerLabels.map((item, index) => (
-                    <th className="p1" key={index}>{item.heading}</th>
+                    <th className="p1" key={index}>
+                      {item.heading}
+                    </th>
                   ))}
                   {showRates && <th className="p1">Rates</th>}
-                  <th>{ScrollTableToBottomButton}</th>
+                  <th></th>
                 </tr>
               </thead>
-              <tbody>
-                {noResultsFound ? (
-                  <tr>
-                    <td colSpan={headerLabels.length + (showRates ? 2 : 1)}>No results found.</td>
-                  </tr>
-                ) : (
-                  paginatedData.map((row, index) => (
+              {!noResultsFound && (
+                <tbody>
+                  {paginatedData.map((row, index) => (
                     <tr className="p2" key={index}>
                       <td>{startIdx + index + 1}</td>
                       {headerLabels.map((collabel, labelIndex) => (
@@ -498,41 +508,75 @@ class Table extends Component {
                         </td>
                       )}
                     </tr>
-                  ))
-                )}
+                  ))}
+                </tbody>
+              )}
+            
+            {noResultsFound && (
+              <tbody>
+                <tr>
+                  <td colSpan={headerLabels.length + (showRates ? 2 : 1)}>
+                    <div>
+                      <div className="search-result-head">
+                        <div>
+                          <h4>Whoops!</h4>{" "}
+                          <Oops className="primary-color-icon" />
+                        </div>
+                        <p className="p2">
+                          We couldn't find the transaction you are looking for
+                        </p>
+                      </div>
+                      <div className="search-result-img">
+                        <img src={searchImg} alt="search"></img>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
               </tbody>
-            </table>
-            <ScrollTableToTopButton />
+            )}
+          </table>
           </div>
-          <div className="table-Footer">
-            <div className="table-footer-rows-div">
-              <label htmlFor="noRows">Rows per page</label>
-              <select id="noRows" value={this.state.rows} onChange={this.handleRowsChange}>
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-              </select>
+
+          {!noResultsFound && (
+            <div className="table-Footer">
+              <div className="table-footer-rows-div">
+                <label htmlFor="noRows">Rows per page</label>
+                <select
+                  id="noRows"
+                  value={this.state.rows}
+                  onChange={this.handleRowsChange}
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                </select>
+              </div>
+              <div className="table-footer-buttons-div">
+                <p>
+                  {`${startIdx + 1}-${Math.min(
+                    endIdx,
+                    dataToRender.length
+                  )} of ${dataToRender.length}`}
+                </p>
+                <button
+                  onClick={() => this.handlePageChange("prev")}
+                  disabled={currentPage === 1}
+                  className={currentPage === 1 ? "disabled-button" : ""}
+                >
+                  <LeftSign />
+                </button>
+                <button
+                  onClick={() => this.handlePageChange("next")}
+                  disabled={currentPage === totalPages}
+                  className={
+                    currentPage === totalPages ? "disabled-button" : ""
+                  }
+                >
+                  <RightSign />
+                </button>
+              </div>
             </div>
-            <div className="table-footer-buttons-div">
-              <p>
-                {`${startIdx + 1}-${Math.min(endIdx, dataToRender.length)} of ${dataToRender.length}`}
-              </p>
-              <button
-                onClick={() => this.handlePageChange('prev')}
-                disabled={currentPage === 1}
-                className={currentPage === 1 ? 'disabled-button' : ''}
-              >
-                <LeftSign />
-              </button>
-              <button
-                onClick={() => this.handlePageChange('next')}
-                disabled={currentPage === totalPages}
-                className={currentPage === totalPages ? 'disabled-button' : ''}
-              >
-                <RightSign />
-              </button>
-            </div>
-          </div>
+          )}
         </div>
       </>
     );

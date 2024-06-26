@@ -8,9 +8,7 @@ import MerchantForm from "./Merchant_Form";
 //SVG icons
 import { RightSign, Oops, LeftSign } from "../../media/icon/SVGicons";
 import searchImg from "../../media/image/search-transaction.png";
-import ScrollTableToBottomButton from "./ScrollTableToBottom";
-import ScrollTableToTopButton from "./ScrollTableToTop";
-
+import ScrollTopAndBottomButton from "./ScrollUpAndDown";
 
 class Table extends Component {
   constructor(props) {
@@ -145,6 +143,7 @@ class Table extends Component {
           />
         )}
         <div className="Table-container">
+        {!noResultsFound && <ScrollTopAndBottomButton />}
           <div className="table-Header">
             <input
               className="inputFeild search-input"
@@ -180,7 +179,7 @@ class Table extends Component {
                         {item.heading}
                       </th>
                     ))}
-                      <th>{<ScrollTableToBottomButton/>}</th>
+                      <th></th>
                     {showMerchants && <th></th>}
                   </tr>
                 </thead>
@@ -211,22 +210,23 @@ class Table extends Component {
                 <tbody>
                   <tr>
                     <td colSpan={headerLabels.length + (showMerchants ? 2 : 1)}>
-                      <div className="searchTxn-result">
-                        <div className="searchTxn-result-head">
-                          <div>
-                            <h4>Oops...</h4> <Oops className="primary-color-icon" />
-                          </div>
-                          <p className="p2">We couldn't find what you are looking for</p>
-                        </div>
-                        <div className="search-result-img">
-                          <img src={searchImg} alt="search" className="full-width-img" />
-                        </div>
+                      <div>
+                         <div className="search-result-head">
+                      <div>
+                        <h4>Oops...</h4> <Oops className="primary-color-icon" />
                       </div>
+                      <p className="p2">
+                      We couldn't find what you are looking for.
+                      </p>
+                    </div>
+                    <div className="search-result-img">
+                      <img src={searchImg} alt="search"></img>
+                    </div>
+                  </div>
                     </td>
                   </tr>
                 </tbody>
               )}
-              <ScrollTableToTopButton/>
             </table>
           </div>
           {!noResultsFound && (

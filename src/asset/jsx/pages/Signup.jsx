@@ -231,6 +231,21 @@ class Signup extends Component {
 											</label>
 										</div>
 									</div>
+
+									<div className="input-group">
+										<input
+											type="text"
+											id="userSignUpKey"
+											className="inputFeild auth-input"
+											required
+											value={this.state.userSignUpKey}
+											onChange={this.handleInputChange}
+										/>
+										<label htmlFor="country" className="inputLabel">
+											Sign-Up Key
+										</label>
+									</div>
+
 									<div className="checkbox-container">
 										<div>
 											<input type="checkbox" required></input>
@@ -242,7 +257,7 @@ class Signup extends Component {
 											</label>
 										</div>
 									</div>
-									<button type="submit" className="btn-primary auth-btn">
+									<button type="submit" className="btn-primary auth-btn-signup">
 										Sign Up
 									</button>
 									

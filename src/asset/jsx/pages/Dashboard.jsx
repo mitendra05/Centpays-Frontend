@@ -475,7 +475,7 @@ class Dashboard extends Component {
                     className="creditcard-img green-icon"
                   />
                 </div>
-                <CustomTooltip details="This card displays the total amount of successful transactions that have occurred today.">
+                <CustomTooltip details={<p>This card displays the total amount of successful transactions that have occurred today.</p>}>
                   <Infoicon className="icon2" />
                 </CustomTooltip>
               </div>
@@ -504,7 +504,7 @@ class Dashboard extends Component {
                     className="creditcard-img grey-icon"
                   />
                 </div>
-                <CustomTooltip details={<p>This card tracks the total number of transactions for today</p>}>
+                <CustomTooltip details={<p>This card tracks the total number of transactions for today.</p>}>
                   <Infoicon className="icon2" />
                 </CustomTooltip>
               </div>
@@ -658,7 +658,7 @@ class Dashboard extends Component {
                   <h4>Traffic Status</h4>
                 </div>
                 <div className="card4-viewmore">
-                  <CustomTooltip details={<p>This card summarizes the total number of transactions this week."</p>}>
+                  <CustomTooltip details={<p>This card summarizes the total number of transactions this week.</p>}>
                     <Infoicon className="icon2" />
                   </CustomTooltip>
                 </div>
@@ -680,7 +680,7 @@ class Dashboard extends Component {
             <div className="row-cards third-row-card1">
               <div className="card-head-with-view-more">
                 <h4>Transactions</h4>
-                <CustomTooltip details={<p>This card compares the difference between amounts of transactions segregated by cards (VISA and Mastercard) of this week and the previous week</p>}>
+                <CustomTooltip details={<p>This card compares the difference between amounts of transactions segregated by cards (VISA and Mastercard) of this week and the previous week.</p>}>
                   <Infoicon className="icon2" />
                 </CustomTooltip>
               </div>
@@ -761,14 +761,15 @@ class Dashboard extends Component {
               <div className="card-head-with-view-more">
                 <h4>Weekly Country-wise Overview</h4>
                 <CustomTooltip
-                  maxWidth={300}
+                   maxWidth={450}
+				   leftMargin={-20}
                   details={
                     <ul>
                       <li>
                         Left part of the card provides a breakdown of number of transactions (successful, failed, incomplete) for this week.
                       </li>
                       <li>
-                        The right side shows amount of successful transactions, amount of failed transactions and the total mount of transactions for the complete week.
+                        The right side shows amount of successful transactions, amount of failed transactions and the total amount of transactions for the complete week.
                       </li>
                     </ul>
                   }
@@ -848,12 +849,12 @@ class Dashboard extends Component {
             <div className="row-cards fourth-row-card1">
               <div className="card-head-with-view-more">
                 <h4>Performance This Month</h4>
-                <CustomTooltip maxWidth={250} details={<p>This card shows key metrics for transactions in the last month (total number of transactions, total volume of transactions, number of successful transactions, volume of successful transactions</p>}>
+                <CustomTooltip  maxWidth={350} leftMargin={-10} details={<p>This card shows key metrics for transactions in the last month total number of transactions, total volume of transactions, number of successful transactions, volume of successful transactions.</p>}>
                   <Infoicon className="icon2" />
                 </CustomTooltip>
               </div>
               <p className="card9-subhead">
-                Your performance this month is {String(card9_Data.growthPercentage).slice(0, 5)}% in comparison to previous month
+                Your performance this month is {String(card9_Data.growthPercentage).slice(0, 5)}% in comparison to previous month.
                 <span className="p2"></span>
               </p>
               <div className="card9-content">
