@@ -91,6 +91,15 @@ class ViewMerchant extends Component {
     return companyName;
   }
 
+  fetchSignupKey = async () => {
+    const backendURL = process.env.REACT_APP_BACKEND_URLT
+    const companyName = localStorage.getItem('company_name');
+    const response = await fetch(`${backendURL}/viewclient?company_name=${companyName}`);
+    const data = await response.json();
+    this.setState({ signupKey: data.signupKey });
+    console.log(data.signupKey);
+  };
+
   componentDidMount() {
     const { company_name: stateCompanyName } = this.state;
 
@@ -102,7 +111,7 @@ class ViewMerchant extends Component {
 
     let date = new Date().toISOString().split("T")[0];
     const backendURL = process.env.REACT_APP_BACKEND_URL;
-
+this.fetchSignupKey();
     this.fetchData(
       `${backendURL}/viewclient?company_name=${company_name}`,
       "overviewData",
@@ -446,10 +455,12 @@ class ViewMerchant extends Component {
   };
 
   formatNumber = (number) => {
-    if (number.length === 10) {
-      return `${number.slice(0, 3)}******${number.slice(-3)}`;
+    const numStr = String(number);
+    if (numStr.length > 12) {
+      const stars = '*'.repeat(numStr.length - 12);
+      return `${numStr.slice(0, 7)}${stars}${numStr.slice(-5)}`;
     }
-    return number;
+    return numStr;
   };
 
   handleCopy = (key, text) => {
