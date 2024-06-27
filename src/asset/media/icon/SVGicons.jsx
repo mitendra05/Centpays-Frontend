@@ -1026,7 +1026,6 @@ export function Logout(props) {
   );
 }
 
-
 export function Eye(props) {
   return (
     <svg

@@ -307,7 +307,7 @@ fill: var(--success-color)
 
 #header {
 	height: 10vh;
-	width: calc(100% - 18.9%);
+	width: calc(100% - 18.4%);
 	position: fixed;
 	right: 0;
 	padding: 5px;
@@ -326,7 +326,7 @@ fill: var(--success-color)
 			rgba(255, 255, 255, 0.5));
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	border-radius: 5px;
-	margin-left: 20px;
+	margin-left: 12px;
 }
 
 .scrolled .header-right {
@@ -422,6 +422,7 @@ nav {
 	width: 35px;
 	padding: 0;
 }
+
 
 /*  ------------------------------ Sidebar  ------------------------------  */
 .sidebar {
@@ -836,7 +837,7 @@ input[type="checkbox"] {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	margin-top: -10px;
+	margin-top: -20px;
 	padding: 0 10px;
 }
 
@@ -858,6 +859,11 @@ input[type="checkbox"] {
 .auth-btn {
 	width: 100%;
 	margin: 40px 0 30px 0;
+}
+
+.auth-btn-signup{
+	width: 100%;
+	margin: 20px 0 15px 0;
 }
 
 .bottom-line a {
@@ -2629,6 +2635,33 @@ border-bottom: none !important;
 .txn-search-table-Footer{
 	height: 50px;
 }
+
+.id-input-div div{
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+  .Transaction-monitoring-modal {
+	margin-top: 10px;
+	background-color: var(--white);
+	padding: 10px;
+	border-radius: 3px;
+	width: 100%;
+	max-width: 90%; 
+	overflow-y: auto;
+	border: 1px solid var(--border-gray);
+	z-index: 999;
+	justify-content: left;
+	margin-left: 15px;
+  }
+  
+  .Transaction-monitoring-modal p {
+	white-space: pre-wrap; 
+	font-size: 14px;
+	line-height: 1.6;
+  }
+  
 /* ..........................................search window ............................................................. */
 /* .search-window-overlay {
 	position: fixed;
@@ -3252,8 +3285,8 @@ border-bottom: none !important;
 /* / ...................user modal....................... / */
 
 .user-modal {
-	right: 2%;
-	top: 10%;
+	right: 0;
+	top: 90%;
 	position: fixed;
 }
 
@@ -3919,7 +3952,7 @@ hr {
 }
 
 .left-section-bottom button{
-width: 100px;
+  width: 100px;
 }
 
 .txn-monitoring-btn-div {
@@ -3951,7 +3984,7 @@ width: 100px;
 
 .right-section {
 	width: 65%;
-	height: 79vh;
+	height: 79.5vh;
 }
 
 .right-section-middle-body {
@@ -4084,7 +4117,43 @@ width: 100px;
 	gap: 5px;
 }
 
+.secretkey-input{
+	width: 50%;
+	border-radius: 0;
+}
 
+.input-container{
+	display: flex;
+	align-items: center;
+}
+
+.copy-icon,.eye-icon{
+	border: 2px solid var(--border-gray);
+	border-radius: 5px;
+	height: 50px;
+	width: 50px;
+	transition: border-color 0.2s ease-in-out;
+	color: var(--lightblack);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.copy-icon{
+    border-right: none;
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+.eye-icon{
+	border-left:none;
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+.integration-Key{
+  margin-top: 25px;
+}
 /* ............dashboard weekly card....... */
 
 .options-container {
@@ -4321,15 +4390,6 @@ width: 100px;
 	z-index: 30;
   }
 
-
-
-.top-icon {
-	width: 25px;
-	height: 25px;
-	align-items: center;
-	transition: all 0.2s ease-in-out;
-}
-
 .scroll-to-top-button:hover {
 	background-color: var(--primary-dark);
 }
@@ -4338,6 +4398,21 @@ width: 100px;
 	opacity: 1;
 }
 
+.scroll-top-and-bottom-button {
+    position: absolute;
+    top: 50%;
+    right: -18px;
+    transform: translateY(-50%);
+    background-color: var(--secondary-dark);
+    border: none;
+	width: 40px;
+	height: 40px;
+    cursor: pointer;
+    z-index: 99;
+	opacity: 0.7;
+	border-radius: 50%;
+	text-align: center;
+}
 /* --------------------- Scroll to Bottom ----------------------- */
 
 .scroll-to-bottom-button {
@@ -4374,31 +4449,16 @@ width: 100px;
 	opacity: 1;
 }
 
+  
+
 /* -----------------Scroll Table to Top ----------------------- */
 
-.scrollTable-to-top-button {
-	position: sticky;
-	bottom: 1%;
-	left: 94%;
-	width: 35px;
-	height: 35px;
-	padding: 5px;
-	font-size: 16px;
-	background-color: var(--primary);
-	color: #fff;
-	border: none;
-	border-radius: 50%;
-	cursor: pointer;
-	opacity: 0;
-	transition: opacity 0.3s;
-	z-index: 30;
-  }
 
 .top-icon {
-	width: 25px;
-	height: 25px;
-	align-items: center;
+	width: 27px;
+	height: 27px;
 	transition: all 0.2s ease-in-out;
+	z-index: 999;
 }
 
 .scrollTable-to-top-button:hover {

@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { UpDoubleArrow } from "../../media/icon/SVGicons";
+import { UpDoubleArrow, DownDoubleArrow } from "../../media/icon/SVGicons"; // Assuming you have both up and down arrow icons
 
-class ScrollTableToTopButton extends Component {
+class ScrollUpAndDown extends Component {
   state = {
-    isVisible: false,
+    isTop: true, // Track if currently at top or bottom
   };
 
   componentDidMount() {
@@ -35,37 +35,56 @@ class ScrollTableToTopButton extends Component {
   };
 
   checkScrollVisibility = (scrollTop, scrollHeight, clientHeight) => {
-    const scrollThreshold = scrollHeight * 0.5; 
-    const isVisible = scrollTop >= scrollThreshold;
-    this.setState({ isVisible });
+    const isAtTop = scrollTop === 0;
+    const isAtBottom = scrollTop + clientHeight >= scrollHeight;
+
+    if (isAtTop) {
+      this.setState({ isTop: true });
+    } else if (isAtBottom) {
+      this.setState({ isTop: false });
+    } else {
+      this.setState({ isTop: false });
+    }
   };
 
-  scrollToTop = () => {
+  scrollToTopOrBottom = () => {
     let tableBody = document.querySelector('.table-Body');
     if (!tableBody) {
       tableBody = document.querySelector('.txn-search-table-Body');
     }
 
     if (tableBody) {
-      tableBody.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
+      const { isTop } = this.state;
+      const scrollHeight = tableBody.scrollHeight;
+
+      if (isTop) {
+        tableBody.scrollTo({
+          top: scrollHeight,
+          behavior: 'smooth'
+        });
+        this.setState({ isTop: false });
+      } else {
+        tableBody.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+        this.setState({ isTop: true });
+      }
     }
   };
 
   render() {
-    const { isVisible } = this.state;
+    const { isTop } = this.state;
 
     return (
       <button
-        onClick={this.scrollToTop}
-        className={`scrollTable-to-top-button ${isVisible ? 'show' : 'hide'}`}
+        onClick={this.scrollToTopOrBottom}
+        className="scroll-top-and-bottom-button"
       >
-        <UpDoubleArrow className='top-icon'/>
+        {isTop ? <DownDoubleArrow className='primary-color-icon top-icon'/> : <UpDoubleArrow className='top-icon'/>}
       </button>
     );
   }
 }
 
-export default ScrollTableToTopButton;
+export default ScrollUpAndDown;

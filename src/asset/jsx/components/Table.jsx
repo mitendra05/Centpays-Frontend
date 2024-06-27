@@ -6,8 +6,7 @@ import { DownSign, RightSign, UpSign, LeftSign } from "../../media/icon/SVGicons
 import visa from "../../media/icon/logoVisa.png";
 import mastercard from "../../media/icon/LogoMastercard.png"
 import CopyToClipboard from "./CopyToClipboard";
-import ScrollTableToBottomButton from "../components/ScrollTableToBottom";
-import ScrollTableToTopButton from "../components/ScrollTableToTop";
+import ScrollTopAndBottomButton from"../../jsx/components/ScrollUpAndDown";
 
 class Table extends Component {
   constructor(props) {
@@ -122,7 +121,8 @@ class Table extends Component {
     return (
       <>
         <div className="txn-search-table-container">
-          <div className="txn-search-table-Body">
+          <div className="txn-search-table-Body">      
+          <ScrollTopAndBottomButton/>
             <table>
               <thead>
                 <tr>
@@ -131,7 +131,7 @@ class Table extends Component {
                   {headerLabels.slice(0, 7).map((item, index) => (
                     <th className="p1" key={index}>{item.heading}</th>
                   ))}
-                  <th>{shouldRenderScrollButtons && <ScrollTableToBottomButton />}</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -181,7 +181,6 @@ class Table extends Component {
                     )}
                   </React.Fragment>
                 ))}
-                {shouldRenderScrollButtons && <ScrollTableToTopButton />}
                 <tr className="p2 total-amount-row">
                   <td className="txn-amount-blank" colSpan={4}></td>
                   <td className="txn-amount-head" colSpan={4}>Subtotal</td>

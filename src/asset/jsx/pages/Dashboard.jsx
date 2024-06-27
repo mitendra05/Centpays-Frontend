@@ -355,8 +355,6 @@ class Dashboard extends Component {
 				const newEndDate = new Date(prevState.endDate);
 				newStartDate.setDate(newStartDate.getDate() + direction * 7);
 				newEndDate.setDate(newEndDate.getDate() + direction * 7);
-				// const fromDate = newStartDate.toISOString().split("T")[0];
-				// const toDate = newEndDate.toISOString().split("T")[0];
 
 				return { startDate: newStartDate, endDate: newEndDate };
 			},
@@ -518,8 +516,9 @@ class Dashboard extends Component {
 						</div>
 						<div className="main-screen-rows second-row">
 							<div className="row-cards second-row-card1">
+	
+								<div className="second-row-card1-left">
 
-								<div class="second-row-card1-left">
 									<h4>Weekly Overview</h4>
 
 									<Card4Bargraph data={this.state.Card4_bargraph} />

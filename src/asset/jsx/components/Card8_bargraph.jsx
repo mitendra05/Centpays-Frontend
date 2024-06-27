@@ -8,10 +8,10 @@ class CustomTooltip extends Component {
       const dataPoint = payload[0];
       return (
         <div className="custom-tooltip">
-        <div className="tooltip-content">    
-          <p className="tooltip-fail">{` ${dataPoint.value}`}</p>
+          <div className="tooltip-content">    
+            <p className="tooltip-fail">{` ${dataPoint.value}`}</p>
+          </div>
         </div>
-      </div>
       );
     }
     return null;
@@ -32,6 +32,7 @@ class Bargraph extends Component {
     const { data } = this.props;
     const maxValue = Math.max(...data.map(item => item.successCount));
     const reversedData = [...data].reverse();
+    
     return (
       <ResponsiveContainer className="barContainer" width="100%" height={140}>
         <BarChart data={reversedData || []} >
@@ -40,17 +41,16 @@ class Bargraph extends Component {
           <Bar
             dataKey="successCount" 
             maxBarSize={20}
-            // activeBar={{ strokeWidth: 0.1, fill: "#9375fc" }}
             animationDuration={1500}
             radius={3}
           >
-            
-            {reversedData.map((entry) => (
-            
-            <Cell fill={entry.successCount === maxValue ? '#8c57ff' : '#F3EEFF' }/>
-          
-        ))}
-            </Bar>
+            {reversedData.map((entry, index) => (
+              <Cell
+                key={index} // Unique key for each Cell
+                fill={entry.successCount === maxValue ? '#8c57ff' : '#F3EEFF' }
+              />
+            ))}
+          </Bar>
        
           <Tooltip content={<CustomTooltip />} cursor={false} />
         </BarChart>
