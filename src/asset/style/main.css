@@ -954,7 +954,7 @@ input[type="checkbox"] {
 	padding-left: 10px;
 	padding-top: 10px;
 	overflow: hidden !important;
-	/*Change 01 - 29/05*/
+	padding-bottom: 20px;
 }
 
 .collapsed-main-screen {
@@ -3881,7 +3881,7 @@ hr {
 }
 
 .left-section-middle {
-	margin: 20px 0;
+	margin: 15px 0;
 }
 
 .left-section-middle-body p {
@@ -4265,6 +4265,43 @@ width: 100px;
 	font-weight: 550;
 }
 
+.secretkey-input{
+	width: 50%;
+	border-radius: 0;
+}
+
+.input-container{
+	display: flex;
+	align-items: center;
+}
+
+.copy-icon,.eye-icon{
+	border: 2px solid var(--border-gray);
+	border-radius: 5px;
+	height: 50px;
+	width: 50px;
+	transition: border-color 0.2s ease-in-out;
+	color: var(--lightblack);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.copy-icon{
+    border-right: none;
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+.eye-icon{
+	border-left:none;
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+.integration-Key{
+  margin-top: 25px;
+}
 /* --------------------- Scroll to Top ----------------------- */
 .scroll-to-top-button {
 	position: fixed;
@@ -4608,7 +4645,7 @@ width: 100px;
 .min-billingaount-header {
 	position: absolute;
 	right: 10px;
-} 
+} 	
 
 @keyframes zoom {
 	0% {
@@ -4625,11 +4662,164 @@ width: 100px;
   .zoom {
 	animation: zoom 0.3s ease-in-out;
   }
+
+  .loadingIcon{
+	height: 100px;
+	width: 100px;
+	cursor:progress;
+  }
+
+  .paymentResult{
+	background-color: #ffffff;
+	width: 25vw;
+	border-radius: 10px;
+	margin-bottom: 5px;
+	padding: 10px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+  }
+
+  .paymentBack{
+	position: absolute;
+	left: 10px;
+	cursor: pointer;
+  }
+
+  .paymentSuccessfull .statusGif{
+	width: 250px;
+  }
+
+  .paymentSuccessfull{
+	text-align: center;
+  }
+
+  .paymentSuccessfull h5{
+	position: absolute;
+	top: 42%;
+	left: 23%;
+  }
+
+  .paymentDetails{
+	text-align: left;
+	border: 1px solid var(--border-gray);
+	padding: 10px;
+	border-radius: 10px;
+  }
+
+  .paymentDetails p{
+	padding: 5px 0;
+  }
+
+  .paymentDetails .p2{
+	padding: 0;
+	margin-top: -10px;
+	font-size: 12px;
+  }
+
+  .paymentDetails .paymentDetails-header{
+	display: flex;
+	justify-content: space-between;
+  }
+
+  .paymentDetails .paymentDetails-header .secondBlock{
+	text-align: right;
+  }
+
+  .paymentDetails .paymentDetails-middle span{
+	display: flex;
+	justify-content: space-between;
+  }
+
+  /* ------------------ */
+
   
-  .MerchantSetting-main-screen{
-	width: 99%;
-	padding: 20px;
-	border-radius: 15px;
-	background-color: var(--white);
+  .paymentFailed .statusGif{
+	width: 250px;
+  }
+
+  .paymentFailed{
+	text-align: center;
+  }
+
+  .paymentFailed h5{
+	position: absolute;
+	top: 42%;
+	left: 23%;
+  }
+
+  .paymentDetails{
+	text-align: left;
+	border: 1px solid var(--border-gray);
+	padding: 10px;
+	border-radius: 10px;
+  }
+
+  .paymentDetails p{
+	padding: 5px 0;
+  }
+
+  .paymentDetails .p2{
+	padding: 0;
+	margin-top: -10px;
+	font-size: 12px;
+  }
+
+  .paymentDetails .paymentDetails-header{
+	display: flex;
+	justify-content: space-between;
+  }
+
+  .paymentDetails .paymentDetails-header .secondBlock{
+	text-align: right;
+  }
+
+  .paymentDetails .paymentDetails-middle span{
+	display: flex;
+	justify-content: space-between;
   }
   
+  
+/* ----------------------------Merchant-Setting-------------------------------- */
+  
+  .merchantSetting{
+	background-color: var(--white);
+	box-shadow: var(--box-shadow);
+	height: 100%;
+	width: 98%;
+	border-radius: 5px;
+	display: flex;
+	align-items: center;
+  }
+
+  .merchantSetting-left{
+	padding: 5px 0px;
+	width: 20%;
+	border-right: 1px solid var(--border-gray);
+  }
+  
+  .merchantSetting-left ul{
+	list-style: none;
+  }
+
+  .setting-section-block{
+	border-bottom: 1px solid var(--border-gray);
+	padding: 5px 10px;
+  }
+
+  .merchantSetting-left .list-heading{
+	color: var(--secondary-dark);
+	margin-top: 5px;
+	margin-bottom: 10px;
+	padding: 0px 10px;
+  }
+
+  .merchantSetting-left ul li{
+	padding: 10px 0;
+  }
+
+  .merchantSetting-right{
+	padding: 5px;
+	width: 80%;
+  }
