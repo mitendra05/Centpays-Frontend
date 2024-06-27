@@ -12,12 +12,10 @@ class CustomTooltip extends Component {
     const { active, payload } = this.props;
     if (active && payload && payload.length) {
       const { count } = payload[0].payload;
-      // const day = this.getDayName(date);
       return (
-
         <div className="custom-tooltip">
-          <div className="tooltip-content">   
-          <p className="tooltip-total">{count}</p> 
+          <div className="tooltip-content">
+            <p className="tooltip-total">{count}</p>
           </div>
         </div>
       );
@@ -32,9 +30,9 @@ class Bargraph extends Component {
     const dateObj = new Date(`${year}-${month}-${day}`);
     const options = { weekday: 'short' };
     const formattedDay = dateObj.toLocaleDateString('en-US', options);
-    
     return formattedDay;
   };
+
   render() {
     const { data } = this.props;
     const reversedData = [...data].reverse();
@@ -43,11 +41,12 @@ class Bargraph extends Component {
       <BarChart
         width={400}
         height={200}
-        data={reversedData || []} 
+        data={reversedData || []}
         margin={{ top: 20, right: 70, bottom: 1 }}
       >
-         <XAxis dataKey="day" axisLine={false} tickLine={false} tickFormatter={this.formatXAxisTick} />
+        <XAxis dataKey="day" axisLine={false} tickLine={false} tickFormatter={this.formatXAxisTick} />
         <Bar
+          key="bar"
           dataKey="count"
           fill="var(--total-color)"
           maxBarSize={8}

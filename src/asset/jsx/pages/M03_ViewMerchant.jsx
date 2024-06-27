@@ -82,8 +82,6 @@ class ViewMerchant extends Component {
         apiKey: false,
         secretKey: false,
       },
-      // fromDate: "22/5/24",
-      // toDate: "22/5/24"
     };
   }
 
@@ -109,12 +107,16 @@ class ViewMerchant extends Component {
       `${backendURL}/viewclient?company_name=${company_name}`,
       "overviewData",
       (data) => {
-        this.setState({
-          idforEdit: data._id,
-          isActive: data.status,
-          statusText: data.status,
-          buttonLabel: data.status === "Active" ? "Suspend" : "Activate",
-        });
+        // Ensure data exists before accessing properties
+        if (data) {
+          this.setState({
+            overviewData: data,
+            idforEdit: data._id,
+            isActive: data.status,
+            statusText: data.status,
+            buttonLabel: data.status === "Active" ? "Suspend" : "Activate",
+          });
+        }
       }
     );
 
@@ -129,7 +131,7 @@ class ViewMerchant extends Component {
     );
   }
 
-  fetchData = async (url, dataVariable, callback = null, Body) => {
+  fetchData = async (url, dataVariable, callback = null) => {
     const { token } = this.state;
     try {
       const response = await fetch(url, {
@@ -138,26 +140,44 @@ class ViewMerchant extends Component {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(Body),
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        this.setState({ [dataVariable]: data }, () => {
-          if (callback) callback(data);
-        });
-      } else {
-        this.setState({
-          errorMessage: "Error in Fetching data. Please try again later.",
-          messageType: "fail",
-        });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
+  
+      const data = await response.json();
+      this.setState({ [dataVariable]: data }, () => {
+        if (callback) callback(data);
+      });
     } catch (error) {
       this.setState({
-        errorMessage: "An unexpected error occurred. Please try again later.",
-        messageType: "",
+        errorMessage: `Error fetching data: ${error.message}`,
+        messageType: "fail",
       });
     }
+  };
+  
+
+  refreshMerchantData = () => {
+    const { company_name } = this.state;
+    const backendURL = process.env.REACT_APP_BACKEND_URL;
+    this.fetchData(
+      `${backendURL}/viewclient?company_name=${company_name}`,
+      "overviewData",
+      (data) => {
+        // Ensure data exists before accessing properties
+        if (data) {
+          this.setState({
+            overviewData: data,
+            idforEdit: data._id,
+            isActive: data.status,
+            statusText: data.status,
+            buttonLabel: data.status === "Active" ? "Suspend" : "Activate",
+          });
+        }
+      }
+    );
   };
 
   updateMerchantStatus = async (statusText, idforEdit) => {
@@ -1353,6 +1373,8 @@ class ViewMerchant extends Component {
                       isAddMerchantPanelOpen={this.state.isAddMerchantPanelOpen}
                       submitButtonText="Update"
                       heading="Update Merchant"
+                      refreshMerchantData={this.refreshMerchantData}
+                      isDisable={true}
                     />
                   )}
                 </div>
@@ -1403,7 +1425,7 @@ class ViewMerchant extends Component {
     } else if (userRole === "merchant") {
       return (
         <>
-          {errorMessage && (
+           {errorMessage && (
             <MessageBox
               message={errorMessage}
               messageType={messageType}
@@ -1421,6 +1443,10 @@ class ViewMerchant extends Component {
           >
             <div className="view-merchant-container">
               <div className="row-cards left-section">
+                <LeftArrow
+                  className="icon2"
+                  onClick={this.handleBackButtonClick}
+                />
                 <div className="left-section-top">
                   <div className="profile-image">
                     <img src={profile} alt="user profile"></img>
@@ -1430,7 +1456,7 @@ class ViewMerchant extends Component {
                     className={`status-div ${
                       statusText === "Active"
                         ? "success-status"
-                        : "pending-status"
+                        : "failed-status"
                     }`}
                   >
                     <p>{statusText}</p>
@@ -1592,7 +1618,23 @@ class ViewMerchant extends Component {
                     </ul>
                   </div>
                 </div>
-                <div className="left-section-bottom"></div>
+                <div className="left-section-bottom">
+                  <button
+                    className="btn-primary"
+                    onClick={() => this.handleAddMerchant()}
+                    disabled={isSuspended}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className={`btn-secondary ${
+                      statusText === "Active" ? "btn-suspend" : "btn-activate"
+                    }`}
+                    onClick={this.handleStatusChange}
+                  >
+                    {buttonLabel}
+                  </button>
+                </div>
               </div>
               <div className="right-section">
                 <div className="btn-container">{this.renderButtons()}</div>
@@ -1752,7 +1794,7 @@ class ViewMerchant extends Component {
                       </div>
                     </div>
                   )}
-                  {/ Rates section /}
+                  {/* Rates section */}
                   {this.state.ratesInfo && (
                     <div className="right-section-middle-body">
                       <h5>Current Prices</h5>
@@ -2030,11 +2072,20 @@ class ViewMerchant extends Component {
                           </tbody>
                         </table>
                       </div>
-                      <div className="rates-table-button-container"></div>
+                      <div className="rates-table-button-container">
+                        <button
+                          className="btn-primary"
+                          onClick={
+                            isEditing ? this.handleSave : this.handleEditClick
+                          }
+                        >
+                          {isEditing ? "Update" : "Edit"}
+                        </button>
+                      </div>
                     </div>
                   )}
 
-                  {/ Settlement section /}
+                  {/* Settlement section */}
                   {this.state.settlementInfo && (
                     <div className="right-section-middle-body">
                       <div className="settlements-container">
@@ -2047,12 +2098,10 @@ class ViewMerchant extends Component {
                     </div>
                   )}
 
-                  {/ Secret section /}
                   {this.state.secretsInfo && (
                     <div className="right-section-middle-body">
                       <div className="settlements-container">
                         <h5>Account Creation Key</h5>
-
                         <div className="secret-field">
                           <p className="p2">Root User Sign Up Key</p>
                           <div className="input-container">
@@ -2169,11 +2218,15 @@ class ViewMerchant extends Component {
                     </div>
                   )}
                   {this.state.isAddMerchantPanelOpen && (
-                    <MerchantForm
-                      handleAddMerchant={this.handleAddMerchant}
-                      merchantData={overviewData}
-                      isAddMerchantPanelOpen={this.state.isAddMerchantPanelOpen}
-                    />
+                     <MerchantForm
+                     handleAddMerchant={this.handleAddMerchant}
+                     merchantData={overviewData}
+                     isAddMerchantPanelOpen={this.state.isAddMerchantPanelOpen}
+                     submitButtonText="Update"
+                     heading="Update Merchant"
+                     refreshMerchantData={this.refreshMerchantData}
+                     isDisable={true}
+                   />
                   )}
                 </div>
               </div>

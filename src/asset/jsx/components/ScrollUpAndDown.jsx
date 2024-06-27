@@ -81,7 +81,7 @@ class ScrollUpAndDown extends Component {
         onClick={this.scrollToTopOrBottom}
         className="scroll-top-and-bottom-button"
       >
-        {isTop ? <DownDoubleArrow className='top-icon'/> : <UpDoubleArrow className='top-icon'/>}
+        {isTop ? <DownDoubleArrow className='primary-color-icon top-icon'/> : <UpDoubleArrow className='top-icon'/>}
       </button>
     );
   }

@@ -241,23 +241,29 @@ class Header extends Component {
               Authorization: `Bearer ${token}`,
             },
           });
+      
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+      
           const data = await response.json();
-    
-          this.setState({ companyList: data });
+          this.setState({ companyList: data, errorMessage: "" }); // Clear any previous error message
         } catch (error) {
+          console.error("Fetch error:", error);
           this.setState({
-            errorMessage: "Error in Fetching data. Please try again later.",
-            messageType: "",
+            errorMessage: "Error fetching data. Please try again later.",
+            companyList: [], // Optionally clear existing data if needed
           });
         }
-      };    
+      };
+          
 
       handleLogout = () => {
        window.location.href = `/`
        localStorage.clear()
       }
 
-    render() {
+      render() {
         const {
             theme,
             scrolled,
@@ -272,7 +278,7 @@ class Header extends Component {
             currentPage,
             userRole,
         } = this.state;
-
+    
         return (
             <>
                 {shortcutModal && (
@@ -282,30 +288,22 @@ class Header extends Component {
                         onClose={() => this.setState({ shortcutModal: false })}
                     />
                 )}
-
-                <div
-                    id="header"
-                    className={scrolled ? "scrolled" : ""}
-
-                >
+    
+                <div id="header" className={scrolled ? "scrolled" : ""}>
                     <nav>
                         <div className="header-left" onClick={this.toggleSearch}>
                             <CustomTooltip title="Search Bar">
-                                <Search className="icon" ></Search>
+                                <Search className="icon"></Search>
                             </CustomTooltip>
                             <CustomTooltip title="Press Ctrl+k">
                                 <p className="header-search-text">
                                     Search &nbsp;
-                                    <img
-                                        src={commandline}
-                                        className="icon"
-                                        alt="commandline icon"
-                                    />
+                                    <img src={commandline} className="icon" alt="commandline icon" />
                                     <strong>K</strong>
                                 </p>
                             </CustomTooltip>
                         </div>
-
+    
                         <div className="header-right">
                             {currentPage === "dashboard" && (
                                 <div className="custom-select-div">
@@ -314,42 +312,33 @@ class Header extends Component {
                                         selectedValue={selectedCurrency}
                                         onChange={this.handleCurrencyChange}
                                     />
-                                   {userRole==="admin"? (<CustomSelect
-                                        defaultLabel="Select Merchant"
-                                        options={[...this.state.companyList]}
-                                        selectedValue={selectedMerchant}
-                                        onChange={this.handleMerchantChange}
-                                    />):"" }
+                                    {userRole === "admin" ? (
+                                        <CustomSelect
+                                            defaultLabel="Select Merchant"
+                                            options={[...this.state.companyList]}
+                                            selectedValue={selectedMerchant}
+                                            onChange={this.handleMerchantChange}
+                                        />
+                                    ) : (
+                                        ""
+                                    )}
                                 </div>
                             )}
                             {theme === "light" ? (
                                 <CustomTooltip title="Light Mode">
-                                    <LightMode
-                                        className="icon"
-                                        onClick={this.toggleTheme}
-                                        title="Change Theme"
-                                    ></LightMode>
+                                    <LightMode className="icon" onClick={this.toggleTheme}></LightMode>
                                 </CustomTooltip>
                             ) : (
                                 <CustomTooltip title="Dark Mode">
-                                    <DarkMode
-                                        className="icon"
-                                        onClick={this.toggleTheme}
-                                    ></DarkMode>
+                                    <DarkMode className="icon" onClick={this.toggleTheme}></DarkMode>
                                 </CustomTooltip>
                             )}
                             <CustomTooltip title="Add shortcut">
-                                <ShortCut
-                                    className="icon"
-                                    onClick={this.toggleUserShortcutModal}
-                                ></ShortCut>
-                            </CustomTooltip>{" "}
+                                <ShortCut className="icon" onClick={this.toggleUserShortcutModal}></ShortCut>
+                            </CustomTooltip>
                             <CustomTooltip title="Notification">
-                                <Notification
-                                    className="icon"
-
-                                ></Notification>
-                            </CustomTooltip>{" "}
+                                <Notification className="icon"></Notification>
+                            </CustomTooltip>
                             <div className="user-profile-div">
                                 <CustomTooltip title="Your Profile">
                                     <img
@@ -357,7 +346,6 @@ class Header extends Component {
                                         src={user}
                                         alt="user-profile"
                                         onClick={this.toggleUserProfileModal}
-                                        title="Your Profile"
                                     ></img>
                                 </CustomTooltip>
                                 <div className="user-profile-badge">
@@ -366,56 +354,42 @@ class Header extends Component {
                             </div>
                         </div>
                     </nav>
-                </div>
-
-                {showUserProfileModal && (
-                    <div className="search-window user-modal">
-                        <header className="modal-container-header">
-                            <img
-                                className="icon user-profile"
-                                src={user}
-                                alt="user-profile"
-                            ></img>
-                            <div className="user-details">
-                                <h5>{this.state.userName}</h5>
-                                <p className="p2">{this.state.email}</p>
+    
+                    {showUserProfileModal && (
+                        <div className="search-window user-modal">
+                            <header className="modal-container-header">
+                                <img className="icon user-profile" src={user} alt="user-profile"></img>
+                                <div className="user-details">
+                                    <h5>{this.state.userName}</h5>
+                                    <p className="p2">{this.state.email}</p>
+                                </div>
+                                <span
+                                    className="close"
+                                    onClick={() => this.setState({ showUserProfileModal: false })}
+                                >
+                                    &times;
+                                </span>
+                            </header>
+    
+                            <div className="user-setting-options">
+                                <div className="esc-div user">
+                                    <img className="icon icon2" src={puser} alt="user-profile"></img>
+                                    <h5>My Profile</h5>
+                                </div>
+    
+                                <div className="esc-div user">
+                                    <img className="icon icon2" src={dollar} alt="user-profile"></img>
+                                    <h5>Pricing</h5>
+                                </div>
+    
+                                <button className="btn-primary userbtn" onClick={this.handleLogout}>
+                                    Logout <Logout className="white-icon" />
+                                </button>
                             </div>
-
-                            <span
-                                className="close"
-                                onClick={() => this.setState({ showUserProfileModal: false })}
-                            >
-                                &times;
-                            </span>
-                        </header>
-
-                        <div className="user-setting-options">
-                            <div className="esc-div user">
-                                <img
-                                    className="icon icon2"
-                                    src={puser}
-                                    alt="user-profile"
-                                ></img>
-                                <h5>My Profile</h5>
-                            </div>
-
-                            <div className="esc-div  user">
-                                <img
-                                    className="icon icon2"
-                                    src={dollar}
-                                    alt="user-profile"
-                                ></img>
-                                <h5>Pricing</h5>
-                            </div>
-
-                            <button className="btn-primary userbtn" onClick={this.handleLogout}>
-                                {" "}
-                                Logout <Logout className="white-icon" />
-                            </button>
                         </div>
-                    </div>
-                )}
-
+                    )}
+                </div>
+    
                 {searchOpen && (
                     <div className="search-window-overlay">
                         <div className="search-window search-modal">
@@ -431,26 +405,20 @@ class Header extends Component {
                                 </div>
                                 <div className="esc-div">
                                     <p className="p2">[esc]</p>
-                                    <Close
-
-                                        className="icon"
-
-                                        onClick={this.toggleSearch}
-                                    />
+                                    <Close className="icon" onClick={this.toggleSearch} />
                                 </div>
                             </header>
                             <div className="option-container">
                                 {options.slice(0, 5).map((option) => (
                                     <p
-                                        className={`p2 pname ${highlightedOptions.includes(option) ? "highlight" : ""
-                                            }`}
+                                        className={`p2 pname ${highlightedOptions.includes(option) ? "highlight" : ""}`}
                                         onClick={() => this.selectOption(option)}
                                     >
                                         {option.name}
                                     </p>
                                 ))}
                             </div>
-
+    
                             <div className="flex-options-container">
                                 {options.slice(5).map((optionGroup) => (
                                     <div className="options-header">
@@ -459,9 +427,7 @@ class Header extends Component {
                                             {optionGroup.options &&
                                                 optionGroup.options.map((option) => (
                                                     <div
-                                                        className={`option ${highlightedOptions.includes(option)
-                                                                ? "highlight"
-                                                                : ""
+                                                        className={`option ${highlightedOptions.includes(option) ? "highlight" : ""
                                                             }`}
                                                         key={option.name}
                                                         onClick={() => this.selectOption(option)}
@@ -485,7 +451,7 @@ class Header extends Component {
                 )}
             </>
         );
-    }
+    }    
 }
 
 export default Header;
