@@ -355,8 +355,8 @@ class Dashboard extends Component {
 				const newEndDate = new Date(prevState.endDate);
 				newStartDate.setDate(newStartDate.getDate() + direction * 7);
 				newEndDate.setDate(newEndDate.getDate() + direction * 7);
-				const fromDate = newStartDate.toISOString().split("T")[0];
-				const toDate = newEndDate.toISOString().split("T")[0];
+				// const fromDate = newStartDate.toISOString().split("T")[0];
+				// const toDate = newEndDate.toISOString().split("T")[0];
 
 				return { startDate: newStartDate, endDate: newEndDate };
 			},
@@ -412,7 +412,6 @@ class Dashboard extends Component {
 			card9_data,
 			card9_Data,
 			card10_data,
-			userName,
 			merchantName,
 			errorMessage,
 			messageType,
@@ -538,6 +537,7 @@ class Dashboard extends Component {
 											/>
 										</div>
 										<CustomTooltip
+										maxWidth={250}
 											details={
 												<ul>
 													<li>
@@ -760,7 +760,7 @@ class Dashboard extends Component {
 								<div className="card-head-with-view-more">
 									<h4>Weekly Country-wise Overview</h4>
 									<CustomTooltip
-										maxWidth={450}
+										maxWidth={300}
 										details={
 											<ul>
 												<li>
@@ -847,7 +847,7 @@ class Dashboard extends Component {
 							<div className="row-cards fourth-row-card1">
 								<div className="card-head-with-view-more">
 									<h4>Performance This Month</h4>
-									<CustomTooltip details={<p>This card shows key metrics for transactions in the last month (total number of transactions, total volume of transactions, number of successful transactions, volume of successful transactions</p>}>
+									<CustomTooltip maxWidth={280} details={<p>This card shows key metrics for transactions in the last month total number of transactions, total volume of transactions, number of successful transactions, volume of successful transactions</p>}>
 										<Infoicon className="icon2" />
 									</CustomTooltip>
 								</div>

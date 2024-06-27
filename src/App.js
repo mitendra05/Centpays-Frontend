@@ -122,7 +122,6 @@ function App() {
           <Route path="/paymentlink" element={<PaymentLink />}></Route>
           <Route path="/merchantsetting" element={<MerchantSettings />}></Route>
 
-
           {/* Manage User Routes */}
           <Route path="/alluser" element={<AllUser />}></Route>
           <Route path="/adduser" element={<Adduser />}></Route>

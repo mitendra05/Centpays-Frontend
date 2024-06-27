@@ -30,13 +30,15 @@ export class AQTest extends Component {
             selectedCurrency: "USD",
             proceedClicked: false,
             selectedCard: 'Visa',
+
             cardHolderName: "",
             cardNumder: "",
             expiryDate: "",
             cvvno: "",
 
             status: " ",
-            isLoader: false,
+            isLoader: false,   
+
         };
     }
 //
@@ -112,7 +114,8 @@ export class AQTest extends Component {
         const order_number = generateRandomString(6);
 
         const payload = {
-            merchantID: "123",
+       
+            merchantID:"1044",
             name: cardHolderName,
             email: billingEmail,
             phone: billingPhoneNumber,
@@ -136,7 +139,7 @@ export class AQTest extends Component {
             const response = await fetch(`${backendURL}/paymentlink`, {
                 method: 'POST',
                 headers: headers,
-                body: JSON.stringify(payload)
+                body: JSON.stringify(payload),
             });
 
             if (!response.ok) {
@@ -144,15 +147,17 @@ export class AQTest extends Component {
             }
 
             const data = await response.json();
+            console.log("data",data)
             if (data.redirectUrl) {
-                window.location.href = data.redirectUrl; // Perform the redirect
-            } else {
+
+                window.location.href = data.redirectUrl; 
+              } else {
+
                 console.error('No redirect URL found in response');
             }
         } catch (error) {
             console.error('Error:', error);
         }
-
 
         this.setState({
             billingName: '',
@@ -195,6 +200,7 @@ export class AQTest extends Component {
 
     render() {
         const { billingName, billingEmail, billingPhoneNumber, amount, selectedCurrency,
+
             proceedClicked, cardHolderName, cardNumder, expiryDate, cvvno, selectedCard, userName, userRole, status, isLoader } = this.state;
 
         if (status === " ") {
@@ -216,6 +222,7 @@ export class AQTest extends Component {
                                             <span className='min-billingdetails-header'><p>{userName}</p><p className='p1'>{userRole}</p></span>
                                             <div className='min-billingaount-header'>{amount + " " + selectedCurrency}</div>
                                         </div>
+
                                         :
                                         <form className='max-billingdetails' onSubmit={this.handleProceed}>
                                             <div className='max-billingdetails-header'>
@@ -235,6 +242,7 @@ export class AQTest extends Component {
                                                         EUR
                                                     </p>
                                                 </div>
+
                                             </div>
                                             <div className='max-billingdetals-middle'>
                                                 <input
