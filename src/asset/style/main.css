@@ -3285,8 +3285,8 @@ border-bottom: none !important;
 /* / ...................user modal....................... / */
 
 .user-modal {
-	right: 2%;
-	top: 10%;
+	right: 0;
+	top: 90%;
 	position: fixed;
 }
 

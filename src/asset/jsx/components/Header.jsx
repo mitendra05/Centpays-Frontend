@@ -116,19 +116,20 @@ class Header extends Component {
     componentDidMount() {
         const savedScrollPosition = localStorage.getItem("Header_ScrollY");
         if (savedScrollPosition) {
-          window.scrollTo(0, parseInt(savedScrollPosition, 10));
+            window.scrollTo(0, parseInt(savedScrollPosition, 10));
         }
         window.addEventListener("scroll", this.handleScroll);
         window.addEventListener("keydown", this.handleKeyDown);
         this.fetchCompanyList();
         const currentPage = window.location.pathname.split("/")[1];
         this.setState({ currentPage });
-      }
+    }
     
-      componentWillUnmount() {
+    componentWillUnmount() {
         localStorage.setItem("Header_ScrollY", window.scrollY);
         window.removeEventListener("scroll", this.handleScroll);
-      }
+        window.removeEventListener("keydown", this.handleKeyDown);
+    }
 
       handleMerchantChange = (merchant) => {
         if (merchant === "Select Merchant") {
@@ -148,17 +149,20 @@ class Header extends Component {
         this.props.onCurrencyChange?.(currency);
       };
     
-      handleScroll = () => {
+       
+    handleScroll = () => {
         if (window.scrollY > 0) {
-          this.setState({
-            scrolled: true,
-          });
+            this.setState({
+                scrolled: true,
+                showUserProfileModal: false,  
+                shortcutModal: false,
+            });
         } else {
-          this.setState({
-            scrolled: false,
-          });
+            this.setState({
+                scrolled: false,
+            });
         }
-      };
+    };
     
       toggleTheme = () => {
         this.setState((prevState) => ({
