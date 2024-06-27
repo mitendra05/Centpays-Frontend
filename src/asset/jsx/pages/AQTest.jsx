@@ -26,7 +26,8 @@ export class AQTest extends Component {
             cardHolderName: "", 
             cardNumder: "",     
             expiryDate: "",      
-            cvvno: ""          
+            cvvno: "",
+            callbackData: null,     
         };
     }
 
@@ -67,7 +68,7 @@ export class AQTest extends Component {
             const order_number = generateRandomString(6);  
             
         const payload = {
-            merchantID:"123",
+            merchantID:"1044",
             name: cardHolderName,
             email: billingEmail,
             phone: billingPhoneNumber,
@@ -91,16 +92,16 @@ export class AQTest extends Component {
             const response = await fetch(`${backendURL}/paymentlink`, {
                 method: 'POST',
                 headers: headers,
-                body: JSON.stringify(payload)
+                body: JSON.stringify(payload),
             });
         
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-        
             const data = await response.json();
+            console.log("data",data)
             if (data.redirectUrl) {
-                window.location.href = data.redirectUrl; // Perform the redirect
+                window.location.href = data.redirectUrl; 
               } else {
                 console.error('No redirect URL found in response');
               }
@@ -108,7 +109,6 @@ export class AQTest extends Component {
             console.error('Error:', error);
         }
         
-    
         this.setState({
             billingName: '',
             billingEmail: '',
@@ -124,8 +124,7 @@ export class AQTest extends Component {
 
     render() {
         const { billingName, billingEmail, billingPhoneNumber, amount, selectedCurrency,
-            proceedClicked, cardHolderName, cardNumder, expiryDate, cvvno, selectedCard, userName, userRole } = this.state;
-
+            proceedClicked, cardHolderName, cardNumder, expiryDate, cvvno, selectedCard, userName, userRole, callbackData } = this.state;
         return (
             <>
                 <Header />
@@ -203,7 +202,7 @@ export class AQTest extends Component {
                                             />
                                         </div>
                                         <div className='max-billingdetals-footer'>
-                                            <button type='submit' className='btn-primary'>Procced</button>
+                                            <button type='submit' className='btn-primary'>Proceed</button>
                                         </div>
                                     </form>}
                                 {proceedClicked ?
