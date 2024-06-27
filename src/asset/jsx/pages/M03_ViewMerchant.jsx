@@ -132,6 +132,7 @@ class ViewMerchant extends Component {
   }
 
   fetchData = async (url, dataVariable, callback = null) => {
+
     const { token } = this.state;
     try {
       const response = await fetch(url, {
@@ -1373,8 +1374,10 @@ class ViewMerchant extends Component {
                       isAddMerchantPanelOpen={this.state.isAddMerchantPanelOpen}
                       submitButtonText="Update"
                       heading="Update Merchant"
+
                       refreshMerchantData={this.refreshMerchantData}
                       isDisable={true}
+
                     />
                   )}
                 </div>
@@ -2218,6 +2221,7 @@ class ViewMerchant extends Component {
                     </div>
                   )}
                   {this.state.isAddMerchantPanelOpen && (
+
                      <MerchantForm
                      handleAddMerchant={this.handleAddMerchant}
                      merchantData={overviewData}
@@ -2227,6 +2231,7 @@ class ViewMerchant extends Component {
                      refreshMerchantData={this.refreshMerchantData}
                      isDisable={true}
                    />
+
                   )}
                 </div>
               </div>

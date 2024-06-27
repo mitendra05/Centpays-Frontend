@@ -67,7 +67,7 @@ class Login extends Component {
 					localStorage.setItem("role", data.user.role);
 					localStorage.setItem("email", data.user.email);
 					localStorage.setItem("name", data.user.name);
-
+					localStorage.setItem("company_name", data.user.company_name);
 					this.setState({
 						userEmail:"",
 						userPassword:"",

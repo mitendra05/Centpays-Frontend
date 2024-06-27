@@ -48,6 +48,8 @@ import MerchantSettings from "./asset/jsx/pages/Merchant_Settings";
 
 import AQTest from "./asset/jsx/pages/AQTest"
 
+import Setting from "./asset/jsx/pages/setting";
+
 function App() {
   return (
     <>
@@ -120,11 +122,14 @@ function App() {
           <Route path="/paymentlink" element={<PaymentLink />}></Route>
           <Route path="/merchantsetting" element={<MerchantSettings />}></Route>
 
-
           {/* Manage User Routes */}
           <Route path="/alluser" element={<AllUser />}></Route>
           <Route path="/adduser" element={<Adduser />}></Route>
           <Route path="/acquirertestingenv" element={<AQTest/>} ></Route>
+
+          <Route path="/acquirertestingenv/:orderNo" element={<AQTest/>} ></Route>
+
+          <Route path="/settings" element={<Setting/>} ></Route>
         </Routes>
       </BrowserRouter>
     </>
