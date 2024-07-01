@@ -50,9 +50,9 @@ export class AQTest extends Component {
   }
   
   componentDidMount() {
-    if( this.state.orderNo!=""){
-        this.fetchData();
-    }
+    // if( this.state.orderNo!=""){
+    //     this.fetchData();
+    // }
     
   }
 

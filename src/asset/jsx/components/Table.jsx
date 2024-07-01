@@ -27,7 +27,6 @@ class Table extends Component {
     }
   }
   
-
   toggleRow = (id) => {
     this.setState((prevState) => {
       const { expandedRows } = prevState;
