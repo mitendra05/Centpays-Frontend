@@ -44,6 +44,7 @@ class Header extends Component {
             userName: localStorage.getItem("name"),
             email: localStorage.getItem("email"),
             userRole: localStorage.getItem("role"),
+            companyName: localStorage.getItem("company_name"),
             token: localStorage.getItem("token"),
 
             highlightedOptions: [],
@@ -107,7 +108,7 @@ class Header extends Component {
             merchant: "",
             companyList: [],
             selectedMerchant: "Select Merchant",
-            selectedCurrency: "USD",
+            selectedCurrency: "EUR",
             currentPage: "dashboard",
         };
     }

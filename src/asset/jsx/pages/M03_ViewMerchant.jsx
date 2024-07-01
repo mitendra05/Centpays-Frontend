@@ -71,14 +71,14 @@ class ViewMerchant extends Component {
       buttonLabel: "Suspend",
       errorMessage: "",
       messageType: "",
-      userSignUpKey: "1234567890",
+      signupKey: ' ',
       apiKey: "0987654321",
       secretKey: "1122334455",
       showUserSignUpKey: false,
       showApiKey: false,
       showSecretKey: false,
       copied: {
-        userSignUpKey: false,
+        signupKey: false,
         apiKey: false,
         secretKey: false,
       },
@@ -92,7 +92,7 @@ class ViewMerchant extends Component {
   }
 
   fetchSignupKey = async () => {
-    const backendURL = process.env.REACT_APP_BACKEND_URLT
+    const backendURL = process.env.REACT_APP_BACKEND_URL
     const companyName = localStorage.getItem('company_name');
     const response = await fetch(`${backendURL}/viewclient?company_name=${companyName}`);
     const data = await response.json();
@@ -564,7 +564,7 @@ this.fetchSignupKey();
       errorMessage,
       messageType,
       userRole,
-      userSignUpKey,
+      signupKey,
       apiKey,
       secretKey,
       showUserSignUpKey,
@@ -1268,11 +1268,11 @@ this.fetchSignupKey();
                           <div className="input-container">
                             <div
                               className={`icon-container copy-icon ${
-                                copied.userSignUpKey ? "disabled" : ""
+                                copied.signupKey ? "disabled" : ""
                               }`}
                               onClick={() =>
-                                !copied.userSignUpKey &&
-                                this.handleCopy("userSignUpKey", userSignUpKey)
+                                !copied.signupKey &&
+                                this.handleCopy("userSignUpKey", signupKey)
                               }
                             >
                               <Copy className="grey-icon" />
@@ -1280,11 +1280,11 @@ this.fetchSignupKey();
                             <input
                               className="inputFeild secretkey-input"
                               type="text"
-                              id="userSignUpKey"
+                              id="signupKey"
                               value={
                                 showUserSignUpKey
-                                  ? userSignUpKey
-                                  : this.formatNumber(userSignUpKey)
+                                  ? signupKey
+                                  : this.formatNumber(signupKey)
                               }
                               readOnly
                             />
@@ -2121,11 +2121,11 @@ this.fetchSignupKey();
                           <div className="input-container">
                             <div
                               className={`icon-container copy-icon ${
-                                copied.userSignUpKey ? "disabled" : ""
+                                copied.signupKey ? "disabled" : ""
                               }`}
                               onClick={() =>
-                                !copied.userSignUpKey &&
-                                this.handleCopy("userSignUpKey", userSignUpKey)
+                                !copied.signupKey &&
+                                this.handleCopy("userSignUpKey", signupKey)
                               }
                             >
                               <Copy className="grey-icon" />
@@ -2133,11 +2133,11 @@ this.fetchSignupKey();
                             <input
                               className="inputFeild secretkey-input"
                               type="text"
-                              id="userSignUpKey"
+                              id="signupKey"
                               value={
                                 showUserSignUpKey
-                                  ? userSignUpKey
-                                  : this.formatNumber(userSignUpKey)
+                                  ? signupKey
+                                  : this.formatNumber(signupKey)
                               }
                               readOnly
                             />
