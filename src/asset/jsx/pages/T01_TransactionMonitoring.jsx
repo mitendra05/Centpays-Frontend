@@ -277,7 +277,6 @@ class TransactionMonitoring extends Component {
       });
     }
 
-    //Last Week
     else if (buttonName === "Last Week") {
       const today = new Date();
       const dayOfWeek = today.getDay();
@@ -306,7 +305,6 @@ class TransactionMonitoring extends Component {
         activeQuickSearchbtn: buttonName,
       });
 
-      //This Month
     } else if (buttonName === "This Month") {
       const currentDate = new Date();
 
@@ -327,7 +325,6 @@ class TransactionMonitoring extends Component {
         activeQuickSearchbtn: buttonName,
       });
 
-      //Last Month
     } else if (buttonName === "Last Month") {
       const currentDate = new Date();
       const endDate = new Date(
@@ -351,7 +348,6 @@ class TransactionMonitoring extends Component {
         activeQuickSearchbtn: buttonName,
       });
 
-      // This Year
     } else if (buttonName === "This Year") {
       const currentDate = new Date();
 
@@ -1423,7 +1419,7 @@ class TransactionMonitoring extends Component {
                       </div>
                     </div>
                     <div className="more-options-div">
-                      {/* <label className={`id-label ${this.state.mid ? "filled-id-label" : ""} `} htmlFor="mid">
+                      <label className={`id-label ${this.state.mid ? "filled-id-label" : ""} `} htmlFor="mid">
 												MID:
 											</label>
 	
@@ -1439,7 +1435,7 @@ class TransactionMonitoring extends Component {
 														{mid}
 													</option>
 												))}
-											</select> */}
+											</select>
 
                       {/* <label className={`id-label ${this.state.paymentgateway ? "filled-id-label" : ""} `} htmlFor="paymentgateway">
 												Payment Gateway:
