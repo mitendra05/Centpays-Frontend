@@ -1633,21 +1633,21 @@ this.fetchSignupKey();
                   </div>
                 </div>
                 <div className="left-section-bottom">
-                  <button
+                  {/* <button
                     className="btn-primary"
                     onClick={() => this.handleAddMerchant()}
                     disabled={isSuspended}
                   >
                     Edit
-                  </button>
-                  <button
+                  </button> */}
+                  {/* <button
                     className={`btn-secondary ${
                       statusText === "Active" ? "btn-suspend" : "btn-activate"
                     }`}
                     onClick={this.handleStatusChange}
                   >
                     {buttonLabel}
-                  </button>
+                  </button> */}
                 </div>
               </div>
               <div className="right-section">
@@ -2087,14 +2087,14 @@ this.fetchSignupKey();
                         </table>
                       </div>
                       <div className="rates-table-button-container">
-                        <button
+                        {/* <button
                           className="btn-primary"
                           onClick={
                             isEditing ? this.handleSave : this.handleEditClick
                           }
                         >
                           {isEditing ? "Update" : "Edit"}
-                        </button>
+                        </button> */}
                       </div>
                     </div>
                   )}
