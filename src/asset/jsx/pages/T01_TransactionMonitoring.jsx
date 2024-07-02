@@ -386,7 +386,7 @@ class TransactionMonitoring extends Component {
       searchIds,
     } = this.state;
     const searchIdsArray = searchIds.split(/[\s,]+/);
-    if (userRole === "admin" || "employee") {
+    if (userRole === "admin" || userRole === "employee") {
       if (!selectedRowToView) {
         return (
           <>
