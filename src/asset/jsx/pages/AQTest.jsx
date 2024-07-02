@@ -35,18 +35,17 @@ export class AQTest extends Component {
             isLoader: false,
         };
     }
-    
-  extractENameFromURL() {
-    const currentPath = window.location.pathname;
-    const orderNo = currentPath.split("/acquirertestingenv/")[1];
-    return orderNo;
-  }
-  
-  componentDidMount() {
-    // if( this.state.orderNo!=""){
-    //     this.fetchData();
-    // }
 
+    extractOrderNoFromURL() {
+        const currentPath = window.location.pathname;
+        const orderNo = currentPath.split("/acquirertestingenv/")[1];
+        return orderNo;
+    }
+
+    componentDidMount() {
+        const token = localStorage.getItem('token');
+        const userName = localStorage.getItem('company_name'); // Assuming you store 'userName' during login
+        const userRole = localStorage.getItem('role'); // Assuming you store 'userRole' during login
     
         console.log("Loaded cookies data:", { token, userName, userRole });
     
