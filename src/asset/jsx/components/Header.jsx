@@ -113,7 +113,6 @@ class Header extends Component {
         };
     }
 
-    // ONCLICK HANDLERS
     componentDidMount() {
         const savedScrollPosition = localStorage.getItem("Header_ScrollY");
         if (savedScrollPosition) {
