@@ -174,7 +174,7 @@ class Header extends Component {
         this.setState({ selectedCurrency: currency });
         this.props.onCurrencyChange?.(currency);
 
-
+    }
     handleScroll = () => {
         if (window.scrollY > 0) {
             this.setState({
@@ -187,7 +187,7 @@ class Header extends Component {
             scrolled: false,
           });
         }
-
+    }
     toggleTheme = () => {
         this.setState((prevState) => ({
             theme: prevState.theme === "light" ? "dark" : "light",
