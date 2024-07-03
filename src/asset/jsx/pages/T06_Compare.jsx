@@ -12,7 +12,7 @@ class Compare extends Component {
     super(props);
     this.state = {
       sidebaropen: true,
-      token: localStorage.getItem("token"),
+      token: this.getCookie('token'),
       AQlist: [],
       searchedResult: [],
       paymentgateway: "",
@@ -32,6 +32,13 @@ class Compare extends Component {
       centpaysmissingTab: false,
       detailsmismatchTab: false,
     };
+  }
+
+  getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
   }
 
   componentDidMount() {

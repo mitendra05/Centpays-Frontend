@@ -15,6 +15,7 @@ class Login extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			token: this.getCookie('token'),
 			isModal: false,
 			userLogged: false,
 			errorMessage: "",
@@ -23,16 +24,21 @@ class Login extends Component {
 			isnewPasswordModal: false,
 			new_otp: "",
 			otp_timestamp: null,
-			token: localStorage.getItem("token"),
-			//api states
 			email:"",
 			password:"",
 		};
 	}
 
+	getCookie = (name) => {
+		const value = `; ${document.cookie}`;
+		const parts = value.split(`; ${name}=`);
+		if (parts.length === 2) return parts.pop().split(';').shift();
+		return null;
+	  }
+
   componentDidMount() {
-    const storedEmail = localStorage.getItem("registeredEmail");
-    const storedPassword = localStorage.getItem("registeredPassword");
+    const storedEmail = this.getCookie("registeredEmail");
+    const storedPassword = this.getCookie("registeredPassword");
     if (storedEmail && storedPassword) {
       this.setState({
         userEmail: storedEmail,
@@ -63,17 +69,20 @@ class Login extends Component {
 			if (response.ok) {
 				const data = await response.json();
 				if (data) {
-					localStorage.setItem("token", data.token);
-					localStorage.setItem("role", data.user.role);
-					localStorage.setItem("email", data.user.email);
-					localStorage.setItem("name", data.user.name);
-					localStorage.setItem("company_name", data.user.company_name);
+					document.cookie = `token=${data.token};path=/`;
+					document.cookie = `role=${data.user.role};path=/`;
+					document.cookie = `email=${data.user.email};path=/`;
+					document.cookie = `name=${data.user.name};path=/`;
+					document.cookie = `company_name=${data.user.company_name};path=/`;
+					
 					this.setState({
 						userEmail:"",
 						userPassword:"",
 					});
+					const token = this.getCookie('token');
+					console.log("token in login",token)
 					this.setState({ userLogged: true });
-				} else {
+				}  else {
 					this.setState({ errorMessage: "Token not genrated",messageType:"fail"});
 				}
 			} else {
@@ -113,9 +122,10 @@ class Login extends Component {
 	  handleForgotPassword = async (e) => {
 		e.preventDefault();
 		const otp = this.generateOtp();
+		const backendURL = process.env.REACT_APP_BACKEND_URL;
 		try {
 		  const response = await fetch(
-			"https://www.paylinkup.online/forgotpassword",
+			`${backendURL}/forgotpassword`,
 			{
 			  method: "POST",
 			  headers: {
@@ -160,9 +170,10 @@ class Login extends Component {
 	  handleResetPassword = async (e) => {
 		e.preventDefault();
 		const { userEmail, newpassword, confirmpassword } = this.state;
+		const backendURL = process.env.REACT_APP_BACKEND_URL;
 		try {
 		  const response = await fetch(
-			"https://www.paylinkup.online/resetpassword",
+			`${backendURL}/resetpassword`,
 			{
 			  method: "PATCH",
 			  headers: {

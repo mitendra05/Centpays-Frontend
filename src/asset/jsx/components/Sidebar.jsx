@@ -24,6 +24,8 @@ class Sidebar extends Component {
 		super(props);
 		this.state = {
 			sidebaropen: true,
+			userRole: this.getCookie('role'),
+			companyName: this.getCookie('company_name'),
 			menuOpen: {
 				masterSetting: false,
 				manageMerchant: false,
@@ -32,11 +34,15 @@ class Sidebar extends Component {
 				manageSettlement: false,
 				dashboard: true,
 			},
-			userRole: localStorage.getItem("role"),
-			companyName: localStorage.getItem("company_name")
 		};
 	}
 
+	getCookie = (name) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
 
 	handleMenuClick = (menuItem) => {
 		this.setState((prevState) => ({

@@ -14,12 +14,12 @@ class Table extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      token: this.getCookie("token"),
       searchText: '',
       highlightedOptions: [],
       noResultsFound: false,
       errorMessage: "",
       messageType: "",
-      token: localStorage.getItem("token"),
       isAddMerchantPanelOpen: false,
       merchantData: {
         company_name: "",
@@ -50,6 +50,13 @@ class Table extends Component {
       rowsPerPage: 10,
       currentPage: 1,
     };
+  }
+
+  getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
   }
 
   getStatusText(status) {
@@ -143,7 +150,7 @@ class Table extends Component {
           />
         )}
         <div className="Table-container">
-        {!noResultsFound && <ScrollTopAndBottomButton />}
+          {!noResultsFound && <ScrollTopAndBottomButton />}
           <div className="table-Header">
             <input
               className="inputFeild search-input"
@@ -179,11 +186,11 @@ class Table extends Component {
                         {item.heading}
                       </th>
                     ))}
-                      <th></th>
+                    <th></th>
                     {showMerchants && <th></th>}
                   </tr>
                 </thead>
-              )}              
+              )}
               {!noResultsFound ? (
                 <tbody>
                   {paginatedData.map((row, index) => (
@@ -211,18 +218,18 @@ class Table extends Component {
                   <tr>
                     <td colSpan={headerLabels.length + (showMerchants ? 2 : 1)}>
                       <div>
-                         <div className="search-result-head">
-                      <div>
-                        <h4>Oops...</h4> <Oops className="primary-color-icon" />
+                        <div className="search-result-head">
+                          <div>
+                            <h4>Oops...</h4> <Oops className="primary-color-icon" />
+                          </div>
+                          <p className="p2">
+                            We couldn't find what you are looking for.
+                          </p>
+                        </div>
+                        <div className="search-result-img">
+                          <img src={searchImg} alt="search"></img>
+                        </div>
                       </div>
-                      <p className="p2">
-                      We couldn't find what you are looking for.
-                      </p>
-                    </div>
-                    <div className="search-result-img">
-                      <img src={searchImg} alt="search"></img>
-                    </div>
-                  </div>
                     </td>
                   </tr>
                 </tbody>

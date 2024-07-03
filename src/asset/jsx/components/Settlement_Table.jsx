@@ -24,6 +24,8 @@ class Table extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      token: this.getCookie('token'),
+      userRole: this.getCookie('role'),
       isRatesModal: false,
       ratesdata: [],
       isEditStatusModal: false,
@@ -35,8 +37,6 @@ class Table extends Component {
       noResultsFound: false,
       errorMessage: "",
       messageType: "",
-      token: localStorage.getItem("token"),
-      userRole: localStorage.getItem("role"),
       fromDate: "",
       toDate: "",
       rows: 10,
@@ -45,7 +45,12 @@ class Table extends Component {
     };
   }
 
-  // handle Functions
+  getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  }
 
   handleRowsChange = (event) => {
     this.setState({

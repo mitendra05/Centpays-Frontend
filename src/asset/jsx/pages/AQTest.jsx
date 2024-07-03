@@ -65,8 +65,9 @@ export class AQTest extends Component {
 
     fetchData = async () => {
         this.setState({ isLoading: true, error: null });
+        const backendURL = process.env.REACT_APP_BACKEND_URL;
         try {
-            const API_URL = `https://paylinkup.online/transactionflow/get_transaction?orderNo=${this.state.orderNo}`;
+            const API_URL = `${backendURL}/transactionflow/get_transaction?orderNo=${this.state.orderNo}`;
             const response = await fetch(API_URL);
             if (!response.ok) {
                 throw new Error(`API request failed with status ${response.status}`);
