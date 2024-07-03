@@ -83,7 +83,7 @@ class CustomSelect extends Component {
               value={searchValue}
               onChange={this.handleSearchChange}
             />
-            {defaultLabel && (
+            {/* {defaultLabel && (
               <div
                 key={defaultLabel}
                 onClick={() => this.handleOptionSelect(defaultLabel)}
@@ -91,7 +91,7 @@ class CustomSelect extends Component {
               >
                 {defaultLabel}
               </div>
-            )}
+            )} */}
             {filteredOptions.map((option) => (
               <div
                 key={option}

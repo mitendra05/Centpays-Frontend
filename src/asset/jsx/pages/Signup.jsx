@@ -71,7 +71,6 @@ class Signup extends Component {
 				}),
 			});
 			if (response.ok) {
-        localStorage.setItem("signupEmail", userEmail);
 				this.setState({
 					userName:"",
 					userEmail:"",

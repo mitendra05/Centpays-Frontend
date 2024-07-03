@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useReducer } from "react";
 
 //images
 
@@ -104,25 +104,42 @@ class Header extends Component {
                     ],
                 },
             ],
-            currency: ["USD", "EUR", "All Currencies"],
+            // currency: ["USD", "EUR", "All Currencies"],
+            currency:[],
             merchant: "",
             companyList: [],
             selectedMerchant: "Select Merchant",
-            selectedCurrency: "EUR",
+            // selectedCurrency:"",
+            selectedCurrency: "",
             currentPage: "dashboard",
         };
     }
 
-    componentDidMount() {
+    componentDidMount = async () => {
         const savedScrollPosition = localStorage.getItem("Header_ScrollY");
+        const userRole= localStorage.getItem("role");
         if (savedScrollPosition) {
             window.scrollTo(0, parseInt(savedScrollPosition, 10));
         }
         window.addEventListener("scroll", this.handleScroll);
         window.addEventListener("keydown", this.handleKeyDown);
-        this.fetchCompanyList();
+        
         const currentPage = window.location.pathname.split("/")[1];
         this.setState({ currentPage });
+        // const userRole = this.state;
+        console.log("role user",userRole)
+        let currency = []
+        if (userRole === "admin"){
+            this.fetchCompanyList();
+            currency= ["USD", "EUR", "All Currencies"]
+        }
+        if(userRole === "merchant"){
+            currency= await this.fetchCurrencyList();
+            console.log("currency merchant",currency)
+        }
+        const selectedCurrency = currency[0];
+        console.log("selected currency",selectedCurrency)
+        this.setState({currency, selectedCurrency})
     }
     
     componentWillUnmount() {
@@ -135,7 +152,7 @@ class Header extends Component {
         if (merchant === "Select Merchant") {
           this.setState({
             selectedMerchant: merchant,
-            selectedCurrency: "USD",
+            selectedCurrency: this.state.selectedCurrency,
           });
           this.props.onMerchantChange?.("");
         } else {
@@ -147,6 +164,7 @@ class Header extends Component {
       handleCurrencyChange = (currency) => {
         this.setState({ selectedCurrency: currency });
         this.props.onCurrencyChange?.(currency);
+        console.log("curr", currency)
       };
     
        
@@ -234,6 +252,33 @@ class Header extends Component {
         }));
       };    
 
+      fetchCurrencyList = async () => {
+        const backendURL = process.env.REACT_APP_BACKEND_URL;
+        const { token, companyName } = this.state;
+        try {
+          const response = await fetch(`${backendURL}/currenciesforcompany?company_name=${companyName}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          });
+      
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+      
+          const data = await response.json();
+          console.log("currency data",data)
+          return data
+        } catch (error) {
+          console.error("Fetch error:", error);
+          this.setState({
+            errorMessage: "Error fetching data. Please try again later."
+          });
+        }
+      };
+
       fetchCompanyList = async () => {
         const backendURL = process.env.REACT_APP_BACKEND_URL;
         const { token } = this.state;
@@ -313,19 +358,18 @@ class Header extends Component {
                                 <div className="custom-select-div">
                                     <CustomSelect
                                         options={currency}
+                                        defaultLabel={selectedCurrency}
                                         selectedValue={selectedCurrency}
                                         onChange={this.handleCurrencyChange}
                                     />
-                                    {userRole === "admin" ? (
+                                    {userRole === "admin" && (
                                         <CustomSelect
                                             defaultLabel="Select Merchant"
                                             options={[...this.state.companyList]}
                                             selectedValue={selectedMerchant}
                                             onChange={this.handleMerchantChange}
                                         />
-                                    ) : (
-                                        ""
-                                    )}
+                                    ) }
                                 </div>
                             )}
                             {theme === "light" ? (
