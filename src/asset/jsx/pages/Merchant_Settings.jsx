@@ -12,10 +12,17 @@ export class Merchant_Settings extends Component {
 		startDate.setDate(today.getDate() - 6);
 		this.state = {
 			sidebaropen: true,
-            token: localStorage.getItem("token"),
-			userRole: localStorage.getItem("role"),
+            token: this.getCookie('token'),
+			userRole: this.getCookie('role'),
         }
     }
+
+    getCookie = (name) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+      }
 
     render() {
         return (

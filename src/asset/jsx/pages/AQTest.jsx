@@ -41,7 +41,53 @@ export class AQTest extends Component {
             orderNo: "", 
         };
     }
-      
+  
+    extractOrderNoFromURL() {
+        const currentPath = window.location.pathname;
+        const orderNo = currentPath.split("/acquirertestingenv/")[1];
+        return orderNo;
+    }
+
+    componentDidMount() {
+        const token = localStorage.getItem('token');
+        const userName = localStorage.getItem('company_name'); // Assuming you store 'userName' during login
+        const userRole = localStorage.getItem('role'); // Assuming you store 'userRole' during login
+    
+        console.log("Loaded cookies data:", { token, userName, userRole });
+    
+        if (token && userName && userRole) {
+            this.setState({
+                token: token,
+                userName: userName,
+                userRole: userRole
+            });
+        }
+
+        if (this.state.orderNo) {
+            this.fetchData();
+        }
+    }
+
+    fetchData = async () => {
+        this.setState({ isLoading: true, error: null });
+        const backendURL = process.env.REACT_APP_BACKEND_URL;
+        try {
+            const API_URL = `${backendURL}/transactionflow/get_transaction?orderNo=${this.state.orderNo}`;
+            const response = await fetch(API_URL);
+            if (!response.ok) {
+                throw new Error(`API request failed with status ${response.status}`);
+            }
+            const data = await response.json();
+            this.setState({ data });
+            console.log("Fetched data:", data);     
+            this.setState({status: data.status})
+        } catch (error) {
+            this.setState({ error: error.message || 'An error occurred while fetching data.' });
+        } finally {
+            this.setState({ isLoading: false });
+        }
+    };
+
     handleInputChange = (e) => {
         this.setState({ [e.target.name]: e.target.value });
     };

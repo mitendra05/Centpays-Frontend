@@ -12,14 +12,21 @@ class PreviewReport extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			token: this.getCookie('token'),
 			id: this.extractidFromURL(),
 			reportData: [],
 			errorMessage: "",
-			token: localStorage.getItem("token"),
 			rateData:[],
 			company_name:"",
 		};
 	}
+
+	getCookie = (name) => {
+		const value = `; ${document.cookie}`;
+		const parts = value.split(`; ${name}=`);
+		if (parts.length === 2) return parts.pop().split(';').shift();
+		return null;
+	  }
 
 	componentDidMount() {
 		this.handleFetchReport(this.state.id);

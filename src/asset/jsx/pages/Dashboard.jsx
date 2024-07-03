@@ -31,8 +31,10 @@ class Dashboard extends Component {
 		startDate.setDate(today.getDate() - 6);
 		this.state = {
 			sidebaropen: true,
-			userName: localStorage.getItem("name"),
-			merchantName: localStorage.getItem("company_name"),
+			userName: this.getCookie('name'),
+			merchantName: this.getCookie('company_name'),
+			token: this.getCookie("token"),
+			userRole: this.getCookie("role"),
 			card1_data: {},
 			card2_data: {},
 			card9_Data: {},
@@ -48,8 +50,6 @@ class Dashboard extends Component {
 			errorMessage: "",
 			messageType: "",
 			merchant: "",
-			token: localStorage.getItem("token"),
-			userRole: localStorage.getItem("role"),
 			isCalendarOpen: false,
 			showCalendar: false,
 			startDate: startDate,
@@ -80,45 +80,78 @@ class Dashboard extends Component {
 		};
 	}
 
-	componentDidMount() {
-        this.fetchData();
-        this.fetchDatacard10();
-        this.fetchDataBasedOnlocalStorage();
-        this.dataInterval = setInterval(() => {
-            this.fetchData();
-            this.fetchDatacard10();
-        }, 300000);
-        this.fetchTableData();
-        this.interval = setInterval(this.fetchTableData, 2000);
+	getCookie = (name) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
     }
 
-    componentDidUpdate(prevProps) {
-        if (prevProps.selectedCurrency !== this.props.selectedCurrency) {
-            this.setState({ currency: this.props.selectedCurrency }, () => {
-                this.fetchData();
-                this.fetchDatacard10();
-                this.fetchDataBasedOnlocalStorage();
-            });
+	componentDidMount = async () => {
+		this.fetchData();
+		this.fetchDatacard10();
+		this.fetchDataBasedOnlocalStorage();
+		this.dataInterval = setInterval(() => {
+			this.fetchData();
+			this.fetchDatacard10();
+		}, 300000);
+		this.fetchTableData();
+		this.interval = setInterval(this.fetchTableData, 2000);
+		// const userRole = this.state;
+		// let currency = ""
+		// if (userRole === "admin"){
+        //     currency = "USD"
+        // }
+        // if(userRole === "merchant"){
+        //     currency= await this.fetchCurrencyList();
+		// 	console.log("currrrr",currency)
+        // }
+        // this.setState({currency})
+	}
+
+	componentWillUnmount() {
+		clearInterval(this.interval);
+	}
+
+	fetchCurrencyList = async () => {
+        const backendURL = process.env.REACT_APP_BACKEND_URL;
+        const { token, merchantName } = this.state;
+        try {
+          const response = await fetch(`${backendURL}/currenciesforcompany?company_name=${merchantName}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          });
+      
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+      
+          const data = await response.json();
+          console.log("currency data",data)
+          return data[0]
+        } catch (error) {
+          console.error("Fetch error:", error);
+          this.setState({
+            errorMessage: "Error fetching data. Please try again later."
+          });
         }
-    }
-
-    componentWillUnmount() {
-        clearInterval(this.interval);
-        clearInterval(this.dataInterval);
-    }
+      };
 
 	fetchTableData = async() => {
 		const backendURL = process.env.REACT_APP_BACKEND_URL;
-		const role = localStorage.getItem("role");
-		const company_name = localStorage.getItem("company_name");
+		const { userRole, merchantName } = this.state
+		// const role = localStorage.getItem("role");
+		// const company_name = localStorage.getItem("company_name");
 		
 		// Construct the URL based on the role
 		let url = `${backendURL}/latest100`;
-		if (role === "merchant") {
-		  url += `?merchant=${company_name}`;
+		if (userRole === "merchant") {
+		  url += `?merchant=${merchantName}`;
 		}
 	  
-		// Fetch the data using the constructed URL
 		try {
 			const response = await fetch(url);
 			if (!response.ok) {
@@ -149,11 +182,11 @@ class Dashboard extends Component {
 	};
 
 	fetchDataBasedOnlocalStorage = () => {
-		const { currency, startDate, endDate } = this.state;
+		const { currency, startDate, endDate, userRole, merchantName } = this.state;
 
-		const role = localStorage.getItem("role");
-		const company_name = localStorage.getItem("company_name");
-		const merchant = role === "merchant" ? company_name : this.state.merchant;
+		// const role = localStorage.getItem("role");
+		// const company_name = localStorage.getItem("company_name");
+		const merchant = userRole === "merchant" ? merchantName : this.state.merchant;
 
 		const fromDate = startDate.toISOString().split("T")[0];
 		const toDate = endDate.toISOString().split("T")[0];
@@ -230,11 +263,11 @@ class Dashboard extends Component {
 
 	fetchData = async () => {
 		const backendURL = process.env.REACT_APP_BACKEND_URL;
-		const { currency, startDate, token, endDate } = this.state;
+		const { currency, startDate, token, endDate, userRole, merchantName } = this.state;
 
-		const role = localStorage.getItem("role");
-		const company_name = localStorage.getItem("company_name");
-		const merchant = role === "merchant" ? company_name : this.state.merchant;
+		// const role = localStorage.getItem("role");
+		// const company_name = localStorage.getItem("company_name");
+		const merchant = userRole === "merchant" ? merchantName : this.state.merchant;
 		const fromDate = startDate.toISOString().split("T")[0];
 		const toDate = endDate.toISOString().split("T")[0];
 		try {
@@ -292,12 +325,12 @@ class Dashboard extends Component {
 
 	fetchDatacard10 = async () => {
 		const backendURL = process.env.REACT_APP_BACKEND_URL;
-		const { currency, token } = this.state;
+		const { currency, token, userRole, merchantName } = this.state;
 
-		// Retrieve role and company_name from local storage
-		const role = localStorage.getItem("role");
-		const company_name = localStorage.getItem("company_name");
-		const merchant = role === "merchant" ? company_name : this.state.merchant;
+		// // Retrieve role and company_name from local storage
+		// const role = localStorage.getItem("role");
+		// const company_name = localStorage.getItem("company_name");
+		const merchant = userRole === "merchant" ? merchantName : this.state.merchant;
 		try {
 			const response = await fetch(
 				`${backendURL}/dashboard/successlast6Months?currency=${currency}&merchant=${merchant}`,
@@ -665,7 +698,7 @@ class Dashboard extends Component {
 												className="creditcard-img grey-icon"
 											/>
 										</div>
-										<h4>Total Traffic this Week</h4>
+										<h4>Traffic Status</h4>
 									</div>
 									<div className="card4-viewmore">
 										<CustomTooltip details={<p>This card summarizes the total number of transactions this week."</p>}>
@@ -680,7 +713,7 @@ class Dashboard extends Component {
 									<h3>
 										{this.formatValue(card2_data.totalNumTxn)}
 										{"  "}
-										<span className="p2">Total Traffic</span>
+										<span className="p2">Total Traffic This Week</span>
 									</h3>
 								</div>
 							</div>
@@ -1064,7 +1097,7 @@ class Dashboard extends Component {
 									<h3 className="first-row-card2-details-amount">
 										{this.formatValue(card1_data.totalTransactions)}
 									</h3>
-									<p>Transactions today</p>
+									<p>Today's Transactions</p>
 								</div>
 							</div>
 						</div>
@@ -1221,7 +1254,7 @@ class Dashboard extends Component {
 									<h3>
 										{this.formatValue(card2_data.totalNumTxn)}
 										{"  "}
-										<span className="p2">Total Traffic</span>
+										<span className="p2">Total Traffic This Week</span>
 									</h3>
 								</div>
 							</div>
@@ -1399,13 +1432,11 @@ class Dashboard extends Component {
 							<div className="row-cards fourth-row-card1">
 								<div className="card-head-with-view-more">
 									<h4>Performance This Month</h4>
-									<CustomTooltip maxWidth={250} details={<p>This card shows key metrics for transactions in the last month (total number of transactions, total volume of transactions, number of successful transactions, volume of successful transactions</p>}>
+									<CustomTooltip maxWidth={250} details={<p>This card shows key metrics for transactions in the last month total number of transactions, total volume of transactions, number of successful transactions, volume of successful transactions</p>}>
 										<Infoicon className="icon2" />
 									</CustomTooltip>
 								</div>
-								<p className="card9-subhead">
-									Total {String(card9_Data.growthPercentage).slice(0, 5)}% Growth
-									😎 <span className="p2">this month</span>
+								<p className="card9-subhead">Your performance this month is {String(card9_Data.growthPercentage).slice(0, 5)}% in comparison to previous month
 								</p>
 								<div className="card9-content">
 									<div className="card7-head">
