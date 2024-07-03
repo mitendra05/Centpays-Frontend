@@ -44,7 +44,6 @@ class Header extends Component {
             userName: localStorage.getItem("name"),
             email: localStorage.getItem("email"),
             userRole: localStorage.getItem("role"),
-            companyName: localStorage.getItem("company_name"),
             token: localStorage.getItem("token"),
 
             highlightedOptions: [],
@@ -104,11 +103,11 @@ class Header extends Component {
                     ],
                 },
             ],
-            currency: ["USD", "EUR", "All Currencies"],
+            currency: [],
             merchant: "",
             companyList: [],
             selectedMerchant: "Select Merchant",
-            selectedCurrency: "EUR",
+            selectedCurrency: "",
             currentPage: "dashboard",
         };
     }
@@ -117,20 +116,20 @@ class Header extends Component {
     componentDidMount() {
         const savedScrollPosition = localStorage.getItem("Header_ScrollY");
         if (savedScrollPosition) {
-            window.scrollTo(0, parseInt(savedScrollPosition, 10));
+          window.scrollTo(0, parseInt(savedScrollPosition, 10));
         }
         window.addEventListener("scroll", this.handleScroll);
         window.addEventListener("keydown", this.handleKeyDown);
         this.fetchCompanyList();
         const currentPage = window.location.pathname.split("/")[1];
         this.setState({ currentPage });
-    }
+        this.fetchCurrencies();
+      }
     
-    componentWillUnmount() {
+      componentWillUnmount() {
         localStorage.setItem("Header_ScrollY", window.scrollY);
         window.removeEventListener("scroll", this.handleScroll);
-        window.removeEventListener("keydown", this.handleKeyDown);
-    }
+      }
 
       handleMerchantChange = (merchant) => {
         if (merchant === "Select Merchant") {
@@ -150,20 +149,17 @@ class Header extends Component {
         this.props.onCurrencyChange?.(currency);
       };
     
-       
-    handleScroll = () => {
+      handleScroll = () => {
         if (window.scrollY > 0) {
-            this.setState({
-                scrolled: true,
-                showUserProfileModal: false,  
-                shortcutModal: false,
-            });
+          this.setState({
+            scrolled: true,
+          });
         } else {
-            this.setState({
-                scrolled: false,
-            });
+          this.setState({
+            scrolled: false,
+          });
         }
-    };
+      };
     
       toggleTheme = () => {
         this.setState((prevState) => ({
@@ -252,16 +248,63 @@ class Header extends Component {
           }
       
           const data = await response.json();
-          this.setState({ companyList: data, errorMessage: "" }); // Clear any previous error message
+          this.setState({ companyList: data, errorMessage: "" }); 
         } catch (error) {
           console.error("Fetch error:", error);
           this.setState({
             errorMessage: "Error fetching data. Please try again later.",
-            companyList: [], // Optionally clear existing data if needed
+            companyList: [], 
           });
         }
       };
           
+      fetchCurrencies = async () => {
+        const backendURL = process.env.REACT_APP_BACKEND_URL;
+        const companyName = localStorage.getItem("company_name");
+        const { userRole, token } = this.state;
+    
+        try {
+            let response;
+            if (userRole === "admin") {
+                this.setState({ 
+                    currency: ["USD", "EUR", "All Currencies"],
+                    selectedCurrency: "USD",
+                    errorMessage: "" 
+                });
+                this.props.onCurrencyChange?.("USD"); 
+            } else {
+                response = await fetch(`${backendURL}/viewclient?company_name=${companyName}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+    
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+    
+                const data = await response.json();
+                const selectedCurrency = (data.currency && data.currency[0]) || "";
+                this.setState({ 
+                    currency: data.currency || [], 
+                    selectedCurrency,
+                    errorMessage: "" 
+                });
+                this.props.onCurrencyChange?.(selectedCurrency); 
+            }
+        } catch (error) {
+            console.error("Fetch error:", error);
+            this.setState({
+                errorMessage: "Error fetching data. Please try again later.",
+                currency: [], 
+                selectedCurrency: "",
+            });
+            this.props.onCurrencyChange?.("");
+        }
+    };
+    
 
       handleLogout = () => {
        window.location.href = `/`
@@ -314,7 +357,7 @@ class Header extends Component {
                                 <div className="custom-select-div">
                                     <CustomSelect
                                         options={currency}
-                                        selectedValue={selectedCurrency}
+                                        selectedValue={userRole === "admin" ? "USD" :selectedCurrency}
                                         onChange={this.handleCurrencyChange}
                                     />
                                     {userRole === "admin" ? (

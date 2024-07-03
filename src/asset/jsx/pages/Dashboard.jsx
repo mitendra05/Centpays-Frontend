@@ -47,7 +47,6 @@ class Dashboard extends Component {
 			card9_data: [{ head: "Transactions" }, { head: "Sale Success" }],
 			errorMessage: "",
 			messageType: "",
-			currency: "USD",
 			merchant: "",
 			token: localStorage.getItem("token"),
 			userRole: localStorage.getItem("role"),
@@ -77,24 +76,36 @@ class Dashboard extends Component {
 				{ id: 17, heading: "Web URL", label: "web_url" },
 			],
 			tableData : [],
+			  currency: props.selectedCurrency || 'USD',
 		};
 	}
 
 	componentDidMount() {
-		this.fetchData();
-		this.fetchDatacard10();
-		this.fetchDataBasedOnlocalStorage();
-		this.dataInterval = setInterval(() => {
-			this.fetchData();
-			this.fetchDatacard10();
-		}, 300000);
-		this.fetchTableData();
-		this.interval = setInterval(this.fetchTableData, 2000);
-	}
+        this.fetchData();
+        this.fetchDatacard10();
+        this.fetchDataBasedOnlocalStorage();
+        this.dataInterval = setInterval(() => {
+            this.fetchData();
+            this.fetchDatacard10();
+        }, 300000);
+        this.fetchTableData();
+        this.interval = setInterval(this.fetchTableData, 2000);
+    }
 
-	componentWillUnmount() {
-		clearInterval(this.interval);
-	}
+    componentDidUpdate(prevProps) {
+        if (prevProps.selectedCurrency !== this.props.selectedCurrency) {
+            this.setState({ currency: this.props.selectedCurrency }, () => {
+                this.fetchData();
+                this.fetchDatacard10();
+                this.fetchDataBasedOnlocalStorage();
+            });
+        }
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.interval);
+        clearInterval(this.dataInterval);
+    }
 
 	fetchTableData = async() => {
 		const backendURL = process.env.REACT_APP_BACKEND_URL;
@@ -330,15 +341,12 @@ class Dashboard extends Component {
 	};
 
 	getCurrencySymbol = (currency) => {
-		switch (currency) {
-			case "USD":
-				return "$";
-			case "EUR":
-				return "€";
-			case "GBP":
-				return "£";
-			default:
-				return "";
+		const { headerLabels } = this.state;
+		const currencyLabel = headerLabels.find(label => label.label === 'currency');
+		if (currencyLabel) {
+			return currencyLabel.heading;
+		} else {
+			return '';
 		}
 	};
 
@@ -426,6 +434,10 @@ class Dashboard extends Component {
 		);
 
 		const percentageChange = parseFloat(card2_data.percentageChange);
+		const validCurrencyCodes = ["USD", "EUR", "GBP", "INR"];
+		const validateCurrency = (currency) => {
+			return validCurrencyCodes.includes(currency) ? currency : "USD";
+		};
 
 		if (userRole === "admin") {
 			return (
@@ -484,7 +496,7 @@ class Dashboard extends Component {
 											"en-US",
 											{
 												style: "currency",
-												currency: currency,
+												currency: validateCurrency(currency),
 												minimumFractionDigits: 0,
 												maximumFractionDigits: 0,
 											}
@@ -589,7 +601,7 @@ class Dashboard extends Component {
 													"en-US",
 													{
 														style: "currency",
-														currency: currency,
+														currency: validateCurrency(currency),
 														minimumFractionDigits: 0,
 														maximumFractionDigits: 0,
 													}
@@ -610,7 +622,7 @@ class Dashboard extends Component {
 													"en-US",
 													{
 														style: "currency",
-														currency: currency,
+														currency: validateCurrency(currency),
 														minimumFractionDigits: 0,
 														maximumFractionDigits: 0,
 													}
@@ -631,7 +643,7 @@ class Dashboard extends Component {
 													"en-US",
 													{
 														style: "currency",
-														currency: currency,
+														currency: validateCurrency(currency),
 														minimumFractionDigits: 0,
 														maximumFractionDigits: 0,
 													}
@@ -695,7 +707,7 @@ class Dashboard extends Component {
 													"en-IN",
 													{
 														style: "currency",
-														currency: currency,
+														currency: validateCurrency(currency),
 														minimumFractionDigits: 0,
 														maximumFractionDigits: 0,
 													}
@@ -732,7 +744,7 @@ class Dashboard extends Component {
 													"en-IN",
 													{
 														style: "currency",
-														currency: currency,
+														currency: validateCurrency(currency),
 														minimumFractionDigits: 0,
 														maximumFractionDigits: 0,
 													}
@@ -790,7 +802,7 @@ class Dashboard extends Component {
 											<h5>
 												{parseFloat(card7_sumOfAmount).toLocaleString("en-US", {
 													style: "currency",
-													currency: currency,
+													currency: validateCurrency(currency),
 													minimumFractionDigits: 0,
 													maximumFractionDigits: 0,
 												})}
@@ -815,7 +827,7 @@ class Dashboard extends Component {
 												<p className="region-amounts">
 													{parseFloat(item["amount"]).toLocaleString("en-US", {
 														style: "currency",
-														currency: currency,
+														currency: validateCurrency(currency),
 														minimumFractionDigits: 0,
 														maximumFractionDigits: 0,
 													})}
@@ -884,7 +896,7 @@ class Dashboard extends Component {
 													card9_Data.totalAmountTransactions
 												).toLocaleString("en-US", {
 													style: "currency",
-													currency: currency,
+													currency: validateCurrency(currency),
 													minimumFractionDigits: 0,
 													maximumFractionDigits: 0,
 												})}
@@ -923,7 +935,7 @@ class Dashboard extends Component {
 													card9_Data.totalAmountSuccessfulTransactions
 												).toLocaleString("en-US", {
 													style: "currency",
-													currency: currency,
+													currency: validateCurrency(currency),
 													minimumFractionDigits: 0,
 													maximumFractionDigits: 0,
 												})}
@@ -941,7 +953,7 @@ class Dashboard extends Component {
 										<span className="p2">
 											{parseFloat(card10_data).toLocaleString("en-US", {
 												style: "currency",
-												currency: currency,
+												currency: validateCurrency(currency),
 												minimumFractionDigits: 0,
 												maximumFractionDigits: 0,
 											})}
@@ -1026,7 +1038,7 @@ class Dashboard extends Component {
 											"en-US",
 											{
 												style: "currency",
-												currency: currency,
+												currency: validateCurrency(currency),
 												minimumFractionDigits: 0,
 												maximumFractionDigits: 0,
 											}
@@ -1130,7 +1142,7 @@ class Dashboard extends Component {
 													"en-US",
 													{
 														style: "currency",
-														currency: currency,
+														currency: validateCurrency(currency),
 														minimumFractionDigits: 0,
 														maximumFractionDigits: 0,
 													}
@@ -1151,7 +1163,7 @@ class Dashboard extends Component {
 													"en-US",
 													{
 														style: "currency",
-														currency: currency,
+														currency: validateCurrency(currency),
 														minimumFractionDigits: 0,
 														maximumFractionDigits: 0,
 													}
@@ -1172,7 +1184,7 @@ class Dashboard extends Component {
 													"en-US",
 													{
 														style: "currency",
-														currency: currency,
+														currency: validateCurrency(currency),
 														minimumFractionDigits: 0,
 														maximumFractionDigits: 0,
 													}
@@ -1236,7 +1248,7 @@ class Dashboard extends Component {
 													"en-IN",
 													{
 														style: "currency",
-														currency: currency,
+														currency: validateCurrency(currency),
 														minimumFractionDigits: 0,
 														maximumFractionDigits: 0,
 													}
@@ -1273,7 +1285,7 @@ class Dashboard extends Component {
 													"en-IN",
 													{
 														style: "currency",
-														currency: currency,
+														currency: validateCurrency(currency),
 														minimumFractionDigits: 0,
 														maximumFractionDigits: 0,
 													}
@@ -1331,7 +1343,7 @@ class Dashboard extends Component {
 											<h5>
 												{parseFloat(card7_sumOfAmount).toLocaleString("en-US", {
 													style: "currency",
-													currency: currency,
+													currency: validateCurrency(currency),
 													minimumFractionDigits: 0,
 													maximumFractionDigits: 0,
 												})}
@@ -1356,7 +1368,7 @@ class Dashboard extends Component {
 												<p className="region-amounts">
 													{parseFloat(item["amount"]).toLocaleString("en-US", {
 														style: "currency",
-														currency: currency,
+														currency: validateCurrency(currency),
 														minimumFractionDigits: 0,
 														maximumFractionDigits: 0,
 													})}
@@ -1425,7 +1437,7 @@ class Dashboard extends Component {
 													card9_Data.totalAmountTransactions
 												).toLocaleString("en-US", {
 													style: "currency",
-													currency: currency,
+													currency: validateCurrency(currency),
 													minimumFractionDigits: 0,
 													maximumFractionDigits: 0,
 												})}
@@ -1464,7 +1476,7 @@ class Dashboard extends Component {
 													card9_Data.totalAmountSuccessfulTransactions
 												).toLocaleString("en-US", {
 													style: "currency",
-													currency: currency,
+													currency: validateCurrency(currency),
 													minimumFractionDigits: 0,
 													maximumFractionDigits: 0,
 												})}
@@ -1482,7 +1494,7 @@ class Dashboard extends Component {
 										<span className="p2">
 											{parseFloat(card10_data).toLocaleString("en-US", {
 												style: "currency",
-												currency: currency,
+												currency: validateCurrency(currency),
 												minimumFractionDigits: 0,
 												maximumFractionDigits: 0,
 											})}

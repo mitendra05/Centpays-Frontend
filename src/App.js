@@ -46,7 +46,8 @@ import Adduser from "./asset/jsx/pages/AddUser";
 import AllUser from "./asset/jsx/pages/AllUser";
 import MerchantSettings from "./asset/jsx/pages/Merchant_Settings";
 
-import AQTest from "./asset/jsx/pages/AQTest"
+import AQTest from "./asset/jsx/pages/AQTest";
+import AQResult from "./asset/jsx/pages/AQResult";
 
 import Setting from "./asset/jsx/pages/setting";
 
@@ -128,6 +129,7 @@ function App() {
           <Route path="/acquirertestingenv" element={<AQTest/>} ></Route>
 
           <Route path="/acquirertestingenv/:orderNo" element={<AQTest/>} ></Route>
+          <Route path="/aqresult/:orderNo" element={<AQResult/>} ></Route>
 
           <Route path="/settings" element={<Setting/>} ></Route>
         </Routes>
