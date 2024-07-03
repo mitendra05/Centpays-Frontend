@@ -124,7 +124,8 @@ class Header extends Component {
 
     componentDidMount = async () => {
         const savedScrollPosition = localStorage.getItem("Header_ScrollY");
-        const userRole= localStorage.getItem("role");
+        const userRole =this.getCookie('role');
+
         if (savedScrollPosition) {
           window.scrollTo(0, parseInt(savedScrollPosition, 10));
         }
@@ -174,7 +175,7 @@ class Header extends Component {
         this.setState({ selectedCurrency: currency });
         this.props.onCurrencyChange?.(currency);
 
-
+    }
     handleScroll = () => {
         if (window.scrollY > 0) {
             this.setState({
@@ -187,7 +188,7 @@ class Header extends Component {
             scrolled: false,
           });
         }
-
+    }
     toggleTheme = () => {
         this.setState((prevState) => ({
             theme: prevState.theme === "light" ? "dark" : "light",
