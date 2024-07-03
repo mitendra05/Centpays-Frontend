@@ -49,7 +49,7 @@ class Dashboard extends Component {
 			card9_data: [{ head: "Transactions" }, { head: "Sale Success" }],
 			errorMessage: "",
 			messageType: "",
-			currency: "USD",
+			// currency: "USD",
 			merchant: "",
 			isCalendarOpen: false,
 			showCalendar: false,
@@ -87,7 +87,7 @@ class Dashboard extends Component {
         return null;
     }
 
-	componentDidMount() {
+	componentDidMount = async () => {
 		this.fetchData();
 		this.fetchDatacard10();
 		this.fetchDataBasedOnlocalStorage();
@@ -97,11 +97,48 @@ class Dashboard extends Component {
 		}, 300000);
 		this.fetchTableData();
 		this.interval = setInterval(this.fetchTableData, 2000);
+		// const userRole = this.state;
+		// let currency = ""
+		// if (userRole === "admin"){
+        //     currency = "USD"
+        // }
+        // if(userRole === "merchant"){
+        //     currency= await this.fetchCurrencyList();
+		// 	console.log("currrrr",currency)
+        // }
+        // this.setState({currency})
 	}
 
 	componentWillUnmount() {
 		clearInterval(this.interval);
 	}
+
+	fetchCurrencyList = async () => {
+        const backendURL = process.env.REACT_APP_BACKEND_URL;
+        const { token, merchantName } = this.state;
+        try {
+          const response = await fetch(`${backendURL}/currenciesforcompany?company_name=${merchantName}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          });
+      
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+      
+          const data = await response.json();
+          console.log("currency data",data)
+          return data[0]
+        } catch (error) {
+          console.error("Fetch error:", error);
+          this.setState({
+            errorMessage: "Error fetching data. Please try again later."
+          });
+        }
+      };
 
 	fetchTableData = async() => {
 		const backendURL = process.env.REACT_APP_BACKEND_URL;
@@ -660,7 +697,7 @@ class Dashboard extends Component {
 												className="creditcard-img grey-icon"
 											/>
 										</div>
-										<h4>Total Traffic this Week</h4>
+										<h4>Traffic Status</h4>
 									</div>
 									<div className="card4-viewmore">
 										<CustomTooltip details={<p>This card summarizes the total number of transactions this week."</p>}>
@@ -675,7 +712,7 @@ class Dashboard extends Component {
 									<h3>
 										{this.formatValue(card2_data.totalNumTxn)}
 										{"  "}
-										<span className="p2">Total Traffic</span>
+										<span className="p2">Total Traffic This Week</span>
 									</h3>
 								</div>
 							</div>
@@ -1059,7 +1096,7 @@ class Dashboard extends Component {
 									<h3 className="first-row-card2-details-amount">
 										{this.formatValue(card1_data.totalTransactions)}
 									</h3>
-									<p>Transactions today</p>
+									<p>Today's Transactions</p>
 								</div>
 							</div>
 						</div>
@@ -1216,7 +1253,7 @@ class Dashboard extends Component {
 									<h3>
 										{this.formatValue(card2_data.totalNumTxn)}
 										{"  "}
-										<span className="p2">Total Traffic</span>
+										<span className="p2">Total Traffic This Week</span>
 									</h3>
 								</div>
 							</div>
@@ -1394,13 +1431,11 @@ class Dashboard extends Component {
 							<div className="row-cards fourth-row-card1">
 								<div className="card-head-with-view-more">
 									<h4>Performance This Month</h4>
-									<CustomTooltip maxWidth={250} details={<p>This card shows key metrics for transactions in the last month (total number of transactions, total volume of transactions, number of successful transactions, volume of successful transactions</p>}>
+									<CustomTooltip maxWidth={250} details={<p>This card shows key metrics for transactions in the last month total number of transactions, total volume of transactions, number of successful transactions, volume of successful transactions</p>}>
 										<Infoicon className="icon2" />
 									</CustomTooltip>
 								</div>
-								<p className="card9-subhead">
-									Total {String(card9_Data.growthPercentage).slice(0, 5)}% Growth
-									😎 <span className="p2">this month</span>
+								<p className="card9-subhead">Your performance this month is {String(card9_Data.growthPercentage).slice(0, 5)}% in comparison to previous month
 								</p>
 								<div className="card9-content">
 									<div className="card7-head">
