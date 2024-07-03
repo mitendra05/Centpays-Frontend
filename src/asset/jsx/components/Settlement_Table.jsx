@@ -18,12 +18,16 @@ import {
   MailStatus,
   PlusSymbol,
   Oops,
+  LeftDoubleArrow,
+  RightDoubleArrow,
 } from "../../media/icon/SVGicons";
 
 class Table extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      token: this.getCookie('token'),
+      userRole: this.getCookie('role'),
       isRatesModal: false,
       ratesdata: [],
       isEditStatusModal: false,
@@ -35,8 +39,6 @@ class Table extends Component {
       noResultsFound: false,
       errorMessage: "",
       messageType: "",
-      token: localStorage.getItem("token"),
-      userRole: localStorage.getItem("role"),
       fromDate: "",
       toDate: "",
       rows: 10,
@@ -45,7 +47,12 @@ class Table extends Component {
     };
   }
 
-  // handle Functions
+  getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  }
 
   handleRowsChange = (event) => {
     this.setState({
@@ -563,6 +570,13 @@ class Table extends Component {
                     )} of ${dataToRender.length}`}
                   </p>
                   <button
+                onClick={() => this.setState({ currentPage: 1 })}
+                disabled={currentPage === 1}
+                className={currentPage === 1 ? 'disabled-button' : ''}
+              >
+                <LeftDoubleArrow />
+              </button>
+                  <button
                     onClick={() => this.handlePageChange("prev")}
                     disabled={currentPage === 1}
                     className={currentPage === 1 ? "disabled-button" : ""}
@@ -578,6 +592,12 @@ class Table extends Component {
                   >
                     <RightSign />
                   </button>
+                  <button
+                onClick={() => this.setState({ currentPage: totalPages })}
+                className={currentPage === totalPages ? 'disabled-button' : ''}
+              >
+                <RightDoubleArrow />
+              </button>
                 </div>
               </div>
             )}
@@ -901,6 +921,13 @@ class Table extends Component {
                     )} of ${dataToRender.length}`}
                   </p>
                   <button
+                    onClick={() => this.setState({ currentPage: 1 })}
+                    disabled={currentPage === 1}
+                    className={currentPage === 1 ? 'disabled-button' : ''}
+                  >
+                    <LeftDoubleArrow />
+                  </button>
+                  <button
                     onClick={() => this.handlePageChange("prev")}
                     disabled={currentPage === 1}
                     className={currentPage === 1 ? "disabled-button" : ""}
@@ -915,6 +942,12 @@ class Table extends Component {
                     }
                   >
                     <RightSign />
+                  </button>
+                  <button
+                    onClick={() => this.setState({ currentPage: totalPages })}
+                    className={currentPage === totalPages ? 'disabled-button' : ''}
+                  >
+                    <RightDoubleArrow />
                   </button>
                 </div>
               </div>

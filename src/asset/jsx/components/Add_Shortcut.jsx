@@ -5,14 +5,21 @@ class SearchWindow extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      token: this.getCookie('token'),
       searchText: "",
       showModal: false,
       selectedOption: null,
       newOptionName: "",
-      token: localStorage.getItem("token"),
       isBlankWindowOpen: true,
       shortcutList: [] 
     };
+  }
+
+  getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
   }
   componentDidMount() {
     this.fetchShortcuts();

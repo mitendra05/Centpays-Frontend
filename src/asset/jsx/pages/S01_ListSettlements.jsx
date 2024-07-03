@@ -17,6 +17,7 @@ class ListSettlement extends Component {
 		super(props);
 		this.state = {
 			sidebaropen: true,
+			token: this.getCookie('token'),
 			headerLabels: [
 				
 				{ id: 1, heading: "Client", label: "company_name" },
@@ -28,7 +29,7 @@ class ListSettlement extends Component {
 			listData: [],
 			showRates: true,
 			errorMessage: "",
-			token: localStorage.getItem("token"),
+			
 		};
 	}
 
@@ -36,6 +37,13 @@ class ListSettlement extends Component {
 		this.fetchData();
 		this.fetchListData();
 	}
+
+	getCookie = (name) => {
+		const value = `; ${document.cookie}`;
+		const parts = value.split(`; ${name}=`);
+		if (parts.length === 2) return parts.pop().split(';').shift();
+		return null;
+	  }
 
 	fetchData = async () => {
 		const { token } = this.state;

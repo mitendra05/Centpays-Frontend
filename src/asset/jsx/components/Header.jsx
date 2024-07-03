@@ -15,7 +15,7 @@ import category from "../../media/icon/category.png";
 import common from "../../media/icon/eye.png";
 import tempr from "../../media/icon/eye.png";
 import doc from "../../media/icon/eye.png";
-import document from "../../media/icon/document.png";
+import dox from "../../media/icon/document.png";
 import settings from "../../media/icon/setting.png";
 import subcategory from "../../media/icon/subCategory.png";
 import commandline from "../../media/icon/commandline.png";
@@ -36,16 +36,16 @@ class Header extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            userName: this.getCookie('name'),
+            email: this.getCookie('email'),
+            userRole: this.getCookie('role'),
+            companyName: this.getCookie('company_name'),
+            token: this.getCookie('token'),
             theme: "light",
             scrolled: false,
             searchOpen: false,
             searchText: "",
             showUserProfileModal: false,
-            userName: localStorage.getItem("name"),
-            email: localStorage.getItem("email"),
-            userRole: localStorage.getItem("role"),
-            companyName: localStorage.getItem("company_name"),
-            token: localStorage.getItem("token"),
 
             highlightedOptions: [],
             options: [
@@ -73,7 +73,7 @@ class Header extends Component {
                         { name: "Document Type", icon: doc, path: "/documenttype" },
                         {
                             name: "Document Categories",
-                            icon: document,
+                            icon: dox,
                             path: "/documentcategories",
                         },
                         { name: "Bank", icon: bank, path: "/bank" },
@@ -113,6 +113,13 @@ class Header extends Component {
         };
     }
 
+    getCookie = (name) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
+
     componentDidMount() {
         const savedScrollPosition = localStorage.getItem("Header_ScrollY");
         if (savedScrollPosition) {
@@ -124,37 +131,37 @@ class Header extends Component {
         const currentPage = window.location.pathname.split("/")[1];
         this.setState({ currentPage });
     }
-    
+
     componentWillUnmount() {
         localStorage.setItem("Header_ScrollY", window.scrollY);
         window.removeEventListener("scroll", this.handleScroll);
         window.removeEventListener("keydown", this.handleKeyDown);
     }
 
-      handleMerchantChange = (merchant) => {
+    handleMerchantChange = (merchant) => {
         if (merchant === "Select Merchant") {
-          this.setState({
-            selectedMerchant: merchant,
-            selectedCurrency: "USD",
-          });
-          this.props.onMerchantChange?.("");
+            this.setState({
+                selectedMerchant: merchant,
+                selectedCurrency: "USD",
+            });
+            this.props.onMerchantChange?.("");
         } else {
-          this.setState({ selectedMerchant: merchant });
-          this.props.onMerchantChange?.(merchant);
+            this.setState({ selectedMerchant: merchant });
+            this.props.onMerchantChange?.(merchant);
         }
-      };
-    
-      handleCurrencyChange = (currency) => {
+    };
+
+    handleCurrencyChange = (currency) => {
         this.setState({ selectedCurrency: currency });
         this.props.onCurrencyChange?.(currency);
-      };
-    
-       
+    };
+
+
     handleScroll = () => {
         if (window.scrollY > 0) {
             this.setState({
                 scrolled: true,
-                showUserProfileModal: false,  
+                showUserProfileModal: false,
                 shortcutModal: false,
             });
         } else {
@@ -163,111 +170,119 @@ class Header extends Component {
             });
         }
     };
-    
-      toggleTheme = () => {
-        this.setState((prevState) => ({
-          theme: prevState.theme === "light" ? "dark" : "light",
-        }));
-      };
 
-      toggleSearch = () => {
-        if (!this.state.showInnerModal) {
-          this.setState((prevState) => ({
-            searchOpen: !prevState.searchOpen,
-            showInnerModal: false,
-          }));
-        } else {
-          this.setState({
-            showInnerModal: false,
-          });
-        }
-      };
-    
-      toggleUserProfileModal = () => {
+    toggleTheme = () => {
         this.setState((prevState) => ({
-          showUserProfileModal: !prevState.showUserProfileModal,
-          searchOpen: false,
+            theme: prevState.theme === "light" ? "dark" : "light",
         }));
-      };
-    
-      handleSearch = (event) => {
+    };
+
+    toggleSearch = () => {
+        if (!this.state.showInnerModal) {
+            this.setState((prevState) => ({
+                searchOpen: !prevState.searchOpen,
+                showInnerModal: false,
+            }));
+        } else {
+            this.setState({
+                showInnerModal: false,
+            });
+        }
+    };
+
+    toggleUserProfileModal = () => {
+        this.setState((prevState) => ({
+            showUserProfileModal: !prevState.showUserProfileModal,
+            searchOpen: false,
+        }));
+    };
+
+    handleSearch = (event) => {
         const searchText = event.target.value.toLowerCase();
         const { options } = this.state;
-    
-        const flattenedOptions = options.flatMap((option) =>
-          option.options ? option.options : [option]
-        );
-    
-        const filteredOptions = flattenedOptions.filter((option) =>
-          option.name.toLowerCase().includes(searchText)
-        );
-    
-        this.setState((prevState) => ({
-          searchText,
-          highlightedOptions: searchText
-            ? filteredOptions
-            : prevState.previousHighlightedOptions,
-          previousOptions: prevState.options,
-          previousHighlightedOptions: prevState.highlightedOptions,
-        }));
-      };
-    
-      handleKeyDown = (event) => {
-        if (event.key === "Escape") {
-          this.setState({ searchOpen: false });
-        } else if (event.ctrlKey && event.key === "k") {
-          this.toggleSearch();
-          event.preventDefault();
-        }
-      };
-    
-      selectOption = (option) => {
-        if (option.path) {
-          window.location.href = option.path;
-        }
-      };
-    
-      toggleUserShortcutModal = () => {
-        this.setState((prevState) => ({
-          shortcutModal: !prevState.shortcutModal,
-          searchOpen: false,
-        }));
-      };    
 
-      fetchCompanyList = async () => {
+        const flattenedOptions = options.flatMap((option) =>
+            option.options ? option.options : [option]
+        );
+
+        const filteredOptions = flattenedOptions.filter((option) =>
+            option.name.toLowerCase().includes(searchText)
+        );
+
+        this.setState((prevState) => ({
+            searchText,
+            highlightedOptions: searchText
+                ? filteredOptions
+                : prevState.previousHighlightedOptions,
+            previousOptions: prevState.options,
+            previousHighlightedOptions: prevState.highlightedOptions,
+        }));
+    };
+
+    handleKeyDown = (event) => {
+        if (event.key === "Escape") {
+            this.setState({ searchOpen: false });
+        } else if (event.ctrlKey && event.key === "k") {
+            this.toggleSearch();
+            event.preventDefault();
+        }
+    };
+
+    selectOption = (option) => {
+        if (option.path) {
+            window.location.href = option.path;
+        }
+    };
+
+    toggleUserShortcutModal = () => {
+        this.setState((prevState) => ({
+            shortcutModal: !prevState.shortcutModal,
+            searchOpen: false,
+        }));
+    };
+
+    fetchCompanyList = async () => {
         const backendURL = process.env.REACT_APP_BACKEND_URL;
         const { token } = this.state;
         try {
-          const response = await fetch(`${backendURL}/companylist?status=Active`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          });
-      
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-      
-          const data = await response.json();
-          this.setState({ companyList: data, errorMessage: "" }); // Clear any previous error message
+            const response = await fetch(`${backendURL}/companylist?status=Active`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            this.setState({ companyList: data, errorMessage: "" }); // Clear any previous error message
         } catch (error) {
-          console.error("Fetch error:", error);
-          this.setState({
-            errorMessage: "Error fetching data. Please try again later.",
-            companyList: [], // Optionally clear existing data if needed
-          });
+            console.error("Fetch error:", error);
+            this.setState({
+                errorMessage: "Error fetching data. Please try again later.",
+                companyList: [], // Optionally clear existing data if needed
+            });
         }
-      };
-          
+    };
 
-      handleLogout = () => {
-       window.location.href = `/`
-       localStorage.clear()
-      }
+    handleLogout = () => {
+        this.deleteCookie('name');
+        this.deleteCookie('email');
+        this.deleteCookie('role');
+        this.deleteCookie('company_name');
+        this.deleteCookie('token');
 
-      render() {
+        window.location.href = '/';
+    }
+    
+    deleteCookie = (name) => {
+        document.cookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
+    };
+
+    render() {
         const {
             theme,
             scrolled,
@@ -282,7 +297,7 @@ class Header extends Component {
             currentPage,
             userRole,
         } = this.state;
-    
+
         return (
             <>
                 {shortcutModal && (
@@ -292,7 +307,7 @@ class Header extends Component {
                         onClose={() => this.setState({ shortcutModal: false })}
                     />
                 )}
-    
+
                 <div id="header" className={scrolled ? "scrolled" : ""}>
                     <nav>
                         <div className="header-left" onClick={this.toggleSearch}>
@@ -307,7 +322,7 @@ class Header extends Component {
                                 </p>
                             </CustomTooltip>
                         </div>
-    
+
                         <div className="header-right">
                             {currentPage === "dashboard" && (
                                 <div className="custom-select-div">
@@ -358,7 +373,7 @@ class Header extends Component {
                             </div>
                         </div>
                     </nav>
-    
+
                     {showUserProfileModal && (
                         <div className="search-window user-modal">
                             <header className="modal-container-header">
@@ -374,18 +389,18 @@ class Header extends Component {
                                     &times;
                                 </span>
                             </header>
-    
+
                             <div className="user-setting-options">
                                 <div className="esc-div user">
                                     <img className="icon icon2" src={puser} alt="user-profile"></img>
                                     <h5>My Profile</h5>
                                 </div>
-    
+
                                 <div className="esc-div user">
                                     <img className="icon icon2" src={dollar} alt="user-profile"></img>
                                     <h5>Pricing</h5>
                                 </div>
-    
+
                                 <button className="btn-primary userbtn" onClick={this.handleLogout}>
                                     Logout <Logout className="white-icon" />
                                 </button>
@@ -393,7 +408,7 @@ class Header extends Component {
                         </div>
                     )}
                 </div>
-    
+
                 {searchOpen && (
                     <div className="search-window-overlay">
                         <div className="search-window search-modal">
@@ -422,7 +437,7 @@ class Header extends Component {
                                     </p>
                                 ))}
                             </div>
-    
+
                             <div className="flex-options-container">
                                 {options.slice(5).map((optionGroup) => (
                                     <div className="options-header">
@@ -455,7 +470,7 @@ class Header extends Component {
                 )}
             </>
         );
-    }    
+    }
 }
 
 export default Header;

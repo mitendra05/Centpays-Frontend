@@ -1,18 +1,18 @@
 import React, { Component } from "react";
 
 //SVG icons
-import { DownSign, RightSign, UpSign, LeftSign } from "../../media/icon/SVGicons";
+import { DownSign, RightSign, UpSign, LeftSign, RightDoubleArrow, LeftDoubleArrow } from "../../media/icon/SVGicons";
 
 import visa from "../../media/icon/logoVisa.png";
 import mastercard from "../../media/icon/LogoMastercard.png"
 import CopyToClipboard from "./CopyToClipboard";
-import ScrollTopAndBottomButton from"../../jsx/components/ScrollUpAndDown";
+import ScrollTopAndBottomButton from "../../jsx/components/ScrollUpAndDown";
 
 class Table extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      token: localStorage.getItem("token"),
+      token: this.getCookie('token'),
       expandedRows: [],
       viewTransaction: false,
       currentPage: 1,
@@ -21,24 +21,31 @@ class Table extends Component {
     };
   }
 
+  getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  }
+
   componentDidUpdate(prevProps) {
     if (prevProps.searchCriteria !== this.props.searchCriteria || prevProps.dataToRender !== this.props.dataToRender) {
       this.setState({ expandedRows: [] });
     }
   }
-  
+
   toggleRow = (id) => {
     this.setState((prevState) => {
       const { expandedRows } = prevState;
       const index = expandedRows.indexOf(id);
       const newExpandedRows = [...expandedRows];
-  
+
       if (index === -1) {
         newExpandedRows.push(id);
       } else {
         newExpandedRows.splice(index, 1);
       }
-  
+
       return { expandedRows: newExpandedRows };
     });
   };
@@ -120,8 +127,8 @@ class Table extends Component {
     return (
       <>
         <div className="txn-search-table-container">
-          <div className="txn-search-table-Body">      
-          <ScrollTopAndBottomButton/>
+          <div className="txn-search-table-Body">
+            <ScrollTopAndBottomButton />
             <table>
               <thead>
                 <tr>
@@ -209,6 +216,13 @@ class Table extends Component {
                 {`${startIndex + 1}-${Math.min(endIndex, dataToRender.length)} of ${dataToRender.length}`}
               </p>
               <button
+                onClick={() => this.setState({ currentPage: 1 })}
+                disabled={currentPage === 1}
+                className={currentPage === 1 ? 'disabled-button' : ''}
+              >
+                <LeftDoubleArrow />
+              </button>
+              <button
                 onClick={() => this.handlePageChange('prev')}
                 disabled={currentPage === 1}
                 className={currentPage === 1 ? 'disabled-button' : ''}
@@ -221,6 +235,12 @@ class Table extends Component {
                 className={currentPage === totalPages ? 'disabled-button' : ''}
               >
                 <RightSign />
+              </button>
+              <button
+                onClick={() => this.setState({ currentPage: totalPages })}
+                className={currentPage === totalPages ? 'disabled-button' : ''}
+              >
+                <RightDoubleArrow />
               </button>
             </div>
 

@@ -16,8 +16,8 @@ class TransactionMonitoring extends Component {
     super(props);
     this.state = {
       sidebaropen: true,
-      token: localStorage.getItem("token"),
-      userRole: localStorage.getItem("role"),
+      token: this.getCookie('token'),
+      userRole: this.getCookie('role'),
       showMoreOptions: false,
       selectedRowToView: null,
       errorMessage: "",
@@ -61,6 +61,13 @@ class TransactionMonitoring extends Component {
       activeQuickSearchbtn: "",
       showTypedData: false,
     };
+  }
+
+  getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
   }
 
   componentDidMount() {
