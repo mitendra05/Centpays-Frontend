@@ -1175,28 +1175,54 @@ class TransactionMonitoring extends Component {
               }  `}
             >
               <div className="main-screen-rows transaction-monitoring-first-row">
-                {this.state.showMoreOptions ? (
+              {this.state.showMoreOptions ? (
                   <div className="row-cards search-card">
-                    <div className="id-search-row">
-                      <div className="id-input-div">
+                  <div className="id-search-row">
+                    <div className="id-input-div">
+                      <div>
                         <label
                           className={`id-label ${
-                            this.state.searchIds ? "filled-id-label" : ""
-                          } `}
+                            searchIds ? "filled-id-label" : ""
+                          }`}
                           htmlFor="searchIds"
                         >
                           Id:
                         </label>
+                        {searchIdsArray.length > 1 && (
+                          <div
+                            className="icon-container"
+                            ref={(ref) => (this.iconContainerRef = ref)}
+                          >
+                            <Eye onClick={this.toggleTypedData} />
+                          </div>
+                        )}
+                      </div>
+                      <div>
                         <input
-                          className="id-input"
+                          className="id-input "
                           type="text"
                           id="searchIds"
-                          value={this.state.searchIds}
-                          placeholder="Txn ID/ Mercahnt Txn ID"
+                          value={searchIds}
+                          placeholder="Txn ID/ Merchant Txn ID"
                           onChange={this.handleInputChange}
-                        ></input>
+                        />
                       </div>
-                      <div className="search-select-div">
+                      {showTypedData && (
+                        <div ref={(ref) => (this.modalRef = ref)}>
+                          <div className="Transaction-monitoring-modal">
+                            <p>
+                              {searchIdsArray.map((line, index) => (
+                                <span key={index}>
+                                  {line}
+                                  <br />
+                                </span>
+                              ))}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="search-select-div search-status-div">
                         <label
                           className={`id-label ${
                             this.state.status ? "filled-id-label" : ""
@@ -1206,13 +1232,13 @@ class TransactionMonitoring extends Component {
                           Status:
                         </label>
                         <select
-                          className="id-input"
+                          className="id-input date-input-mrchnt-div"
                           id="status"
                           value={this.state.status}
                           onChange={this.handleInputChange}
                         >
                           <option value="">Select Status</option>
-                          <option value="SUccess">Success</option>
+                          <option value="Success">Success</option>
                           <option value="Failed">Failed</option>
                           <option value="Incompleted">Incompleted</option>
                         </select>
@@ -1235,7 +1261,45 @@ class TransactionMonitoring extends Component {
 													))}
 												</select>
 											</div> */}
-                      <div className="txn-monitoring-btn-div">
+                     
+                    </div>
+
+                    <div className="from-to-input-div">
+                      <div className="id-input-div">
+                        <label
+                          className={`date-label ${
+                            this.state.fromDate ? "filled-id-label" : ""
+                          } `}
+                          htmlFor="fromDate"
+                        >
+                          From:
+                        </label>
+                        <input
+                          className="date-input id-input-mrchnt-div"
+                          type="datetime-local"
+                          id="fromDate"
+                          value={this.state.fromDate}
+                          onChange={this.handleInputChange}
+                        ></input>
+                      </div>
+                      <div className="id-input-div todate-div">
+                        <label
+                          className={`date-label ${
+                            this.state.toDate ? "filled-id-label" : ""
+                          } `}
+                          htmlFor="toDate"
+                        >
+                          To:
+                        </label>
+                        <input
+                          className="date-input date-input-mrchnt-div"
+                          type="datetime-local"
+                          id="toDate"
+                          value={this.state.toDate}
+                          onChange={this.handleInputChange}
+                        ></input>
+                      </div>
+                      <div className="txn-monitoring-btn-div txn-monitoring-mrcnt-btn-div">
                         <button
                           className="btn-primary"
                           onClick={() => this.handleSearch()}
@@ -1248,43 +1312,6 @@ class TransactionMonitoring extends Component {
                         >
                           Clear
                         </button>
-                      </div>
-                    </div>
-
-                    <div className="from-to-input-div">
-                      <div className="date-input-div">
-                        <label
-                          className={`date-label ${
-                            this.state.fromDate ? "filled-id-label" : ""
-                          } `}
-                          htmlFor="fromDate"
-                        >
-                          From:
-                        </label>
-                        <input
-                          className="date-input"
-                          type="datetime-local"
-                          id="fromDate"
-                          value={this.state.fromDate}
-                          onChange={this.handleInputChange}
-                        ></input>
-                      </div>
-                      <div className="date-input-div">
-                        <label
-                          className={`date-label ${
-                            this.state.toDate ? "filled-id-label" : ""
-                          } `}
-                          htmlFor="toDate"
-                        >
-                          To:
-                        </label>
-                        <input
-                          className="date-input"
-                          type="datetime-local"
-                          id="toDate"
-                          value={this.state.toDate}
-                          onChange={this.handleInputChange}
-                        ></input>
                       </div>
                     </div>
                     <div className="quick-search-div">
@@ -1431,7 +1458,7 @@ class TransactionMonitoring extends Component {
 											</label>
 	
 											<select
-												className="id-input"
+												className="id-input card-type"
 												id="mid"
 												value={this.state.mid}
 												onChange={this.handleInputChange}
@@ -1512,7 +1539,7 @@ class TransactionMonitoring extends Component {
                         Card Type:
                       </label>
                       <select
-                        className="id-input"
+                        className="id-input card-type "
                         id="cardtype"
                         value={this.state.cardtype}
                         onChange={this.handleInputChange}
@@ -1549,27 +1576,52 @@ class TransactionMonitoring extends Component {
                   </div>
                 ) : (
                   <div className="row-cards search-card">
-                    <div className="id-search-row">
-                      <div className="id-input-div">
+                  <div className="id-search-row">
+                    <div className="id-input-div">
+                      <div>
                         <label
                           className={`id-label ${
-                            this.state.searchIds ? "filled-id-label" : ""
-                          } `}
+                            searchIds ? "filled-id-label" : ""
+                          }`}
                           htmlFor="searchIds"
                         >
                           Id:
                         </label>
+                        {searchIdsArray.length > 1 && (
+                          <div
+                            className="icon-container"
+                            ref={(ref) => (this.iconContainerRef = ref)}
+                          >
+                            <Eye onClick={this.toggleTypedData} />
+                          </div>
+                        )}
+                      </div>
+                      <div>
                         <input
-                          className="id-input"
+                          className="id-input "
                           type="text"
                           id="searchIds"
-                          value={this.state.searchIds}
-                          placeholder="Txn ID/ Mercahnt Txn ID"
+                          value={searchIds}
+                          placeholder="Txn ID/ Merchant Txn ID"
                           onChange={this.handleInputChange}
-                        ></input>
-                        <Eye className="icon2" onClick={this.toggleTypedData} />
+                        />
                       </div>
-                      <div className="search-select-div">
+                      {showTypedData && (
+                        <div ref={(ref) => (this.modalRef = ref)}>
+                          <div className="Transaction-monitoring-modal">
+                            <p>
+                              {searchIdsArray.map((line, index) => (
+                                <span key={index}>
+                                  {line}
+                                  <br />
+                                </span>
+                              ))}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="search-select-div search-status-div">
                         <label
                           className={`id-label ${
                             this.state.status ? "filled-id-label" : ""
@@ -1579,7 +1631,7 @@ class TransactionMonitoring extends Component {
                           Status:
                         </label>
                         <select
-                          className="id-input"
+                          className="id-input date-input-mrchnt-div"
                           id="status"
                           value={this.state.status}
                           onChange={this.handleInputChange}
@@ -1608,7 +1660,45 @@ class TransactionMonitoring extends Component {
 													))}
 												</select>
 											</div> */}
-                      <div className="txn-monitoring-btn-div">
+                     
+                    </div>
+
+                    <div className="from-to-input-div">
+                      <div className="id-input-div">
+                        <label
+                          className={`date-label ${
+                            this.state.fromDate ? "filled-id-label" : ""
+                          } `}
+                          htmlFor="fromDate"
+                        >
+                          From:
+                        </label>
+                        <input
+                          className="date-input id-input-mrchnt-div"
+                          type="datetime-local"
+                          id="fromDate"
+                          value={this.state.fromDate}
+                          onChange={this.handleInputChange}
+                        ></input>
+                      </div>
+                      <div className="id-input-div todate-div">
+                        <label
+                          className={`date-label ${
+                            this.state.toDate ? "filled-id-label" : ""
+                          } `}
+                          htmlFor="toDate"
+                        >
+                          To:
+                        </label>
+                        <input
+                          className="date-input date-input-mrchnt-div"
+                          type="datetime-local"
+                          id="toDate"
+                          value={this.state.toDate}
+                          onChange={this.handleInputChange}
+                        ></input>
+                      </div>
+                      <div className="txn-monitoring-btn-div txn-monitoring-mrcnt-btn-div">
                         <button
                           className="btn-primary"
                           onClick={() => this.handleSearch()}
@@ -1621,43 +1711,6 @@ class TransactionMonitoring extends Component {
                         >
                           Clear
                         </button>
-                      </div>
-                    </div>
-
-                    <div className="from-to-input-div">
-                      <div className="date-input-div">
-                        <label
-                          className={`date-label ${
-                            this.state.fromDate ? "filled-id-label" : ""
-                          } `}
-                          htmlFor="fromDate"
-                        >
-                          From:
-                        </label>
-                        <input
-                          className="date-input"
-                          type="datetime-local"
-                          id="fromDate"
-                          value={this.state.fromDate}
-                          onChange={this.handleInputChange}
-                        ></input>
-                      </div>
-                      <div className="date-input-div">
-                        <label
-                          className={`date-label ${
-                            this.state.toDate ? "filled-id-label" : ""
-                          } `}
-                          htmlFor="toDate"
-                        >
-                          To:
-                        </label>
-                        <input
-                          className="date-input"
-                          type="datetime-local"
-                          id="toDate"
-                          value={this.state.toDate}
-                          onChange={this.handleInputChange}
-                        ></input>
                       </div>
                     </div>
                     <div className="quick-search-div">
