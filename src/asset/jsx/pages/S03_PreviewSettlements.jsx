@@ -15,8 +15,8 @@ class PreviewSettlement extends Component {
 		super(props);
 		this.state = {
 			sidebaropen: true,
-			token: localStorage.getItem("token"),
-			userRole: localStorage.getItem("role"),
+			token: this.getCookie('token'),
+			userRole: this.getCookie('role'),
 			company_name: this.extractENameFromURL(),
 			headerLabels: [
 				{ id: 1, heading: "# Report", label: "report_id" },
@@ -32,6 +32,13 @@ class PreviewSettlement extends Component {
 			messageType:"",
 		};
 	}
+
+	getCookie = (name) => {
+		const value = `; ${document.cookie}`;
+		const parts = value.split(`; ${name}=`);
+		if (parts.length === 2) return parts.pop().split(';').shift();
+		return null;
+	  }
 
 	componentDidMount() {
 		this.showSettlementRecord(this.state.company_name);

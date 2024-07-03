@@ -11,9 +11,9 @@ class MerchantForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      token: this.getCookie('token'),
       errorMessage: "",
       messageType: "",
-      token: localStorage.getItem("token"),
       isAddMerchantPanelOpen: this.props.isAddMerchantPanelOpen,
       companyInfo: true,
       businessInfo: false,
@@ -34,6 +34,13 @@ class MerchantForm extends Component {
       }
     }
   }
+
+  getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+}
 
   componentDidMount() {
     if (this.props.isAddMerchantPanelOpen) {

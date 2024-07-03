@@ -24,6 +24,7 @@ class CreateSettlement extends Component {
     super(props);
     this.state = {
       sidebaropen: true,
+      token: this.getCookie('token'),
       isNoteOpen: false,
       isEdited: false,
       isPreview: false,
@@ -66,7 +67,6 @@ class CreateSettlement extends Component {
       ratedata: [],
       errorMessage: "",
       company_name: this.extractCompanyNameFromURL(),
-      token: localStorage.getItem("token"),
       dropdownValue: "Default",
       AppCount: " ",
       DecCount: " ",
@@ -77,6 +77,13 @@ class CreateSettlement extends Component {
       fileName: 'No File Chosen',
       attachment: null,
     };
+  }
+
+  getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
   }
 
   extractCompanyNameFromURL() {
