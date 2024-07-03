@@ -215,6 +215,7 @@ class Table extends Component {
               <p>
                 {`${startIndex + 1}-${Math.min(endIndex, dataToRender.length)} of ${dataToRender.length}`}
               </p>
+              
               <button
                 onClick={() => this.setState({ currentPage: 1 })}
                 disabled={currentPage === 1}
