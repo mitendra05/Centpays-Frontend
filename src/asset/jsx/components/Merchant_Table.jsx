@@ -6,7 +6,7 @@ import MessageBox from "./Message_box";
 import MerchantForm from "./Merchant_Form";
 
 //SVG icons
-import { RightSign, Oops, LeftSign } from "../../media/icon/SVGicons";
+import { RightSign, Oops, LeftSign, LeftDoubleArrow, RightDoubleArrow } from "../../media/icon/SVGicons";
 import searchImg from "../../media/image/search-transaction.png";
 import ScrollTopAndBottomButton from "./ScrollUpAndDown";
 
@@ -251,6 +251,13 @@ class Table extends Component {
                   {`${startIndex + 1}-${Math.min(endIndex, dataToRender.length)} of ${dataToRender.length}`}
                 </p>
                 <button
+                onClick={() => this.setState({ currentPage: 1 })}
+                disabled={currentPage === 1}
+                className={currentPage === 1 ? 'disabled-button' : ''}
+              >
+                <LeftDoubleArrow />
+              </button>
+                <button
                   onClick={() => this.handlePageChange(-1)}
                   disabled={currentPage === 1}
                   className={currentPage === 1 ? 'disabled-button' : ''}
@@ -264,6 +271,12 @@ class Table extends Component {
                 >
                   <RightSign />
                 </button>
+                <button
+                onClick={() => this.setState({ currentPage: totalPages })}
+                className={currentPage === totalPages ? 'disabled-button' : ''}
+              >
+                <RightDoubleArrow />
+              </button>
               </div>
 
             </div>

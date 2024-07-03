@@ -18,6 +18,8 @@ import {
   MailStatus,
   PlusSymbol,
   Oops,
+  LeftDoubleArrow,
+  RightDoubleArrow,
 } from "../../media/icon/SVGicons";
 
 class Table extends Component {
@@ -568,6 +570,13 @@ class Table extends Component {
                     )} of ${dataToRender.length}`}
                   </p>
                   <button
+                onClick={() => this.setState({ currentPage: 1 })}
+                disabled={currentPage === 1}
+                className={currentPage === 1 ? 'disabled-button' : ''}
+              >
+                <LeftDoubleArrow />
+              </button>
+                  <button
                     onClick={() => this.handlePageChange("prev")}
                     disabled={currentPage === 1}
                     className={currentPage === 1 ? "disabled-button" : ""}
@@ -583,6 +592,12 @@ class Table extends Component {
                   >
                     <RightSign />
                   </button>
+                  <button
+                onClick={() => this.setState({ currentPage: totalPages })}
+                className={currentPage === totalPages ? 'disabled-button' : ''}
+              >
+                <RightDoubleArrow />
+              </button>
                 </div>
               </div>
             )}
@@ -906,6 +921,13 @@ class Table extends Component {
                     )} of ${dataToRender.length}`}
                   </p>
                   <button
+                    onClick={() => this.setState({ currentPage: 1 })}
+                    disabled={currentPage === 1}
+                    className={currentPage === 1 ? 'disabled-button' : ''}
+                  >
+                    <LeftDoubleArrow />
+                  </button>
+                  <button
                     onClick={() => this.handlePageChange("prev")}
                     disabled={currentPage === 1}
                     className={currentPage === 1 ? "disabled-button" : ""}
@@ -920,6 +942,12 @@ class Table extends Component {
                     }
                   >
                     <RightSign />
+                  </button>
+                  <button
+                    onClick={() => this.setState({ currentPage: totalPages })}
+                    className={currentPage === totalPages ? 'disabled-button' : ''}
+                  >
+                    <RightDoubleArrow />
                   </button>
                 </div>
               </div>
