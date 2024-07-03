@@ -104,12 +104,12 @@ class Header extends Component {
                     ],
                 },
             ],
-            // currency: ["USD", "EUR", "All Currencies"],
-            currency:[],
+
+            currency: [],
             merchant: "",
             companyList: [],
             selectedMerchant: "Select Merchant",
-            // selectedCurrency:"",
+
             selectedCurrency: "",
             currentPage: "dashboard",
         };
@@ -126,13 +126,14 @@ class Header extends Component {
         const savedScrollPosition = localStorage.getItem("Header_ScrollY");
         const userRole= localStorage.getItem("role");
         if (savedScrollPosition) {
-            window.scrollTo(0, parseInt(savedScrollPosition, 10));
+          window.scrollTo(0, parseInt(savedScrollPosition, 10));
         }
         window.addEventListener("scroll", this.handleScroll);
         window.addEventListener("keydown", this.handleKeyDown);
         
         const currentPage = window.location.pathname.split("/")[1];
         this.setState({ currentPage });
+
         // const userRole = this.state;
         console.log("role user",userRole)
         let currency = []
@@ -150,10 +151,10 @@ class Header extends Component {
     }
 
     componentWillUnmount() {
+
         localStorage.setItem("Header_ScrollY", window.scrollY);
         window.removeEventListener("scroll", this.handleScroll);
-        window.removeEventListener("keydown", this.handleKeyDown);
-    }
+      }
 
     handleMerchantChange = (merchant) => {
         if (merchant === "Select Merchant") {
@@ -173,6 +174,7 @@ class Header extends Component {
         this.setState({ selectedCurrency: currency });
         this.props.onCurrencyChange?.(currency);
 
+
     handleScroll = () => {
         if (window.scrollY > 0) {
             this.setState({
@@ -181,11 +183,10 @@ class Header extends Component {
                 shortcutModal: false,
             });
         } else {
-            this.setState({
-                scrolled: false,
-            });
+          this.setState({
+            scrolled: false,
+          });
         }
-    };
 
     toggleTheme = () => {
         this.setState((prevState) => ({

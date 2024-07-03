@@ -72,7 +72,7 @@ class ViewMerchant extends Component {
       buttonLabel: "Suspend",
       errorMessage: "",
       messageType: "",
-      signupKey: ' ',
+      signupKey: " ",
       apiKey: "0987654321",
       secretKey: "1122334455",
       showUserSignUpKey: false,
@@ -134,10 +134,10 @@ class ViewMerchant extends Component {
       }
     );
 
-    this.fetchData(
-      `${backendURL}/approvalratio?merchant=${company_name}&fromDate=${date}&toDate=${date}`,
-      "approvalData"
-    );
+    // this.fetchData(
+    //   `${backendURL}/approvalratio?merchant=${company_name}&fromDate=${date}&toDate=${date}`,
+    //   "approvalData"
+    // );
 
     this.fetchData(
       `${backendURL}/volumesum?company_name=${company_name}`,
@@ -146,7 +146,6 @@ class ViewMerchant extends Component {
   }
 
   fetchData = async (url, dataVariable, callback = null) => {
-
     const { token } = this.state;
     try {
       const response = await fetch(url, {
@@ -172,7 +171,6 @@ class ViewMerchant extends Component {
       });
     }
   };
-
 
   refreshMerchantData = () => {
     const { company_name } = this.state;
@@ -339,13 +337,6 @@ class ViewMerchant extends Component {
     );
   };
 
-  // handleCalenderClick = () => {
-  //   console.log("clicked");
-  //   this.setState({
-  //     calendarVisible: !this.state.calendarVisible,
-  //   });
-  // };
-
   handleBackButtonClick = () => {
     window.history.back();
   };
@@ -457,7 +448,7 @@ class ViewMerchant extends Component {
   formatNumber = (number) => {
     const numStr = String(number);
     if (numStr.length > 12) {
-      const stars = '*'.repeat(numStr.length - 12);
+      const stars = "*".repeat(numStr.length - 12);
       return `${numStr.slice(0, 7)}${stars}${numStr.slice(-5)}`;
     }
     return numStr;
@@ -611,7 +602,7 @@ class ViewMerchant extends Component {
                   <div className="profile-image">
                     <img src={profile} alt="user profile"></img>
                   </div>
-                  <h5>{this.state.company_name}</h5>
+                  <h5>{this.state.company_name.split(/[^a-zA-Z\s]+/).join(' ')}</h5>
                   <div
                     className={`status-div ${statusText === "Active"
                         ? "success-status"
@@ -1379,10 +1370,8 @@ class ViewMerchant extends Component {
                       isAddMerchantPanelOpen={this.state.isAddMerchantPanelOpen}
                       submitButtonText="Update"
                       heading="Update Merchant"
-
                       refreshMerchantData={this.refreshMerchantData}
                       isDisable={true}
-
                     />
                   )}
                 </div>
@@ -2221,7 +2210,6 @@ class ViewMerchant extends Component {
                     </div>
                   )}
                   {this.state.isAddMerchantPanelOpen && (
-
                     <MerchantForm
                       handleAddMerchant={this.handleAddMerchant}
                       merchantData={overviewData}
@@ -2231,7 +2219,6 @@ class ViewMerchant extends Component {
                       refreshMerchantData={this.refreshMerchantData}
                       isDisable={true}
                     />
-
                   )}
                 </div>
               </div>

@@ -3916,7 +3916,7 @@ hr {
 }
 
 .left-section-middle {
-	margin: 15px 0;
+	margin: 5px 0;
 }
 
 .left-section-middle-body p {
@@ -4488,6 +4488,16 @@ hr {
 	border-radius: 10px;
 }
 
+#paymentscreen2{
+    height: 100vh;
+	width: 99%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: #d8d8d8;
+	border-radius: 10px;
+}
+
 .paymentscreen {
 	height: 100%;
 	width: 100%;
@@ -4758,7 +4768,9 @@ hr {
 
 .paymentSuccessfull .statusGif {
 	width: 250px;
-}
+	margin-top: -20px;
+  }
+
 
 .paymentSuccessfull {
 	text-align: center;
@@ -4767,8 +4779,8 @@ hr {
 .paymentSuccessfull h5 {
 	position: absolute;
 	top: 42%;
-	left: 23%;
-}
+	left: 26%;
+  }
 
 .paymentDetails {
 	text-align: left;
@@ -4806,7 +4818,9 @@ hr {
 
 .paymentFailed .statusGif {
 	width: 250px;
-}
+	margin-top: -20px;
+  }
+
 
 .paymentFailed {
 	text-align: center;
@@ -4815,8 +4829,8 @@ hr {
 .paymentFailed h5 {
 	position: absolute;
 	top: 42%;
-	left: 23%;
-}
+	left: 26%;
+  }
 
 .paymentDetails {
 	text-align: left;
