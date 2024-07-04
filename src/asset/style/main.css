@@ -30,6 +30,7 @@
 	--orange-color: #ffb400;
 	--light-black-color: #0000000a;
 	--red-color: rgb(220, 0, 0);
+	--login-Bg-desing: #ecedf3;
 }
 
 body {
@@ -757,7 +758,6 @@ input[type="checkbox"] {
 #auth {
 	width: 100vw;
 	height: 100vh;
-
 }
 
 .auth-bg-top {
@@ -796,13 +796,15 @@ input[type="checkbox"] {
 }
 
 .auth-main-container {
-	height: 88vh;
+	height: 80%;
 	background-color: var(--white);
 	border-radius: 8px;
 	box-shadow: var(--box-shadow);
-	padding: 50px;
-	z-index: 99;
-	position: absolute;
+	padding: 0px;
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .forlogin {
@@ -810,8 +812,8 @@ input[type="checkbox"] {
 }
 
 .auth-content {
-	height: 100%;
-	width: 100%;
+	height: 80%;
+	width: 80%;
 }
 
 .logo-container {
@@ -823,6 +825,7 @@ input[type="checkbox"] {
 .auth-content form {
 	text-align: center;
 	margin-top: 30px;
+	position: relative;
 }
 
 .auth-content form .input-group {
@@ -866,6 +869,12 @@ input[type="checkbox"] {
 	margin: 20px 0 15px 0;
 }
 
+.bottom-line{
+	position: absolute;
+	bottom: -55%;
+	width: 100%;
+}
+
 .bottom-line a {
 	padding: 0 5px;
 }
@@ -898,12 +907,17 @@ input[type="checkbox"] {
 
 /*  ------------------------------ Signup Page ------------------------------  */
 
-.forsignup {
-	width: 50vw;
+.forsignup .auth-main-container{
 	height: 90vh;
+	width: 40vw;
 }
 
-.input-group-div {
+.forsignup .auth-content{
+	width: 90%;
+	height: 95%;
+}
+
+.forsignup .input-group-div {
 	display: flex;
 	justify-content: space-between;
 	margin: -20px 0;
@@ -913,36 +927,45 @@ input[type="checkbox"] {
 	display: flex;
 	justify-content: space-between;
 	width: 48%;
-	margin: 0;
 }
 
 .input-group-div .input-group .inputFeild {
 	width: 100%;
 }
 
-.checkbox-container a {
-	padding: 0 5px;
+.checkbox-container p{
+	position: absolute;
+	right: 0%;
 }
+
+.forsignup .bottom-line{
+	bottom: -10%;
+}
+
 
 /* .........Signup Modal.................... */
 
 .loginsuccessful-modal {
 	width: 350px;
 	text-align: center;
-	margin-bottom: 30px;
+	margin-bottom: 5px;
 	align-items: baseline;
 }
 
 .line-spacing {
-	line-height: 3.5;
+	padding: 15px 0;
 }
 
 .content-modal {
+	text-align: left;
 	color: gray;
 }
 
 .loginbutton-modal {
-	margin-top: 30px;
+	margin: 0 auto;
+	margin-top: 15px;
+	margin-bottom: 15px;
+	width: 60%;
 }
 
 .baktologin {
@@ -3872,7 +3895,6 @@ hr {
 	padding: 20px;
 	margin-bottom: 20px;
 }
-
 
 .left-section-top {
 	display: flex;
