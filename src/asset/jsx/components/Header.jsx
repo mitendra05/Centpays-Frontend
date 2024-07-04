@@ -1,7 +1,6 @@
 import React, { Component, useReducer } from "react";
 
 //images
-
 import { Search, DarkMode, LightMode, Notification, ShortCut, Close, Logout } from "../../media/icon/SVGicons";
 
 import user from "../../media/icon/user-profile.png";
@@ -60,22 +59,10 @@ class Header extends Component {
                     options: [
                         { name: "Business Type", icon: business, path: "/businesstype" },
                         { name: "Categories", icon: category, path: "/categories" },
-                        {
-                            name: "Business Subcategories",
-                            icon: subcategory,
-                            path: "/businesssubcategories",
-                        },
-                        {
-                            name: "Manage Currencies",
-                            icon: settings,
-                            path: "/managecurrencies",
-                        },
+                        { name: "Business Subcategories", icon: subcategory, path: "/businesssubcategories" },
+                        { name: "Manage Currencies", icon: settings, path: "/managecurrencies" },
                         { name: "Document Type", icon: doc, path: "/documenttype" },
-                        {
-                            name: "Document Categories",
-                            icon: dox,
-                            path: "/documentcategories",
-                        },
+                        { name: "Document Categories", icon: dox, path: "/documentcategories" },
                         { name: "Bank", icon: bank, path: "/bank" },
                     ],
                 },
@@ -83,33 +70,19 @@ class Header extends Component {
                     name: "Report Group",
                     icon: report,
                     options: [
-                        {
-                            name: "Transaction Report",
-                            icon: transaction,
-                            path: "/transactionreport",
-                        },
+                        { name: "Transaction Report", icon: transaction, path: "/transactionreport" },
                         { name: "Temp Report", icon: tempr, path: "/tempreport" },
-                        {
-                            name: "Temp Unique Order Report",
-                            icon: report,
-                            path: "/tempureport",
-                        },
-                        {
-                            name: "Temp Common Order Report",
-                            icon: common,
-                            path: "/tempcreport",
-                        },
+                        { name: "Temp Unique Order Report", icon: report, path: "/tempureport" },
+                        { name: "Temp Common Order Report", icon: common, path: "/tempcreport" },
                         { name: "Payout Report", icon: prereport, path: "/payoutreport" },
                         { name: "Compare", icon: compare, path: "/compare" },
                     ],
                 },
             ],
-
             currency: [],
             merchant: "",
             companyList: [],
             selectedMerchant: "Select Merchant",
-
             selectedCurrency: "",
             currentPage: "dashboard",
         };
@@ -124,45 +97,46 @@ class Header extends Component {
 
     componentDidMount = async () => {
         const savedScrollPosition = localStorage.getItem("Header_ScrollY");
-        const userRole= localStorage.getItem("role");
+        const userRole = this.getCookie('role');
+
         if (savedScrollPosition) {
-          window.scrollTo(0, parseInt(savedScrollPosition, 10));
+            window.scrollTo(0, parseInt(savedScrollPosition, 10));
         }
         window.addEventListener("scroll", this.handleScroll);
         window.addEventListener("keydown", this.handleKeyDown);
-        
+
         const currentPage = window.location.pathname.split("/")[1];
         this.setState({ currentPage });
 
         // const userRole = this.state;
-        console.log("role user",userRole)
+        console.log("role user", userRole)
         let currency = []
-        if (userRole === "admin"){
+        if (userRole === "admin") {
             this.fetchCompanyList();
-            currency= ["USD", "EUR", "All Currencies"]
+            currency = ["USD", "EUR", "All Currencies"]
         }
-        if(userRole === "merchant"){
-            currency= await this.fetchCurrencyList();
-            console.log("currency merchant",currency)
+        if (userRole === "merchant") {
+            currency = await this.fetchCurrencyList();
+            console.log("currency merchant", currency)
         }
         const selectedCurrency = currency[0];
-        console.log("selected currency",selectedCurrency)
-        this.setState({currency, selectedCurrency})
+        console.log("selected currency", selectedCurrency)
+        this.setState({ currency, selectedCurrency })
+        this.handleCurrencyChange(selectedCurrency)
     }
 
     componentWillUnmount() {
-
         localStorage.setItem("Header_ScrollY", window.scrollY);
         window.removeEventListener("scroll", this.handleScroll);
-      }
+    }
 
     handleMerchantChange = (merchant) => {
         if (merchant === "Select Merchant") {
-          this.setState({
-            selectedMerchant: merchant,
-            selectedCurrency: this.state.selectedCurrency,
-          });
-          this.props.onMerchantChange?.("");
+            this.setState({
+                selectedMerchant: merchant,
+                selectedCurrency: this.state.selectedCurrency,
+            });
+            this.props.onMerchantChange?.("");
 
         } else {
             this.setState({ selectedMerchant: merchant });
@@ -172,9 +146,10 @@ class Header extends Component {
 
     handleCurrencyChange = (currency) => {
         this.setState({ selectedCurrency: currency });
+        console.log(currency, "Hello")
         this.props.onCurrencyChange?.(currency);
-
     }
+
     handleScroll = () => {
         if (window.scrollY > 0) {
             this.setState({
@@ -183,11 +158,12 @@ class Header extends Component {
                 shortcutModal: false,
             });
         } else {
-          this.setState({
-            scrolled: false,
-          });
+            this.setState({
+                scrolled: false,
+            });
         }
     }
+
     toggleTheme = () => {
         this.setState((prevState) => ({
             theme: prevState.theme === "light" ? "dark" : "light",
@@ -258,32 +234,32 @@ class Header extends Component {
         }));
     };
 
-      fetchCurrencyList = async () => {
+    fetchCurrencyList = async () => {
         const backendURL = process.env.REACT_APP_BACKEND_URL;
         const { token, companyName } = this.state;
         try {
-          const response = await fetch(`${backendURL}/currenciesforcompany?company_name=${companyName}`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          });
-      
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-      
-          const data = await response.json();
-          console.log("currency data",data)
-          return data
+            const response = await fetch(`${backendURL}/currenciesforcompany?company_name=${companyName}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log("currency data", data)
+            return data
         } catch (error) {
-          console.error("Fetch error:", error);
-          this.setState({
-            errorMessage: "Error fetching data. Please try again later."
-          });
+            console.error("Fetch error:", error);
+            this.setState({
+                errorMessage: "Error fetching data. Please try again later."
+            });
         }
-      };
+    };
 
     fetchCompanyList = async () => {
         const backendURL = process.env.REACT_APP_BACKEND_URL;
@@ -321,7 +297,7 @@ class Header extends Component {
 
         window.location.href = '/';
     }
-    
+
     deleteCookie = (name) => {
         document.cookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
     };
@@ -383,7 +359,7 @@ class Header extends Component {
                                             selectedValue={selectedMerchant}
                                             onChange={this.handleMerchantChange}
                                         />
-                                    ) }
+                                    )}
                                 </div>
                             )}
                             {theme === "light" ? (
