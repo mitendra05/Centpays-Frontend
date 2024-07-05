@@ -43,8 +43,9 @@ class ViewMerchant extends Component {
     super(props);
     this.state = {
       sidebaropen: true,
-      token: localStorage.getItem("token"),
-      userRole: localStorage.getItem("role"),
+      token: this.getCookie('token'),
+      userRole: this.getCookie('role'),
+      companyName: this.getCookie('company_name'),
       company_name: this.extractENameFromURL(),
       overviewData: [],
       ratesData: [],
@@ -71,7 +72,7 @@ class ViewMerchant extends Component {
       buttonLabel: "Suspend",
       errorMessage: "",
       messageType: "",
-      signupKey: ' ',
+      signupKey: " ",
       apiKey: "0987654321",
       secretKey: "1122334455",
       showUserSignUpKey: false,
@@ -91,9 +92,16 @@ class ViewMerchant extends Component {
     return companyName;
   }
 
+  getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  }
+
   fetchSignupKey = async () => {
     const backendURL = process.env.REACT_APP_BACKEND_URL
-    const companyName = localStorage.getItem('company_name');
+    const {companyName} = this.state;
     const response = await fetch(`${backendURL}/viewclient?company_name=${companyName}`);
     const data = await response.json();
     this.setState({ signupKey: data.signupKey });
@@ -101,19 +109,16 @@ class ViewMerchant extends Component {
   };
 
   componentDidMount() {
-    const { company_name: stateCompanyName } = this.state;
-
-    const role = localStorage.getItem("role");
-    const localStorageCompanyName = localStorage.getItem("company_name");
+    const { company_name: stateCompanyName, companyName, role } = this.state;
 
     const company_name =
-      role === "merchant" ? localStorageCompanyName : stateCompanyName;
+      role === "merchant" ? companyName : stateCompanyName;
 
     let date = new Date().toISOString().split("T")[0];
     const backendURL = process.env.REACT_APP_BACKEND_URL;
-this.fetchSignupKey();
+    this.fetchSignupKey();
     this.fetchData(
-      `${backendURL}/viewclient?company_name=${company_name}`,
+      `${backendURL}/viewclient?company_name=${companyName}`,
       "overviewData",
       (data) => {
         // Ensure data exists before accessing properties
@@ -129,10 +134,10 @@ this.fetchSignupKey();
       }
     );
 
-    this.fetchData(
-      `${backendURL}/approvalratio?merchant=${company_name}&fromDate=${date}&toDate=${date}`,
-      "approvalData"
-    );
+    // this.fetchData(
+    //   `${backendURL}/approvalratio?merchant=${company_name}&fromDate=${date}&toDate=${date}`,
+    //   "approvalData"
+    // );
 
     this.fetchData(
       `${backendURL}/volumesum?company_name=${company_name}`,
@@ -141,7 +146,6 @@ this.fetchSignupKey();
   }
 
   fetchData = async (url, dataVariable, callback = null) => {
-
     const { token } = this.state;
     try {
       const response = await fetch(url, {
@@ -151,11 +155,11 @@ this.fetchSignupKey();
           "Content-Type": "application/json",
         },
       });
-  
+
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-  
+
       const data = await response.json();
       this.setState({ [dataVariable]: data }, () => {
         if (callback) callback(data);
@@ -167,7 +171,6 @@ this.fetchSignupKey();
       });
     }
   };
-  
 
   refreshMerchantData = () => {
     const { company_name } = this.state;
@@ -221,15 +224,10 @@ this.fetchSignupKey();
 
   fetchRatesData = async () => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
-    const { token } = this.state;
+    const { token, role, companyName } = this.state;
 
-    // Retrieve role and potentially company_name from local storage
-    const role = localStorage.getItem("role");
-    const localStorageCompanyName = localStorage.getItem("company_name");
-
-    // Determine the company_name to use based on the role
     const company_name =
-      role === "merchant" ? localStorageCompanyName : this.state.company_name;
+      role === "merchant" ? companyName : this.state.company_name;
 
     try {
       const response = await fetch(
@@ -338,13 +336,6 @@ this.fetchSignupKey();
       }
     );
   };
-
-  // handleCalenderClick = () => {
-  //   console.log("clicked");
-  //   this.setState({
-  //     calendarVisible: !this.state.calendarVisible,
-  //   });
-  // };
 
   handleBackButtonClick = () => {
     window.history.back();
@@ -457,7 +448,7 @@ this.fetchSignupKey();
   formatNumber = (number) => {
     const numStr = String(number);
     if (numStr.length > 12) {
-      const stars = '*'.repeat(numStr.length - 12);
+      const stars = "*".repeat(numStr.length - 12);
       return `${numStr.slice(0, 7)}${stars}${numStr.slice(-5)}`;
     }
     return numStr;
@@ -596,11 +587,10 @@ this.fetchSignupKey();
           <Header />
           <Sidebar />
           <div
-            className={`main-screen ${
-              this.state.sidebaropen
+            className={`main-screen ${this.state.sidebaropen
                 ? "collapsed-main-screen"
                 : "expanded-main-screen"
-            }  `}
+              }  `}
           >
             <div className="view-merchant-container">
               <div className="row-cards left-section">
@@ -612,13 +602,12 @@ this.fetchSignupKey();
                   <div className="profile-image">
                     <img src={profile} alt="user profile"></img>
                   </div>
-                  <h5>{this.state.company_name}</h5>
+                  <h5>{this.state.company_name.split(/[^a-zA-Z\s]+/).join(' ')}</h5>
                   <div
-                    className={`status-div ${
-                      statusText === "Active"
+                    className={`status-div ${statusText === "Active"
                         ? "success-status"
                         : "failed-status"
-                    }`}
+                      }`}
                   >
                     <p>{statusText}</p>
                   </div>
@@ -788,9 +777,8 @@ this.fetchSignupKey();
                     Edit
                   </button>
                   <button
-                    className={`btn-secondary ${
-                      statusText === "Active" ? "btn-suspend" : "btn-activate"
-                    }`}
+                    className={`btn-secondary ${statusText === "Active" ? "btn-suspend" : "btn-activate"
+                      }`}
                     onClick={this.handleStatusChange}
                   >
                     {buttonLabel}
@@ -1069,8 +1057,7 @@ this.fetchSignupKey();
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${
-                                    ratesData.chargeback_fee
+                                  `${ratesData.chargeback_fee
                                   } ${getCurrencySymbol(ratesData.currency)}`
                                 )}
                               </td>
@@ -1209,8 +1196,7 @@ this.fetchSignupKey();
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${
-                                    ratesData.annual_maintenance_fee
+                                  `${ratesData.annual_maintenance_fee
                                   } ${getCurrencySymbol(ratesData.currency)}`
                                 )}
                               </td>
@@ -1267,9 +1253,8 @@ this.fetchSignupKey();
                           <p className="p2">Root User Sign Up Key</p>
                           <div className="input-container">
                             <div
-                              className={`icon-container copy-icon ${
-                                copied.signupKey ? "disabled" : ""
-                              }`}
+                              className={`icon-container copy-icon ${copied.signupKey ? "disabled" : ""
+                                }`}
                               onClick={() =>
                                 !copied.signupKey &&
                                 this.handleCopy("userSignUpKey", signupKey)
@@ -1385,10 +1370,8 @@ this.fetchSignupKey();
                       isAddMerchantPanelOpen={this.state.isAddMerchantPanelOpen}
                       submitButtonText="Update"
                       heading="Update Merchant"
-
                       refreshMerchantData={this.refreshMerchantData}
                       isDisable={true}
-
                     />
                   )}
                 </div>
@@ -1439,7 +1422,7 @@ this.fetchSignupKey();
     } else if (userRole === "merchant") {
       return (
         <>
-           {errorMessage && (
+          {errorMessage && (
             <MessageBox
               message={errorMessage}
               messageType={messageType}
@@ -1449,11 +1432,10 @@ this.fetchSignupKey();
           <Header />
           <Sidebar />
           <div
-            className={`main-screen ${
-              this.state.sidebaropen
+            className={`main-screen ${this.state.sidebaropen
                 ? "collapsed-main-screen"
                 : "expanded-main-screen"
-            }  `}
+              }  `}
           >
             <div className="view-merchant-container">
               <div className="row-cards left-section">
@@ -1467,11 +1449,10 @@ this.fetchSignupKey();
                   </div>
                   <h5>{this.state.company_name}</h5>
                   <div
-                    className={`status-div ${
-                      statusText === "Active"
+                    className={`status-div ${statusText === "Active"
                         ? "success-status"
                         : "failed-status"
-                    }`}
+                      }`}
                   >
                     <p>{statusText}</p>
                   </div>
@@ -1633,21 +1614,21 @@ this.fetchSignupKey();
                   </div>
                 </div>
                 <div className="left-section-bottom">
-                  <button
+                  {/* <button
                     className="btn-primary"
                     onClick={() => this.handleAddMerchant()}
                     disabled={isSuspended}
                   >
                     Edit
-                  </button>
-                  <button
+                  </button> */}
+                  {/* <button
                     className={`btn-secondary ${
                       statusText === "Active" ? "btn-suspend" : "btn-activate"
                     }`}
                     onClick={this.handleStatusChange}
                   >
                     {buttonLabel}
-                  </button>
+                  </button> */}
                 </div>
               </div>
               <div className="right-section">
@@ -1922,8 +1903,7 @@ this.fetchSignupKey();
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${
-                                    ratesData.chargeback_fee
+                                  `${ratesData.chargeback_fee
                                   } ${getCurrencySymbol(ratesData.currency)}`
                                 )}
                               </td>
@@ -2062,8 +2042,7 @@ this.fetchSignupKey();
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${
-                                    ratesData.annual_maintenance_fee
+                                  `${ratesData.annual_maintenance_fee
                                   } ${getCurrencySymbol(ratesData.currency)}`
                                 )}
                               </td>
@@ -2087,14 +2066,14 @@ this.fetchSignupKey();
                         </table>
                       </div>
                       <div className="rates-table-button-container">
-                        <button
+                        {/* <button
                           className="btn-primary"
                           onClick={
                             isEditing ? this.handleSave : this.handleEditClick
                           }
                         >
                           {isEditing ? "Update" : "Edit"}
-                        </button>
+                        </button> */}
                       </div>
                     </div>
                   )}
@@ -2120,9 +2099,8 @@ this.fetchSignupKey();
                           <p className="p2">Root User Sign Up Key</p>
                           <div className="input-container">
                             <div
-                              className={`icon-container copy-icon ${
-                                copied.signupKey ? "disabled" : ""
-                              }`}
+                              className={`icon-container copy-icon ${copied.signupKey ? "disabled" : ""
+                                }`}
                               onClick={() =>
                                 !copied.signupKey &&
                                 this.handleCopy("userSignUpKey", signupKey)
@@ -2232,17 +2210,15 @@ this.fetchSignupKey();
                     </div>
                   )}
                   {this.state.isAddMerchantPanelOpen && (
-
-                     <MerchantForm
-                     handleAddMerchant={this.handleAddMerchant}
-                     merchantData={overviewData}
-                     isAddMerchantPanelOpen={this.state.isAddMerchantPanelOpen}
-                     submitButtonText="Update"
-                     heading="Update Merchant"
-                     refreshMerchantData={this.refreshMerchantData}
-                     isDisable={true}
-                   />
-
+                    <MerchantForm
+                      handleAddMerchant={this.handleAddMerchant}
+                      merchantData={overviewData}
+                      isAddMerchantPanelOpen={this.state.isAddMerchantPanelOpen}
+                      submitButtonText="Update"
+                      heading="Update Merchant"
+                      refreshMerchantData={this.refreshMerchantData}
+                      isDisable={true}
+                    />
                   )}
                 </div>
               </div>

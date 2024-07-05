@@ -17,19 +17,26 @@ class Signup extends Component {
 			errorMessage: "",
 			isSignupSuccessful: false,
 			// api states
-			userName:"",
-			userEmail:"",
-			userMobile_no:"",
-			userCompany_name:"",
-			userCountry:"",
-			userPassword:"",
-			userConfirm_password:"",
+			userName: "",
+			userEmail: "",
+			userMobile_no: "",
+			userCompany_name: "",
+			userCountry: "",
+			userPassword: "",
+			userConfirm_password: "",
 		};
 	}
 
 	handleInputChange = (event) => {
 		this.setState({ [event.target.id]: event.target.value });
 	};
+
+	getCookie = (name) => {
+		const value = `; ${document.cookie}`;
+		const parts = value.split(`; ${name}=`);
+		if (parts.length === 2) return parts.pop().split(';').shift();
+		return null;
+	}
 
 
 	handleSubmit = async (e) => {
@@ -45,14 +52,14 @@ class Signup extends Component {
 			userConfirm_password,
 		} = this.state;
 
-     const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
+		const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
 
-    if (!passwordRegex.test(userPassword)) {
-        this.setState({
-            errorMessage: "Password must be at least 8 characters long and contain at least one uppercase letter, one digit, and one special character.", messageType: "Failed"
-        });
-        return;
-    }
+		if (!passwordRegex.test(userPassword)) {
+			this.setState({
+				errorMessage: "Password must be at least 8 characters long and contain at least one uppercase letter, one digit, and one special character.", messageType: "Failed"
+			});
+			return;
+		}
 
 		try {
 			const response = await fetch(`${backendURL}/signup`, {
@@ -71,35 +78,36 @@ class Signup extends Component {
 				}),
 			});
 			if (response.ok) {
-        localStorage.setItem("signupEmail", userEmail);
+
+				document.cookie = `signupEmail=${userEmail};path=/`;
 				this.setState({
-					userName:"",
-					userEmail:"",
-					userMobile_no:"",
-					userCountry:"",
-					userPassword:"",
-					userConfirm_password:"",
-					userCompany_name:"",
+					userName: "",
+					userEmail: "",
+					userMobile_no: "",
+					userCountry: "",
+					userPassword: "",
+					userConfirm_password: "",
+					userCompany_name: "",
 				});
 				this.handleSignupSuccessModalToggle("open");
 			} else {
-				this.setState({ errorMessage: "Error creating user. Please try again later.", messageType: "Failed"});
+				this.setState({ errorMessage: "Error creating user. Please try again later.", messageType: "Failed" });
 			}
 		} catch (error) {
-			this.setState({ errorMessage: "An unexpected error occurred. Please try again later.", messageType: "Failed"});
+			this.setState({ errorMessage: "An unexpected error occurred. Please try again later.", messageType: "Failed" });
 		}
 	};
 
 	handleSignupSuccessModalToggle = (action) => {
 		this.setState({ isSignupSuccessful: action === "open" ? true : false });
-	  };	  
+	};
 
 	render() {
-		const {isSignupSuccessful } = this.state;
+		const { isSignupSuccessful } = this.state;
 		return (
 			<>
-				 {isSignupSuccessful && <Modal onClose={() => this.setState({ isSignupSuccessful: false })} />}
-				 {isSignupSuccessful && (
+				{isSignupSuccessful && <Modal onClose={() => this.setState({ isSignupSuccessful: false })} />}
+				{isSignupSuccessful && (
 					<Modal
 						onClose={() => this.handleSignupSuccessModalToggle("close")}
 						onDecline={() => this.handleSignupSuccessModalToggle("decline")}
@@ -108,24 +116,21 @@ class Signup extends Component {
 						modalHeading={"Congratulations! 🎉"}
 						modalBody={
 							<div className="auth-content loginsuccessful-modal">
-								<h7 className="line-spacing">
-									Your Account has been set-up successfully. 
-								</h7>
-								<p></p>
-								<p></p>
-								<p className="p1 content-modal">Login to access your account</p>
+								<h5 className="line-spacing">Your Account has been set-up successfully.</h5>
 								<button className="btn-primary loginbutton-modal" onClick={() => window.location.href = "/"}>Login</button>
+								<p className="p1 content-modal">*Login to access your account</p> 
 							</div>
 						}
 					/>
 				)}
+
 				<div id="auth">
 					<div className="auth-bg-top"></div>
 					<div className="auth-bg-bottom"></div>
 					<img className="tree1" src={tree1} alt="tree"></img>
 					<img className="tree2" src={tree2} alt="tree"></img>
-					<div className="auth-container">
-						<div className="auth-main-container forsignup">
+					<div className="auth-container forsignup">
+						<div className="auth-main-container ">
 							<div className="auth-content">
 								<div className="logo-container">
 									<img className="logo" src={fullLogo} alt="Centpays"></img>
@@ -260,7 +265,7 @@ class Signup extends Component {
 									<button type="submit" className="btn-primary auth-btn-signup">
 										Sign Up
 									</button>
-									
+
 									<p className="bottom-line">
 										Already have an account?
 										<Link to="/" className="highlight-text">

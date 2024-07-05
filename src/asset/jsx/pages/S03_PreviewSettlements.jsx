@@ -15,7 +15,8 @@ class PreviewSettlement extends Component {
 		super(props);
 		this.state = {
 			sidebaropen: true,
-			token: localStorage.getItem("token"),
+			token: this.getCookie('token'),
+			userRole: this.getCookie('role'),
 			company_name: this.extractENameFromURL(),
 			headerLabels: [
 				{ id: 1, heading: "# Report", label: "report_id" },
@@ -31,6 +32,13 @@ class PreviewSettlement extends Component {
 			messageType:"",
 		};
 	}
+
+	getCookie = (name) => {
+		const value = `; ${document.cookie}`;
+		const parts = value.split(`; ${name}=`);
+		if (parts.length === 2) return parts.pop().split(';').shift();
+		return null;
+	  }
 
 	componentDidMount() {
 		this.showSettlementRecord(this.state.company_name);
@@ -84,10 +92,11 @@ class PreviewSettlement extends Component {
 	};
 
 	render() {
-		const { headerLabels, apiData, showReport, errorMessage,messageType } = this.state;
+		const { headerLabels, apiData, showReport, errorMessage,messageType, userRole } = this.state;
 
 		const length = apiData.length;
 
+		if (userRole === "admin") {
 		return (
 			<>
 				{errorMessage && <MessageBox message={errorMessage} messageType={messageType} onClose={() => this.setState({ errorMessage: ""})} />}
@@ -178,7 +187,95 @@ class PreviewSettlement extends Component {
 				</div>
 			</>
 		);
+		}
+		else if (userRole === "merchant") {
+			return (
+				<>
+					{errorMessage && <MessageBox message={errorMessage} messageType={messageType} onClose={() => this.setState({ errorMessage: ""})} />}
+					<Header />
+					<Sidebar />
+					<div
+						className={`main-screen ${this.state.sidebaropen
+								? "collapsed-main-screen"
+								: "expanded-main-screen"
+							}  `}
+					>
+						<div className="main-screen-rows settlement-first-row">
+							<div className="row-cards settlement-card">
+								<div className="settlement-card-section">
+									<div>
+									<h4>{this.state.company_name.split(/[^a-zA-Z\s]+/).join(' ')}</h4>
+									</div>
+									<div>
+										<div className="creditcard-div">
+											<User
+												className="creditcard-img black-icon" width="28" height="28"
+											></User>
+										</div>
+									</div>
+								</div>
+								<div className="vertical-line-card1"></div>
+								<div className="settlement-card-section">
+									<div>
+										<h4>{length}</h4>
+										<p className="p2">Invoices</p>
+									</div>
+									<div>
+										<div className="creditcard-div">
+											<Article
+												className="creditcard-img black-icon"
+											/>
+										</div>
+									</div>
+								</div>
+								<div className="vertical-line-card1"></div>
+								<div className="settlement-card-section">
+									<div>
+										<h4>${this.formatValue(this.state.volumeData["totalVolume"])}</h4>
+										<p className="p2">Total Volume</p>
+									</div>
+									<div>
+										<div className="creditcard-div">
+											<Wallet
+												className="creditcard-img black-icon"
+											/>
+										</div>
+									</div>
+								</div>
+								<div className="vertical-line-card1"></div>
+								<div className="settlement-card-section">
+									<div>
+										<h4>${this.formatValue(this.state.volumeData["settledVolume"])}</h4>
+										<p className="p2">Settled Volume</p>
+									</div>
+									<div>
+										<div className="creditcard-div">
+											<DollarCircle
+												className="creditcard-img black-icon"
+											/>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div className="main-screen-rows">
+							<div className="row-cards table-card">
+								<SettlementTable
+									showBackButton={true}
+									headerLabels={headerLabels}
+									apiData={apiData}
+									showReport={showReport}
+									company_name={this.state.company_name}
+									showSettlementRecord={this.showSettlementRecord}
+								/>
+							</div>
+						</div>
+					</div>
+				</>
+			);
+		}
 	}
+
 }
 
 export default PreviewSettlement;

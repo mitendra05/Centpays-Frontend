@@ -6,31 +6,37 @@ import Sidebar from "../components/Sidebar";
 
 export class setting extends Component {
     constructor(props) {
-		super(props);
-		this.state = {
-			sidebaropen: true,
-			token: localStorage.getItem("token"),
-			userRole: localStorage.getItem("role"),
-            company_name: localStorage.getItem("company_name"),
-		};
-	}
+        super(props);
+        this.state = {
+            sidebaropen: true,
+            token: this.getCookie("token"),
+            userRole: this.getCookie("role"),
+            company_name: this.getCookie("company_name"),
+        };
+    }
 
-	componentDidMount() {
-		
-	}
+    getCookie = (name) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
+
+    componentDidMount() {
+
+    }
 
     render() {
-        const{company_name,userRole}=this.state;
+        const { company_name, userRole } = this.state;
         return (
             <>
                 <Header />
                 <Sidebar />
                 <div
-                className={`main-screen ${
-                    this.state.sidebaropen
-                    ? "collapsed-main-screen"
-                    : "expanded-main-screen"
-                }  `}
+                    className={`main-screen ${this.state.sidebaropen
+                            ? "collapsed-main-screen"
+                            : "expanded-main-screen"
+                        }  `}
                 >
                     <div className='merchantSetting'>
                         <div className='merchantSetting-left'>

@@ -9,6 +9,7 @@ import loackicon from "../../media/image/padlock.png";
 import Loader from "../../media/image/Loader.gif";
 import Success from "../../media/image/success.gif"
 import Failed from "../../media/image/Close.gif"
+import AQResult from "../pages/AQResult";
 
 // import { LeftSign } from '../../media/icon/SVGicons';
 import { LeftArrow } from '../../media/icon/SVGicons';
@@ -22,7 +23,6 @@ export class AQTest extends Component {
             token: localStorage.getItem("token"),
             userName: localStorage.getItem("name"),
             userRole: localStorage.getItem("role"),
-            orderNo: this.extractENameFromURL(),
             billingName: "",
             billingEmail: "",
             billingPhoneNumber: "",
@@ -38,42 +38,53 @@ export class AQTest extends Component {
 
             status: " ",
             isLoader: false,   
-
+            orderNo: "", 
         };
     }
-//
-    
-  extractENameFromURL() {
-    const currentPath = window.location.pathname;
-    const orderNo = currentPath.split("/acquirertestingenv/")[1];
-    return orderNo;
-  }
   
-  componentDidMount() {
-    if( this.state.orderNo!=""){
-        this.fetchData();
+    extractOrderNoFromURL() {
+        const currentPath = window.location.pathname;
+        const orderNo = currentPath.split("/acquirertestingenv/")[1];
+        return orderNo;
     }
+
+    componentDidMount() {
+        const token = localStorage.getItem('token');
+        const userName = localStorage.getItem('company_name'); // Assuming you store 'userName' during login
+        const userRole = localStorage.getItem('role'); // Assuming you store 'userRole' during login
     
-  }
+        console.log("Loaded cookies data:", { token, userName, userRole });
+    
+        if (token && userName && userRole) {
+            this.setState({
+                token: token,
+                userName: userName,
+                userRole: userRole
+            });
+        }
+
+        if (this.state.orderNo) {
+            this.fetchData();
+        }
+    }
 
     fetchData = async () => {
         this.setState({ isLoading: true, error: null });
-
+        const backendURL = process.env.REACT_APP_BACKEND_URL;
         try {
-        const API_URL = `https:// paylinkup.online/transactionflow/get_transaction?orderNo=${this.state.orderNo}`; // Replace with your actual API endpoint
-        const response = await fetch(API_URL);
-
-        if (!response.ok) {
-            throw new Error(`API request failed with status ${response.status}`);
-        }
-
-        const data = await response.json();
-        this.setState({ data });
-        console.log(data)
+            const API_URL = `${backendURL}/transactionflow/get_transaction?orderNo=${this.state.orderNo}`;
+            const response = await fetch(API_URL);
+            if (!response.ok) {
+                throw new Error(`API request failed with status ${response.status}`);
+            }
+            const data = await response.json();
+            this.setState({ data });
+            console.log("Fetched data:", data);     
+            this.setState({status: data.status})
         } catch (error) {
-        this.setState({ error: error.message || 'An error occurred while fetching data.' });
+            this.setState({ error: error.message || 'An error occurred while fetching data.' });
         } finally {
-        this.setState({ isLoading: false });
+            this.setState({ isLoading: false });
         }
     };
 
@@ -152,7 +163,9 @@ export class AQTest extends Component {
 
                 window.location.href = data.redirectUrl; 
               } else {
-
+                this.setState({
+                    orderNo: data.orderNo, 
+                });
                 console.error('No redirect URL found in response');
             }
         } catch (error) {
@@ -173,30 +186,7 @@ export class AQTest extends Component {
         });
     };
 
-    getStatusText(status) {
-        switch (status) {
-          case "Successful":
-            return (
-              <div className="status-div success-status">
-                <p>Successful</p>
-              </div>
-            );
-          case "Failed":
-            return (
-              <div className="status-div failed-status">
-                <p>Failed</p>
-              </div>
-            );
-          case "Pending":
-            return (
-              <div className="status-div pending-status">
-                <p>Pending</p>
-              </div>
-            );
-          default:
-            return "";
-        }
-      }
+
 
     render() {
         const { billingName, billingEmail, billingPhoneNumber, amount, selectedCurrency,
@@ -371,90 +361,9 @@ export class AQTest extends Component {
                     </div>
                 </>
             );
-        } else if (status) {
+        } else if (this.state.orderNo) {
             return (
-                <>
-                    <Header />
-                    <Sidebar />
-                    <div className={`main-screen ${this.state.sidebaropen
-                        ? "collapsed-main-screen"
-                        : "expanded-main-screen "
-                        }  `}
-                    >
-                        <div id='paymentscreen'>
-                            <div className='paymentscreen'>
-                                <div className='paymentResult'>
-                                    {status === "Success" ? 
-                                        <div className='paymentSuccessfull'>
-                                            <LeftArrow  className="paymentBack"/>
-                                            <img src={Success} alt='Success GIF' className='statusGif'/>
-                                            <h5>Transaction Successful!</h5>
-                                            <div className='paymentDetails'>
-                                                <div className='paymentDetails-header'>
-                                                    <span>
-                                                        <p>User Name</p>
-                                                        <p className='p2'>Recipient</p>
-                                                    </span>
-
-                                                    <span className='secondBlock'>
-                                                        <p>10000 USD</p>
-                                                        <p className='p2'>Amount</p>
-                                                    </span>
-                                                </div>
-
-                                                <div className='paymentDetails-middle'>
-                                                    <span>
-                                                        <p>Date :</p><p>25/06/2024</p>
-                                                    </span>
-                                                    <span>
-                                                        <p>Order No. :</p><p>dfkhgewlkfew</p>
-                                                    </span>
-                                                    <span>
-                                                        <p>Transaction ID:</p><p>aekfuhlasdjbgr</p>
-                                                    </span>
-                                                    <p>{this.getStatusText("Successful")}</p>
-                                                </div>
-
-                                            </div>
-                                        </div> 
-                                    : 
-                                        <div className='paymentFailed'>
-                                            <LeftArrow  className="paymentBack"/>
-                                            <img src={Failed} alt='Success GIF' className='statusGif'/>
-                                            <h5>Transaction Failed!</h5>
-                                            <div className='paymentDetails'>
-                                                <div className='paymentDetails-header'>
-                                                    <span>
-                                                        <p>User Name</p>
-                                                        <p className='p2'>Recipient</p>
-                                                    </span>
-
-                                                    <span className='secondBlock'>
-                                                        <p>10000 USD</p>
-                                                        <p className='p2'>Amount</p>
-                                                    </span>
-                                                </div>
-
-                                                <div className='paymentDetails-middle'>
-                                                    <span>
-                                                        <p>Date :</p><p>25/06/2024</p>
-                                                    </span>
-                                                    <span>
-                                                        <p>Order No. :</p><p>dfkhgewlkfew</p>
-                                                    </span>
-                                                    <span>
-                                                        <p>Transaction ID:</p><p>aekfuhlasdjbgr</p>
-                                                    </span>
-                                                    <p>{this.getStatusText("Failed")}</p>
-                                                </div>
-
-                                            </div>
-                                        </div>}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </>
+                <AQResult orderNo={this.state.orderNo} />
             );
         }
     }
