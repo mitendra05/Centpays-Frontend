@@ -51,7 +51,7 @@ export class AQTest extends Component {
 
       const data = await response.json();
       // Store fetched data in AqresultData
-      this.setState({ AqresultData: data.data }); // Assuming `data.data` contains the fetched transaction data
+      this.setState({ AqresultData: data.data });
       console.log("Fetched data:", data.data);
     } catch (error) {
       this.setState({ error: error.message || 'An error occurred while fetching data.' });
@@ -161,10 +161,8 @@ export class AQTest extends Component {
                           <p>Transaction ID:</p>
                           <p>{AqresultData.txnId}</p>
                         </span>
-                        <span>
-                        <p>{AqresultData.status}</p>
+                        <p>{this.getStatusText(AqresultData.status)}</p>
                         <p>{AqresultData.message}</p>
-                        </span>            
                       </div>
                     </div>
                   </div>
