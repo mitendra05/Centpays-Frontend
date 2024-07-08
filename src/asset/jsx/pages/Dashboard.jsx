@@ -87,8 +87,15 @@ class Dashboard extends Component {
     }
 
 	componentDidMount = async () => {
-		console.log(this.state.currency, "Dashboard C")
-		
+		const token = this.getCookie('token');
+		if (!token) {
+			window.location.href = '/';
+			return;
+		}
+		this.fetchData();
+		this.fetchDatacard10();
+		this.fetchDataBasedOnlocalStorage();
+
 		this.dataInterval = setInterval(() => {
 			this.fetchData();
 			this.fetchDatacard10();

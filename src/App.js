@@ -2,11 +2,9 @@ import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 //       ---------- CSS import ----------
-
 import "./asset/style/main.css";
 
 //      ---------- Pages import ----------
-
 import Login from "./asset/jsx/pages/Login";
 import Signup from "./asset/jsx/pages/Signup";
 import Dashboard from "./asset/jsx/pages/Dashboard";
@@ -48,6 +46,7 @@ import MerchantSettings from "./asset/jsx/pages/Merchant_Settings";
 
 import AQTest from "./asset/jsx/pages/AQTest";
 import AQResult from "./asset/jsx/pages/AQResult";
+import NotFound from "./asset/jsx/pages/NotFound";
 
 
 import Setting from "./asset/jsx/pages/setting";
@@ -66,72 +65,46 @@ function App() {
 
           {/* Dashboard Routes */}
           <Route path="/dashboard" element={<Dashboard />}></Route>
-          <Route
-            path="/livetransactiontable"
-            element={<LiveTransactionTable />}
-          ></Route>
+          <Route path="/livetransactiontable" element={<LiveTransactionTable />}></Route>
 
           {/* Settlement Routes */}
           <Route path="/settlements" element={<ListSettlement />}></Route>
-          <Route
-            path="/createsettlement"
-            element={<CreateSettlement />}
-          ></Route>
-          <Route
-            path="/previewsettlement/:company_name"
-            element={<PreviewSettlement />}
-          ></Route>
+          <Route path="/createsettlement"element={<CreateSettlement />} ></Route>
+          <Route path="/previewsettlement/:company_name"element={<PreviewSettlement />}></Route>
           <Route path="/previewreport/:id" element={<PreviewReport />}></Route>
 
           {/* Master Settings Routes */}
           <Route path="/businesstype" element={<BusinessType />}></Route>
           <Route path="/categories" element={<Categories />}></Route>
-          <Route
-            path="/businesssubcategories"
-            element={<BusinessSubcategories />}
-          ></Route>
-          <Route
-            path="/managecurrencies"
-            element={<ManageCurrencies />}
-          ></Route>
+          <Route path="/businesssubcategories" element={<BusinessSubcategories />}></Route>
+          <Route path="/managecurrencies" element={<ManageCurrencies />}></Route>
           <Route path="/documenttype" element={<DocumentType />}></Route>
-          <Route
-            path="/documentcategory"
-            element={<DocumentCategory />}
-          ></Route>
+          <Route path="/documentcategory" element={<DocumentCategory />}></Route>
           <Route path="/bank" element={<Bank />}></Route>
 
           {/* Transaction Report Routes */}
-          <Route
-            path="/transactionmonitoring"
-            element={<TransactionMonitoring />}
-          ></Route>
-          <Route
-            path="/transactionreport"
-            element={<TransactionReport />}
-          ></Route>
+          <Route path="/transactionmonitoring" element={<TransactionMonitoring />}></Route>
+          <Route path="/transactionreport" element={<TransactionReport />}></Route>
           <Route path="/tempreport" element={<TempReport />}></Route>
           <Route path="/tempureport" element={<TempUReport />}></Route>
           <Route path="/tempcreport" element={<TempCReport />}></Route>
           <Route path="/payoutreport" element={<PayoutReport />}></Route>
           <Route path="/compare" element={<Compare />}></Route>
 
-          {/* Manage Merchant Routes */}
           <Route path="/allmerchant" element={<AllMerchant />}></Route>
-          <Route
-            path="/viewmerchant/:company_name"
-            element={<ViewMerchant />}
-          ></Route>
+          <Route path="/viewmerchant/:company_name"element={<ViewMerchant />}></Route>
           <Route path="/whitelisted" element={<Whitelisted />}></Route>
           <Route path="/paymentlink" element={<PaymentLink />}></Route>
           <Route path="/merchantsetting" element={<MerchantSettings />}></Route>
 
-          {/* Manage User Routes */}
           <Route path="/alluser" element={<AllUser />}></Route>
           <Route path="/adduser" element={<Adduser />}></Route>
 
+
           <Route path="/settings" element={<Setting/>} ></Route>
-          <Route path="/rcompare" element={<RCompare/>} ></Route>
+		      <Route path="/acquirertestingenv" element={<AQTest />}></Route>
+		      <Route path="/paymentresult/:orderNo" element={<AQResult />}></Route>
+          <Route path="*" element={<NotFound />} ></Route>
         </Routes>
       </BrowserRouter>
     </>

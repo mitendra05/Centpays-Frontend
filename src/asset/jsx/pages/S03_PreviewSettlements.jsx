@@ -41,6 +41,12 @@ class PreviewSettlement extends Component {
 	  }
 
 	componentDidMount() {
+		const token = this.getCookie('token');
+
+		if (!token) {
+			window.location.href = '/';
+			return;
+		}
 		this.showSettlementRecord(this.state.company_name);
 		this.fetchData(this.state.company_name);
 	}

@@ -38,6 +38,11 @@ class Compare extends Component {
   };
 
   componentDidMount() {
+    const token = this.getCookie('token');
+		if (!token) {
+			window.location.href = '/';
+			return;
+		}
     this.fetchAcquirerList();
   }
 
