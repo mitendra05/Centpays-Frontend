@@ -152,7 +152,6 @@ class Header extends Component {
         this.props.onCurrencyChange?.(currency);
     }
 
-
     handleScroll = () => {
         if (window.scrollY > 0) {
             this.setState({
