@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { UpDoubleArrow, DownDoubleArrow } from "../../media/icon/SVGicons"; // Assuming you have both up and down arrow icons
+import { UpDoubleArrow, DownDoubleArrow } from "../../media/icon/SVGicons"; 
 
 class ScrollUpAndDown extends Component {
   state = {
-    isTop: true, // Track if currently at top or bottom
+    isTop: true, 
   };
 
   componentDidMount() {
@@ -81,7 +81,7 @@ class ScrollUpAndDown extends Component {
         onClick={this.scrollToTopOrBottom}
         className="scroll-top-and-bottom-button"
       >
-        {isTop ? <DownDoubleArrow className='primary-color-icon top-icon'/> : <UpDoubleArrow className='top-icon'/>}
+        {isTop ? <DownDoubleArrow className='primary-color-icon top-icon'/> : <UpDoubleArrow className='primary-color-icon top-icon'/>}
       </button>
     );
   }

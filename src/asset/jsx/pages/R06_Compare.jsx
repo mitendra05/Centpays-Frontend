@@ -12,7 +12,7 @@ class Compare extends Component {
     super(props);
     this.state = {
       sidebaropen: true,
-      token: localStorage.getItem("token"),
+      token: this.getCookie("token"),
       AQlist: [],
       searchedResult: [],
       paymentgateway: "",
@@ -29,6 +29,13 @@ class Compare extends Component {
       messageType: "",
     };
   }
+
+  getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+    return null;
+  };
 
   componentDidMount() {
     this.fetchAcquirerList();
@@ -113,7 +120,6 @@ class Compare extends Component {
           messageType: null,
         },
         () => {
-          // After setting state, call findMismatches
           this.findMismatches();
         }
       );
@@ -128,24 +134,16 @@ class Compare extends Component {
 
   handleSettleData = async () => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
-    const { token, mismatches } = this.state;
-
+    const { token, unmatchedExcelData, unmatchedSelectedData } = this.state;
+  
     try {
-      // Extract txnids from mismatches and join them into a single string
-      const settleData = mismatches
-        .map((mismatch) => mismatch.reference_id || mismatch.txnid)
-        .join(" ");
-
-      // Log the settle data for debugging
-      console.log("Settle data to send:", settleData);
-
+      const settleDataExcel = unmatchedExcelData.map((data) => data.reference_id).join("");
+      const settleDataSelected = unmatchedSelectedData.map((data) => data.reference_id).join("");
+  
       const payload = {
-        txnids: settleData,
+        txnids: settleDataExcel + settleDataSelected,
       };
-
-      // Log the payload to check its structure
-      console.log("Payload to send:", JSON.stringify(payload));
-
+  
       const response = await fetch(`${backendURL}/settledbybank`, {
         method: "PATCH",
         headers: {
@@ -154,19 +152,16 @@ class Compare extends Component {
         },
         body: JSON.stringify(payload),
       });
-
-      console.log("Response status:", response.status);
-      console.log("Response headers:", response.headers);
-
+  
       if (!response.ok) {
         const errorText = await response.text();
         console.error("Error response from backend:", errorText);
         throw new Error("Error settling data. Please try again later.");
       }
-
+  
       const responseData = await response.json();
       console.log("Settled data response:", responseData);
-
+  
       this.setState({
         errorMessage: "Data sent successfully!",
         messageType: "success",
@@ -179,7 +174,8 @@ class Compare extends Component {
       });
     }
   };
-
+  
+  
   handleClear = () => {
     this.setState({
       fromDate: "",
@@ -201,6 +197,7 @@ class Compare extends Component {
       const columns = ["reference_id", "amount", "status"];
       const headers = json[0];
       const indices = columns.map((col) => headers.indexOf(col));
+
       const filteredData = json.map((row) =>
         indices.map((index, colIndex) => {
           let cell = row[index];
@@ -212,28 +209,41 @@ class Compare extends Component {
         })
       );
 
-      this.setState({ excelData: filteredData });
+      this.setState({ excelData: filteredData }, () => {
+        console.log("Excel Data:", this.state.excelData);
+      });
+
       const excelTotals = this.calculateExcelTotals(filteredData);
-      this.setState({ excelTotals });
-      this.setState({ receivedAmount: excelTotals.totalAmount.toFixed(2) });
+      this.setState({ excelTotals }, () => {
+        console.log("Excel Totals:", this.state.excelTotals);
+      });
+
+      this.setState(
+        { receivedAmount: excelTotals.totalAmount.toFixed(2) },
+        () => {
+          console.log("Received Amount:", this.state.receivedAmount);
+        }
+      );
     };
     reader.readAsArrayBuffer(file);
   };
 
-  calculateExcelTotals = (data) => {
-    const totalTransactions = data.length;
+  calculateExcelTotals = (filteredData) => {
+    let totalTransactions = 0;
+    let totalAmount = 0;
 
-    const totalAmount = data.reduce((sum, item, index) => {
-      // Skip header row (index 0)
-      if (index === 0) return sum;
-      return sum + parseFloat(item[1]);
-    }, 0);
+    filteredData.slice(1).forEach((row) => {
+      const amount = parseFloat(row[1]);
+      if (!isNaN(amount)) {
+        totalTransactions += 1;
+        totalAmount += amount;
+      }
+    });
 
-    const successfulAmount = data
-      .filter((item, index) => index > 0 && item[2] === "Success")
-      .reduce((sum, item) => sum + parseFloat(item[1]), 0);
-
-    return { totalTransactions, totalAmount, successfulAmount };
+    return {
+      totalTransactions,
+      totalAmount,
+    };
   };
 
   calculateSearchedTotals = (data) => {
@@ -246,130 +256,124 @@ class Compare extends Component {
 
   findMismatches = () => {
     const { excelData, searchedResult } = this.state;
-    console.log("excel", excelData);
-
+  
     if (excelData.length === 0 || searchedResult.length === 0) {
-      return; // No data to compare
+      return;
     }
-
-    const matchData = [];
-    const mismatchedData = [];
-
-    // Convert searchedResult into a Map for easier lookup
-    const searchedMap = new Map();
+  
+    let totalSearchDataCount = searchedResult.length;
+    let matchDataCount = 0;
+  
+    const matchedData = [];
+    const unmatchedExcelData = [];
+    const unmatchedSelectedData = [];
+  
+    const searchedMap = {};
     searchedResult.forEach((transaction) => {
-      searchedMap.set(transaction.txnid, {
+      searchedMap[transaction.txnid] = {
         amount: parseFloat(transaction.amount),
         status: transaction.Status === "Success" ? "Success" : "Failed",
-      });
+      };
     });
-
-    excelData.forEach((excelTransaction) => {
-      const reference_id =
-        excelTransaction.reference_id || excelTransaction.txnid;
-        const excelAmount = parseFloat(excelTransaction.amount);
-        const excelStatus =
-        excelTransaction.status === "Success" ? "Success" : "Failed";
-
-      if (searchedMap.has(reference_id)) {
-        const searchedTransaction = searchedMap.get(reference_id);
+  
+    excelData.slice(1).forEach((excelTransaction) => {
+      const [reference_id, excelAmountStr, excelStatusRaw] = excelTransaction;
+      const excelAmount = parseFloat(excelAmountStr);
+      const excelStatus = excelStatusRaw === "Success" ? "Success" : "Failed";
+  
+      if (searchedMap[reference_id]) {
+        const searchedTransaction = searchedMap[reference_id];
         const searchedAmount = searchedTransaction.amount;
         const searchedStatus = searchedTransaction.status;
-
+  
         if (excelAmount === searchedAmount && excelStatus === searchedStatus) {
-          matchData.push({
-            ID: {
-              reference_id: reference_id,
-              txnId: reference_id, 
-            },
-            Amount: {
-              "amount of excel": excelAmount,
-              "amount of search data": searchedAmount,
-            },
-            Status: {
-              "status of excel": excelStatus,
-              "status of searched data": searchedStatus,
-            },
+          matchedData.push({
+            reference_id,
+            amount: excelAmount,
+            status: excelStatus,
           });
+          matchDataCount++;
         } else {
-          // Found a mismatch
-          mismatchedData.push({
-            ID: {
-              reference_id: reference_id,
-              txnId: reference_id, 
-            },
-            Amount: {
-              "amount of excel": excelAmount,
-              "amount of search data": searchedAmount,
-            },
-            Status: {
-              "status of excel": excelStatus,
-              "status of searched data": searchedStatus,
-            },
+          unmatchedExcelData.push({
+            reference_id,
+            amount: excelAmount,
+            status: excelStatus,
+          });
+          unmatchedSelectedData.push({
+            reference_id,
+            amount: searchedAmount,
+            status: searchedStatus,
           });
         }
-
-        // Remove from searchedMap to mark as processed
-        searchedMap.delete(reference_id);
+        delete searchedMap[reference_id];
       } else {
-        // No matching txnId found in searched data
-        mismatchedData.push({
-          ID: {
-            reference_id: reference_id,
-            txnId: reference_id,
-          },
-          Amount: {
-            "amount of excel": excelAmount,
-            "amount of search data": 0, // Assuming 0 for amount not found
-          },
-          Status: {
-            "status of excel": excelStatus,
-            "status of searched data": "Not Found",
-          },
+        unmatchedExcelData.push({
+          reference_id,
+          amount: excelAmount,
+          status: excelStatus,
         });
       }
     });
-
-    // Any remaining items in searchedMap are not found in excelData
-    searchedMap.forEach((searchedTransaction, txnid) => {
-      mismatchedData.push({
-        ID: {
-          ReferenceID: txnid,
-          txnId: txnid,
-        },
-        Amount: {
-          "amount of excel": 0, // Assuming 0 for amount not found
-          "amount of search data": searchedTransaction.amount,
-        },
-        Status: {
-          "status of excel": "Not Found",
-          "status of searched data": searchedTransaction.status,
-        },
+  
+    
+    Object.keys(searchedMap).forEach((reference_id) => {
+      const searchedTransaction = searchedMap[reference_id];
+      unmatchedSelectedData.push({
+        reference_id,
+        amount: searchedTransaction.amount,
+        status: searchedTransaction.status,
       });
     });
-    console.log("sadsf",matchData);
-    console.log("mismatch",mismatchedData);
-    // Set state with matchData and mismatchedData
+  
+   
+    let matchPercentage = (matchDataCount / totalSearchDataCount) * 100;
+    matchPercentage = matchPercentage.toFixed(2);
+  
+    let color;
+    let message;
+    if (matchPercentage >= 0 && matchPercentage <= 40) {
+      color = "var(--red-color)";
+      message = "Low match";
+    } else if (matchPercentage >= 41 && matchPercentage <= 60) {
+      color = "var(--orange-color)";
+      message = "Moderate match";
+    } else if (matchPercentage >= 61 && matchPercentage <= 80) {
+      color = "var(--blue-color)";
+      message = "Good match";
+    } else if (matchPercentage >= 81 && matchPercentage <= 99) {
+      color = "var(--purple-color)";
+      message = "High match ";
+    } else if (matchPercentage === "100.00") {
+      color = "var(--green-color)";
+      message = "Perfect match";
+    }
+  
     this.setState({
-      matchData,
-      mismatchedData,
-      matchModal: true, // Optionally show modal or handle these data accordingly
+      matchedData,
+      unmatchedExcelData,
+      unmatchedSelectedData,
+      matchDataCount,
+      totalSearchDataCount,
+      matchPercentage,
+      color,
+      message,
       mismatchModal: true,
     });
   };
-
+  
   closeModal = () => {
     this.setState({ mismatchModal: false });
   };
 
   handleCopyReferenceIds = () => {
-    const { mismatches } = this.state;
-    const referenceIds = mismatches
-      .map((mismatch) => mismatch.reference_id || mismatch.txnid)
-      .join("");
-
+    const { unmatchedExcelData, unmatchedSelectedData } = this.state;
+  
+    const excelReferenceIds = unmatchedExcelData.map((data) => data.reference_id).join("\n");
+    const selectedReferenceIds = unmatchedSelectedData.map((data) => data.reference_id).join("\n");
+    const allReferenceIds = `${excelReferenceIds}\n${selectedReferenceIds}`;
+  
     navigator.clipboard
-      .writeText(referenceIds)
+      .writeText(allReferenceIds)
       .then(() => {
         this.setState({
           errorMessage: "Copied!",
@@ -377,29 +381,40 @@ class Compare extends Component {
         });
       })
       .catch((err) => {
+        console.error("Error copying IDs:", err);
         this.setState({
-          errorMessage: "Error to copied ids!",
+          errorMessage: "Error copying IDs!",
           messageType: "fail",
         });
       });
   };
-
+  
   handleExcelReferenceIds = () => {
-    const { mismatches } = this.state;
+    const { unmatchedExcelData, unmatchedSelectedData } = this.state;
 
-    const exportData = mismatches.map((mismatch, index) => ({
-      "S.NO.": index + 1,
-      "Reference Id": mismatch.reference_id || mismatch.txnid,
-      Amount: mismatch.db_amount || mismatch.excel_amount || mismatch.amount,
-      Status: mismatch.db_status || mismatch.excel_status || mismatch.status,
-    }));
-
+    const exportData = [
+      ...unmatchedExcelData.map((data, index) => ({
+        "S.NO.": index + 1,
+        "Reference Id": data.reference_id,
+        Amount: data.amount,
+        Status: data.status,
+      })),
+      ...unmatchedSelectedData.map((data, index) => ({
+        "S.NO.": unmatchedExcelData.length + index + 1,
+        "Reference Id": data.reference_id,
+        Amount: data.amount,
+        Status: data.status,
+      })),
+    ];
+  
     const workbook = XLSX.utils.book_new();
-
     const worksheet = XLSX.utils.json_to_sheet(exportData);
+
     XLSX.utils.book_append_sheet(workbook, worksheet, "Mismatch Data");
+ 
     XLSX.writeFile(workbook, "Mismatch_Data.xlsx");
   };
+  
 
   render() {
     const {
@@ -625,14 +640,13 @@ class Compare extends Component {
 
                 <div className="header-container">
                   <div className="left-div">
-                    <span>Date: </span>
+                    <span className="date-section">From: <p className="p2">{this.state.fromDate}</p>  To: <p className="p2">{this.state.toDate}</p> </span>
                     <span>Total Amount: {totalAmount} /- </span>
                     <span>Received Amount: {receivedAmount}/- </span>
                   </div>
                   <div className="right-div">
                     <h4 style={{ color: this.state.color }}>
-                      {this.state.message}{" "}
-                      {/* {this.state.percentageDifference.toFixed(2)}% */}
+                      {this.state.message} {this.state.matchPercentage}%
                     </h4>
                   </div>
                 </div>
@@ -649,22 +663,25 @@ class Compare extends Component {
                         </tr>
                       </thead>
                       <tbody>
-                        {this.state.mismatchedData.map((mismatch, index) => (
+                        {this.state.unmatchedExcelData.map((data, index) => (
                           <tr key={index}>
                             <td>{index + 1}</td>
+                            <td>{data.reference_id}</td>
+                            <td>{data.amount}</td>
+                            <td>{data.status}</td>
+                          </tr>
+                        ))}
+
+                        {this.state.unmatchedSelectedData.map((data, index) => (
+                          <tr
+                            key={index + this.state.unmatchedExcelData.length}
+                          >
                             <td>
-                              {mismatch.ID.ReferenceID || mismatch.ID.txnId}
+                              {this.state.unmatchedExcelData.length + index + 1}
                             </td>
-                            <td>
-                              {mismatch.Amount["amount of excel"] ||
-                                mismatch.Amount["amount of search data"] ||
-                                0}
-                            </td>
-                            <td>
-                              {mismatch.Status["status of excel"] ||
-                                mismatch.Status["status of searched data"] ||
-                                "Not Found"}
-                            </td>
+                            <td>{data.reference_id}</td>
+                            <td>{data.amount}</td>
+                            <td>{data.status}</td>
                           </tr>
                         ))}
                       </tbody>
