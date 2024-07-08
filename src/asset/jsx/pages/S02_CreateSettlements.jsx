@@ -108,6 +108,12 @@ class CreateSettlement extends Component {
   }
 
   componentDidMount() {
+    const token = this.getCookie('token');
+
+		if (!token) {
+			window.location.href = '/';
+			return;
+		}
     this.fetchCompanyList();
 
     const company_name = this.extractCompanyNameFromURL();

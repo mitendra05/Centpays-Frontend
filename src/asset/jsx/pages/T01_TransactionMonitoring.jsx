@@ -71,6 +71,11 @@ class TransactionMonitoring extends Component {
   }
 
   componentDidMount() {
+    const token = this.getCookie('token');
+		if (!token) {
+			window.location.href = '/';
+			return;
+		}
     const backendURL = process.env.REACT_APP_BACKEND_URL;
     this.fetchData(`${backendURL}/companylist`, "companyList");
     this.fetchData(`${backendURL}/listofmids`, "midList");

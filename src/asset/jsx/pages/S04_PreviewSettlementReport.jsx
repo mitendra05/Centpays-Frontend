@@ -29,6 +29,11 @@ class PreviewReport extends Component {
 	  }
 
 	componentDidMount() {
+		const token = this.getCookie('token');
+		if (!token) {
+			window.location.href = '/';
+			return;
+		}
 		this.handleFetchReport(this.state.id);
 		this.handleFetchRate();
 	}

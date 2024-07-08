@@ -4514,6 +4514,7 @@ hr {
 	border-radius: 10px;
 }
 
+
 #paymentscreen-result{
     height: 100vh;
 	width: 99%;
@@ -4805,6 +4806,7 @@ hr {
 	top: 42%;
 	left: 50%;
 	transform: translateX(-50%);
+
 }
 
 .paymentDetails {
@@ -4844,6 +4846,7 @@ hr {
 
 /* ------------------ */
 .paymentFailed .statusGif {
+
 	width: 200px;
 	margin-top: 0px;
 }
@@ -4855,6 +4858,7 @@ hr {
 .paymentFailed h5 {
 	position: absolute;
 	top: 42%;
+
 	left: 50%;
 	transform: translateX(-50%);
 }
@@ -5087,6 +5091,7 @@ gap: 15px;
 margin: 15px 0;
 }
 
+
 .mismatches-head p{
 cursor: pointer;
 }
@@ -5094,6 +5099,7 @@ cursor: pointer;
 .mismatches-body ul {
 list-style: none;
 }
+
 
 .mismatches-body-section{
 margin-top: 15px;
