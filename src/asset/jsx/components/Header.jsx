@@ -38,7 +38,7 @@ class Header extends Component {
         this.state = {
             userName: this.getCookie('name'),
             email: this.getCookie('email'),
-            userRole: this.getCookie('role'),
+            // userRole: this.getCookie('role'),
             companyName: this.getCookie('company_name'),
             token: this.getCookie('token'),
             theme: "light",
@@ -124,7 +124,9 @@ class Header extends Component {
 
     componentDidMount = async () => {
         const savedScrollPosition = localStorage.getItem("Header_ScrollY");
-        const userRole= localStorage.getItem("role");
+        // const userRole= localStorage.getItem("role");
+        const userRole= this.getCookie('role')
+        this.setState({userRole: userRole})
         if (savedScrollPosition) {
           window.scrollTo(0, parseInt(savedScrollPosition, 10));
         }
@@ -173,7 +175,7 @@ class Header extends Component {
     handleCurrencyChange = (currency) => {
         this.setState({ selectedCurrency: currency });
         this.props.onCurrencyChange?.(currency);
-
+   
     }
     handleScroll = () => {
         if (window.scrollY > 0) {
