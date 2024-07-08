@@ -46,9 +46,9 @@ import Adduser from "./asset/jsx/pages/AddUser";
 import AllUser from "./asset/jsx/pages/AllUser";
 import MerchantSettings from "./asset/jsx/pages/Merchant_Settings";
 
-import AQTest from "./asset/jsx/pages/AQTest";
-import AQResult from "./asset/jsx/pages/AQResult";
-
+// import AQTest from "./asset/jsx/pages/AQTest";
+// import AQResult from "./asset/jsx/pages/AQResult";
+import NotFound from "./asset/jsx/pages/NotFound";
 
 import Setting from "./asset/jsx/pages/setting";
 
@@ -99,7 +99,6 @@ function App() {
           ></Route>
           <Route path="/bank" element={<Bank />}></Route>
 
-          {/* Transaction Report Routes */}
           <Route
             path="/transactionmonitoring"
             element={<TransactionMonitoring />}
@@ -114,7 +113,6 @@ function App() {
           <Route path="/payoutreport" element={<PayoutReport />}></Route>
           <Route path="/compare" element={<Compare />}></Route>
 
-          {/* Manage Merchant Routes */}
           <Route path="/allmerchant" element={<AllMerchant />}></Route>
           <Route
             path="/viewmerchant/:company_name"
@@ -124,11 +122,11 @@ function App() {
           <Route path="/paymentlink" element={<PaymentLink />}></Route>
           <Route path="/merchantsetting" element={<MerchantSettings />}></Route>
 
-          {/* Manage User Routes */}
           <Route path="/alluser" element={<AllUser />}></Route>
           <Route path="/adduser" element={<Adduser />}></Route>
 
           <Route path="/settings" element={<Setting/>} ></Route>
+          <Route path="*" element={<NotFound />} ></Route>
         </Routes>
       </BrowserRouter>
     </>

@@ -4488,8 +4488,8 @@ hr {
 	border-radius: 10px;
 }
 
-#paymentscreen2{
-    height: 100vh;
+#paymentscreen2 {
+	height: 100vh;
 	width: 99%;
 	display: flex;
 	align-items: center;
@@ -4769,7 +4769,7 @@ hr {
 .paymentSuccessfull .statusGif {
 	width: 250px;
 	margin-top: -20px;
-  }
+}
 
 
 .paymentSuccessfull {
@@ -4780,7 +4780,7 @@ hr {
 	position: absolute;
 	top: 42%;
 	left: 26%;
-  }
+}
 
 .paymentDetails {
 	text-align: left;
@@ -4819,7 +4819,7 @@ hr {
 .paymentFailed .statusGif {
 	width: 250px;
 	margin-top: -20px;
-  }
+}
 
 
 .paymentFailed {
@@ -4830,7 +4830,7 @@ hr {
 	position: absolute;
 	top: 42%;
 	left: 26%;
-  }
+}
 
 .paymentDetails {
 	text-align: left;
@@ -4962,7 +4962,7 @@ hr {
 	margin: 15px 0;
 }
 
-.mismatches-head p{
+.mismatches-head p {
 	cursor: pointer;
 }
 
@@ -4970,18 +4970,34 @@ hr {
 	list-style: none;
 }
 
-.mismatches-body-section{
+.mismatches-body-section {
 	margin-top: 15px;
 }
 
-.mismatch-details-row{
+.mismatch-details-row {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	margin: 5px 0;
 }
 
-.selected-tab{
+.selected-tab {
 	color: var(--primary);
 	border-bottom: 1px solid var(--primary-dark);
+}
+
+.animate-slide {
+	animation: slideInRight 0.7s forwards;
+}
+
+@keyframes slideInRight {
+	0% {
+		transform: translateX(100%);
+		opacity: 0;
+	}
+
+	100% {
+		transform: translateX(0);
+		opacity: 1;
+	}
 }

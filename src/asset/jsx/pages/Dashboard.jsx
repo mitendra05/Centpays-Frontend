@@ -88,6 +88,11 @@ class Dashboard extends Component {
     }
 
 	componentDidMount = async () => {
+		const token = this.getCookie('token');
+		if (!token) {
+			window.location.href = '/';
+			return;
+		}
 		this.fetchData();
 		this.fetchDatacard10();
 		this.fetchDataBasedOnlocalStorage();

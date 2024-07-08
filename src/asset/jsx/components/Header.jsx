@@ -1,6 +1,4 @@
-import React, { Component, useReducer } from "react";
-
-//images
+import React, { Component, } from "react";
 
 import { Search, DarkMode, LightMode, Notification, ShortCut, Close, Logout } from "../../media/icon/SVGicons";
 
@@ -40,6 +38,7 @@ class Header extends Component {
             email: this.getCookie('email'),
             userRole: this.getCookie('role'),
             companyName: this.getCookie('company_name'),
+            loginTime: this.getCookie('loginTime'),
             token: this.getCookie('token'),
             theme: "light",
             scrolled: false,
@@ -124,45 +123,44 @@ class Header extends Component {
 
     componentDidMount = async () => {
         const savedScrollPosition = localStorage.getItem("Header_ScrollY");
-        const userRole= localStorage.getItem("role");
+        const userRole = localStorage.getItem("role");
         if (savedScrollPosition) {
-          window.scrollTo(0, parseInt(savedScrollPosition, 10));
+            window.scrollTo(0, parseInt(savedScrollPosition, 10));
         }
         window.addEventListener("scroll", this.handleScroll);
         window.addEventListener("keydown", this.handleKeyDown);
-        
+
         const currentPage = window.location.pathname.split("/")[1];
         this.setState({ currentPage });
 
         // const userRole = this.state;
-        console.log("role user",userRole)
+        console.log("role user", userRole)
         let currency = []
-        if (userRole === "admin"){
+        if (userRole === "admin") {
             this.fetchCompanyList();
-            currency= ["USD", "EUR", "All Currencies"]
+            currency = ["USD", "EUR", "All Currencies"]
         }
-        if(userRole === "merchant"){
-            currency= await this.fetchCurrencyList();
-            console.log("currency merchant",currency)
+        if (userRole === "merchant") {
+            currency = await this.fetchCurrencyList();
+            console.log("currency merchant", currency)
         }
         const selectedCurrency = currency[0];
-        console.log("selected currency",selectedCurrency)
-        this.setState({currency, selectedCurrency})
+        console.log("selected currency", selectedCurrency)
+        this.setState({ currency, selectedCurrency })
     }
 
     componentWillUnmount() {
-
         localStorage.setItem("Header_ScrollY", window.scrollY);
         window.removeEventListener("scroll", this.handleScroll);
-      }
+    }
 
     handleMerchantChange = (merchant) => {
         if (merchant === "Select Merchant") {
-          this.setState({
-            selectedMerchant: merchant,
-            selectedCurrency: this.state.selectedCurrency,
-          });
-          this.props.onMerchantChange?.("");
+            this.setState({
+                selectedMerchant: merchant,
+                selectedCurrency: this.state.selectedCurrency,
+            });
+            this.props.onMerchantChange?.("");
 
         } else {
             this.setState({ selectedMerchant: merchant });
@@ -173,6 +171,7 @@ class Header extends Component {
     handleCurrencyChange = (currency) => {
         this.setState({ selectedCurrency: currency });
         this.props.onCurrencyChange?.(currency);
+    }
 
 
     handleScroll = () => {
@@ -183,10 +182,11 @@ class Header extends Component {
                 shortcutModal: false,
             });
         } else {
-          this.setState({
-            scrolled: false,
-          });
+            this.setState({
+                scrolled: false,
+            });
         }
+    }
 
     toggleTheme = () => {
         this.setState((prevState) => ({
@@ -258,32 +258,32 @@ class Header extends Component {
         }));
     };
 
-      fetchCurrencyList = async () => {
+    fetchCurrencyList = async () => {
         const backendURL = process.env.REACT_APP_BACKEND_URL;
         const { token, companyName } = this.state;
         try {
-          const response = await fetch(`${backendURL}/currenciesforcompany?company_name=${companyName}`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          });
-      
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-      
-          const data = await response.json();
-          console.log("currency data",data)
-          return data
+            const response = await fetch(`${backendURL}/currenciesforcompany?company_name=${companyName}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log("currency data", data)
+            return data
         } catch (error) {
-          console.error("Fetch error:", error);
-          this.setState({
-            errorMessage: "Error fetching data. Please try again later."
-          });
+            console.error("Fetch error:", error);
+            this.setState({
+                errorMessage: "Error fetching data. Please try again later."
+            });
         }
-      };
+    };
 
     fetchCompanyList = async () => {
         const backendURL = process.env.REACT_APP_BACKEND_URL;
@@ -302,25 +302,68 @@ class Header extends Component {
             }
 
             const data = await response.json();
-            this.setState({ companyList: data, errorMessage: "" }); // Clear any previous error message
+            this.setState({ companyList: data, errorMessage: "" });
         } catch (error) {
             console.error("Fetch error:", error);
             this.setState({
                 errorMessage: "Error fetching data. Please try again later.",
-                companyList: [], // Optionally clear existing data if needed
+                companyList: [],
             });
         }
     };
 
-    handleLogout = () => {
-        this.deleteCookie('name');
-        this.deleteCookie('email');
-        this.deleteCookie('role');
-        this.deleteCookie('company_name');
-        this.deleteCookie('token');
-
-        window.location.href = '/';
-    }
+    handleLogout = async (e) => {
+        const { email, companyName } = this.state;
+        const backendURL = process.env.REACT_APP_BACKEND_URL;
+        e.preventDefault();
+    
+        const endTime = Date.now();
+    
+        localStorage.setItem('email', email);
+        localStorage.setItem('companyName', companyName);
+    
+        const storedEmail = localStorage.getItem('email');
+        const login_time = localStorage.getItem('login_time');
+        const company_name = localStorage.getItem('companyName');
+    
+        try {
+            const response = await fetch(`${backendURL}/sessionactivity`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    email: storedEmail,
+                    company_name,
+                    login_time,
+                    logout_time: endTime
+                }),
+            });
+    
+            if (response.ok) {
+                // Clear cookies
+                this.deleteCookie('token');
+                this.deleteCookie('role');
+                this.deleteCookie('email');
+                this.deleteCookie('name');
+                this.deleteCookie('company_name');
+    
+                // Remove localStorage items
+                localStorage.removeItem('login_time');
+    
+                // Update component state
+                this.setState({ userLogged: false, userEmail: '', userPassword: '' });
+    
+                // Redirect to home page
+                window.location.href = '/';
+            } else {
+                this.setState({ errorMessage: "Logout failed", messageType: "fail" });
+            }
+        } catch (error) {
+            console.error("Error logging out:", error);
+            this.setState({ errorMessage: "There was a problem with your logout operation", messageType: "fail" });
+        }
+    };
     
     deleteCookie = (name) => {
         document.cookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
@@ -383,7 +426,7 @@ class Header extends Component {
                                             selectedValue={selectedMerchant}
                                             onChange={this.handleMerchantChange}
                                         />
-                                    ) }
+                                    )}
                                 </div>
                             )}
                             {theme === "light" ? (
@@ -515,5 +558,7 @@ class Header extends Component {
         );
     }
 }
+
+
 
 export default Header;
