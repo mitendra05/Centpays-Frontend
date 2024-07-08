@@ -1642,25 +1642,6 @@ class TransactionMonitoring extends Component {
                           <option value="Incompleted">Incompleted</option>
                         </select>
                       </div>
-                      {/* <div className="search-select-div">
-												<label className={`id-label ${this.state.merchant ? "filled-id-label" : ""} `} htmlFor="merchant">
-													Merchant:
-												</label>
-												<select
-													className="id-input"
-													id="merchant"
-													value={this.state.merchant}
-													onChange={this.handleInputChange}
-												>
-													<option value="">Select Merchant</option>
-													{this.state.companyList.map((company) => (
-														<option key={company} value={company}>
-															{company}
-														</option>
-													))}
-												</select>
-											</div> */}
-                     
                     </div>
 
                     <div className="from-to-input-div">

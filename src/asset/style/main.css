@@ -2377,6 +2377,24 @@ td {
 	justify-content: flex-start;
 }
 
+.search-status-div{
+   margin-right: 36rem;
+   margin-bottom: -1px;
+}
+
+.date-input-mrchnt-div{
+   width: 340px !important;
+}
+
+.txn-monitoring-mrcnt-btn-div{
+	margin-top: -60px;
+	margin-left: 120px;
+}
+
+.id-input-mrchnt-div{
+	width: 356px !important;
+}
+
 .id-label {
 	font-weight: 550;
 	margin-bottom: 5px;
@@ -2385,6 +2403,10 @@ td {
 	height: 30%;
 	text-wrap: nowrap;
 	width: fit-content;
+}
+
+.card-type{
+	margin-left: 10px;
 }
 
 .filled-id-label {
@@ -2639,53 +2661,56 @@ td {
 	height: 15px;
 }
 
-.total-amount-row td {
-	padding: 10px !important;
+.total-amount-row td{
+	padding:10px !important;
 	font-size: 13px;
 }
-
-.txn-amount-blank {
-	border-bottom: none !important;
+  
+.txn-amount-blank{
+border-bottom: none !important;
 }
 
-.txn-amount-head {
+ .txn-amount-head {
 	text-align: left !important;
-}
+  }
 
-.txn-amount-value {
+  .txn-amount-value {
 	text-align: right !important;
-}
+  }
 
-.txn-search-table-Footer {
+.txn-search-table-Footer{
 	height: 50px;
 }
 
-.id-input-div div {
+.id-input-div div{
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 }
 
-.Transaction-monitoring-modal {
+.todate-div{
+	margin-left: 20px;
+}
+  .Transaction-monitoring-modal {
 	margin-top: 10px;
 	background-color: var(--white);
 	padding: 10px;
 	border-radius: 3px;
 	width: 100%;
-	max-width: 90%;
+	max-width: 90%; 
 	overflow-y: auto;
 	border: 1px solid var(--border-gray);
 	z-index: 999;
 	justify-content: left;
 	margin-left: 15px;
-}
-
-.Transaction-monitoring-modal p {
-	white-space: pre-wrap;
+  }
+  
+  .Transaction-monitoring-modal p {
+	white-space: pre-wrap; 
 	font-size: 14px;
 	line-height: 1.6;
-}
-
+  }
+  
 /* ..........................................search window ............................................................. */
 /* .search-window-overlay {
 	position: fixed;
@@ -4015,6 +4040,10 @@ hr {
 	padding: 20px 5px;
 }
 
+.right-section-middle-body h5{
+	margin-bottom: 20px;
+}
+
 .right-section-middle-body p {
 	font-size: 13px;
 	color: rgb(108, 103, 119, 0.6);
@@ -4031,7 +4060,7 @@ hr {
 .overview-head {
 	display: flex;
 	align-items: center;
-	margin: 15px 0 20px 0;
+	margin: 15px 0 10px 0 ;
 }
 
 .overview-details {
