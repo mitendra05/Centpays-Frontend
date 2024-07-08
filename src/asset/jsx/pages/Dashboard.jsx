@@ -11,12 +11,11 @@ import Card8Bargraph from "../components/Card8_bargraph";
 import MessageBox from "../components/Message_box";
 import CustomTooltip from "../components/Custom-tooltip";
 import ScrollToTopButton from "../components/ScrollToTop";
-
 import Table from "../components/Table";
-
 
 //SVG Icons
 import { Infoicon, UpSign, DownSign, DollarCircle, CreaditCard, Wallet, PieChart, BarChart, Calendar, Traffic } from "../../media/icon/SVGicons";
+
 // images
 import visa from "../../media/icon/logoVisa.png";
 import mastercard from "../../media/icon/LogoMastercard.png";
@@ -76,7 +75,7 @@ class Dashboard extends Component {
 				{ id: 17, heading: "Web URL", label: "web_url" },
 			],
 			tableData : [],
-			  currency: props.selectedCurrency || 'USD',
+			  currency: this.props.selectedCurrency,
 		};
 	}
 
@@ -88,25 +87,14 @@ class Dashboard extends Component {
     }
 
 	componentDidMount = async () => {
-		this.fetchData();
-		this.fetchDatacard10();
-		this.fetchDataBasedOnlocalStorage();
+		console.log(this.state.currency, "Dashboard C")
+		
 		this.dataInterval = setInterval(() => {
 			this.fetchData();
 			this.fetchDatacard10();
 		}, 300000);
 		this.fetchTableData();
 		this.interval = setInterval(this.fetchTableData, 2000);
-		// const userRole = this.state;
-		// let currency = ""
-		// if (userRole === "admin"){
-        //     currency = "USD"
-        // }
-        // if(userRole === "merchant"){
-        //     currency= await this.fetchCurrencyList();
-		// 	console.log("currrrr",currency)
-        // }
-        // this.setState({currency})
 	}
 
 	componentWillUnmount() {
@@ -166,11 +154,10 @@ class Dashboard extends Component {
 	  
 
 	handleCurrencyChange = (selectedCurrency) => {
-		this.setState({ currency: selectedCurrency }, () => {
-			this.fetchDataBasedOnlocalStorage();
-			this.fetchData();
-			this.fetchDatacard10();
-		});
+		this.setState({ currency: selectedCurrency },()=> {
+		this.fetchData();
+		this.fetchDatacard10();
+		this.fetchDataBasedOnlocalStorage();});			
 	};
 
 	handleMerchantChange = (selectedMerchant) => {
@@ -183,9 +170,6 @@ class Dashboard extends Component {
 
 	fetchDataBasedOnlocalStorage = () => {
 		const { currency, startDate, endDate, userRole, merchantName } = this.state;
-
-		// const role = localStorage.getItem("role");
-		// const company_name = localStorage.getItem("company_name");
 		const merchant = userRole === "merchant" ? merchantName : this.state.merchant;
 
 		const fromDate = startDate.toISOString().split("T")[0];
@@ -221,6 +205,7 @@ class Dashboard extends Component {
 	};
 
 	fetchDataFromURL = async (url, stateKey) => {
+		
 		const { token } = this.state;
 		try {
 			const response = await fetch(url, {
@@ -257,7 +242,7 @@ class Dashboard extends Component {
 				this.setState({ [stateKey]: data });
 			}
 		} catch (error) {
-			this.setState({ errorMessage: "Error fetching rates data:", error });
+			this.setState({ errorMessage: "Error fetching rates data:dlifgeiufghi", error });
 		}
 	};
 
