@@ -42,13 +42,13 @@ class ViewMerchant extends Component {
     super(props);
     this.state = {
       sidebaropen: true,
-      token: this.getCookie('token'),
-      userRole: this.getCookie('role'),
-      companyName: this.getCookie('company_name'),
+      token: this.getCookie("token"),
+      userRole: this.getCookie("role"),
+      companyName: this.getCookie("company_name"),
       company_name: this.extractENameFromURL(),
       overviewData: [],
       ratesData: [],
-      // approvalData: [],
+      approvalData: {},
       volumeData: [],
       showApprovalRatio: true,
       showTotalVolume: false,
@@ -108,9 +108,9 @@ class ViewMerchant extends Component {
   getCookie = (name) => {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
+    if (parts.length === 2) return parts.pop().split(";").shift();
     return null;
-  }
+  };
 
   componentDidMount() {
     this.interval = setInterval(() => {
@@ -130,8 +130,7 @@ class ViewMerchant extends Component {
     }
     const { company_name: stateCompanyName, userRole, companyName } = this.state;
 
-    const company_name =
-      userRole === "merchant" ? companyName : stateCompanyName;
+    const company_name = role === "merchant" ? companyName : stateCompanyName;
 
     let date = new Date().toISOString().split("T")[0];
     const backendURL = process.env.REACT_APP_BACKEND_URL;
@@ -152,6 +151,10 @@ class ViewMerchant extends Component {
       }
     );
 
+    this.fetchData(
+      `${backendURL}/approvalratio?merchant=${company_name}&fromDate=${date}&toDate=${date}`,
+      "approvalData"
+    );
 
     this.fetchData(
       `${backendURL}/volumesum?company_name=${company_name}`,
@@ -620,12 +623,15 @@ class ViewMerchant extends Component {
                   <div className="profile-image">
                     <img src={profile} alt="user profile"></img>
                   </div>
-                  <h5>{this.state.company_name.split(/[^a-zA-Z\s]+/).join(' ')}</h5>
+                  <h5>
+                    {this.state.company_name.split(/[^a-zA-Z\s]+/).join(" ")}
+                  </h5>
                   <div
-                    className={`status-div ${statusText === "Active"
+                    className={`status-div ${
+                      statusText === "Active"
                         ? "success-status"
                         : "failed-status"
-                      }`}
+                    }`}
                   >
                     <p>{statusText}</p>
                   </div>
@@ -645,7 +651,17 @@ class ViewMerchant extends Component {
                           </div>
                         </div>
                         <div>
-                          <h5>99%</h5>
+                          <h5>
+                            {this.state.approvalData &&
+                            this.state.approvalData.approvalRatio !== undefined
+                              ? parseFloat(
+                                  this.state.approvalData.approvalRatio.toFixed(
+                                    2
+                                  )
+                                )
+                              : "N/A"}%
+                          </h5>
+
                           <p className="p2">Approval Ratio</p>
                         </div>
                       </div>
@@ -818,7 +834,7 @@ class ViewMerchant extends Component {
                     <ul>
                       <li>
                         <div className="p2 icons-div">
-                          <User className="merchant-icon" />
+                          <User className="merchant-icon" width="20" height="20"/>
                           Username:&nbsp;
                           <p>{overviewData.username}</p>
                         </div>
@@ -846,7 +862,7 @@ class ViewMerchant extends Component {
                       </li>
                     </ul>
 
-                    <p className="p2">CONTACTS</p>
+                    <p>CONTACTS</p>
                     <ul>
                       <li>
                         <div className="p2 icons-div">
@@ -881,8 +897,9 @@ class ViewMerchant extends Component {
                     Edit
                   </button>
                   <button
-                    className={`btn-secondary ${statusText === "Active" ? "btn-suspend" : "btn-activate"
-                      }`}
+                    className={`btn-secondary ${
+                      statusText === "Active" ? "btn-suspend" : "btn-activate"
+                    }`}
                     onClick={this.handleStatusChange}
                   >
                     {buttonLabel}
@@ -1161,7 +1178,8 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.chargeback_fee
+                                  `${
+                                    ratesData.chargeback_fee
                                   } ${getCurrencySymbol(ratesData.currency)}`
                                 )}
                               </td>
@@ -1300,7 +1318,8 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.annual_maintenance_fee
+                                  `${
+                                    ratesData.annual_maintenance_fee
                                   } ${getCurrencySymbol(ratesData.currency)}`
                                 )}
                               </td>
@@ -1357,8 +1376,9 @@ class ViewMerchant extends Component {
                           <p className="p2">Root User Sign Up Key</p>
                           <div className="input-container">
                             <div
-                              className={`icon-container copy-icon ${copied.signupKey ? "disabled" : ""
-                                }`}
+                              className={`icon-container copy-icon ${
+                                copied.signupKey ? "disabled" : ""
+                              }`}
                               onClick={() =>
                                 !copied.signupKey &&
                                 this.handleCopy("userSignUpKey", signupKey)
@@ -1536,10 +1556,12 @@ class ViewMerchant extends Component {
           <Header />
           <Sidebar />
           <div
+
             className={`main-screen ${this.state.sidebaropen
               ? "collapsed-main-screen"
               : "expanded-main-screen"
               }  `}
+
           >
             <div className="view-merchant-container">
               <div className="row-cards left-section">
@@ -1553,6 +1575,7 @@ class ViewMerchant extends Component {
                   </div>
                   <h5>{this.state.company_name}</h5>
                   <div
+
                     className={`status-div ${statusText === "Active"
                       ? "success-status"
                       : "failed-status"
@@ -1576,7 +1599,16 @@ class ViewMerchant extends Component {
                           </div>
                         </div>
                         <div>
-                          <h5>99%</h5>
+                        <h5>
+                            {this.state.approvalData &&
+                            this.state.approvalData.approvalRatio !== undefined
+                              ? parseFloat(
+                                  this.state.approvalData.approvalRatio.toFixed(
+                                    2
+                                  )
+                                )
+                              : "N/A"}%
+                          </h5>
                           <p className="p2">Approval Ratio</p>
                         </div>
                       </div>
@@ -2006,7 +2038,8 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.chargeback_fee
+                                  `${
+                                    ratesData.chargeback_fee
                                   } ${getCurrencySymbol(ratesData.currency)}`
                                 )}
                               </td>
@@ -2145,7 +2178,8 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.annual_maintenance_fee
+                                  `${
+                                    ratesData.annual_maintenance_fee
                                   } ${getCurrencySymbol(ratesData.currency)}`
                                 )}
                               </td>
@@ -2202,8 +2236,9 @@ class ViewMerchant extends Component {
                           <p className="p2">Root User Sign Up Key</p>
                           <div className="input-container">
                             <div
-                              className={`icon-container copy-icon ${copied.signupKey ? "disabled" : ""
-                                }`}
+                              className={`icon-container copy-icon ${
+                                copied.signupKey ? "disabled" : ""
+                              }`}
                               onClick={() =>
                                 !copied.signupKey &&
                                 this.handleCopy("userSignUpKey", signupKey)
