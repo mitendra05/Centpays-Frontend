@@ -2,11 +2,9 @@ import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 //       ---------- CSS import ----------
-
 import "./asset/style/main.css";
 
 //      ---------- Pages import ----------
-
 import Login from "./asset/jsx/pages/Login";
 import Signup from "./asset/jsx/pages/Signup";
 import Dashboard from "./asset/jsx/pages/Dashboard";
@@ -46,11 +44,14 @@ import Adduser from "./asset/jsx/pages/AddUser";
 import AllUser from "./asset/jsx/pages/AllUser";
 import MerchantSettings from "./asset/jsx/pages/Merchant_Settings";
 
-// import AQTest from "./asset/jsx/pages/AQTest";
-// import AQResult from "./asset/jsx/pages/AQResult";
+import AQTest from "./asset/jsx/pages/AQTest";
+import AQResult from "./asset/jsx/pages/AQResult";
 import NotFound from "./asset/jsx/pages/NotFound";
 
+
 import Setting from "./asset/jsx/pages/setting";
+
+import RCompare from "./asset/jsx/pages/R06_Compare";
 
 function App() {
   return (
@@ -64,49 +65,26 @@ function App() {
 
           {/* Dashboard Routes */}
           <Route path="/dashboard" element={<Dashboard />}></Route>
-          <Route
-            path="/livetransactiontable"
-            element={<LiveTransactionTable />}
-          ></Route>
+          <Route path="/livetransactiontable" element={<LiveTransactionTable />}></Route>
 
           {/* Settlement Routes */}
           <Route path="/settlements" element={<ListSettlement />}></Route>
-          <Route
-            path="/createsettlement"
-            element={<CreateSettlement />}
-          ></Route>
-          <Route
-            path="/previewsettlement/:company_name"
-            element={<PreviewSettlement />}
-          ></Route>
+          <Route path="/createsettlement"element={<CreateSettlement />} ></Route>
+          <Route path="/previewsettlement/:company_name"element={<PreviewSettlement />}></Route>
           <Route path="/previewreport/:id" element={<PreviewReport />}></Route>
 
           {/* Master Settings Routes */}
           <Route path="/businesstype" element={<BusinessType />}></Route>
           <Route path="/categories" element={<Categories />}></Route>
-          <Route
-            path="/businesssubcategories"
-            element={<BusinessSubcategories />}
-          ></Route>
-          <Route
-            path="/managecurrencies"
-            element={<ManageCurrencies />}
-          ></Route>
+          <Route path="/businesssubcategories" element={<BusinessSubcategories />}></Route>
+          <Route path="/managecurrencies" element={<ManageCurrencies />}></Route>
           <Route path="/documenttype" element={<DocumentType />}></Route>
-          <Route
-            path="/documentcategory"
-            element={<DocumentCategory />}
-          ></Route>
+          <Route path="/documentcategory" element={<DocumentCategory />}></Route>
           <Route path="/bank" element={<Bank />}></Route>
 
-          <Route
-            path="/transactionmonitoring"
-            element={<TransactionMonitoring />}
-          ></Route>
-          <Route
-            path="/transactionreport"
-            element={<TransactionReport />}
-          ></Route>
+          {/* Transaction Report Routes */}
+          <Route path="/transactionmonitoring" element={<TransactionMonitoring />}></Route>
+          <Route path="/transactionreport" element={<TransactionReport />}></Route>
           <Route path="/tempreport" element={<TempReport />}></Route>
           <Route path="/tempureport" element={<TempUReport />}></Route>
           <Route path="/tempcreport" element={<TempCReport />}></Route>
@@ -114,10 +92,7 @@ function App() {
           <Route path="/compare" element={<Compare />}></Route>
 
           <Route path="/allmerchant" element={<AllMerchant />}></Route>
-          <Route
-            path="/viewmerchant/:company_name"
-            element={<ViewMerchant />}
-          ></Route>
+          <Route path="/viewmerchant/:company_name"element={<ViewMerchant />}></Route>
           <Route path="/whitelisted" element={<Whitelisted />}></Route>
           <Route path="/paymentlink" element={<PaymentLink />}></Route>
           <Route path="/merchantsetting" element={<MerchantSettings />}></Route>
@@ -125,7 +100,10 @@ function App() {
           <Route path="/alluser" element={<AllUser />}></Route>
           <Route path="/adduser" element={<Adduser />}></Route>
 
+
           <Route path="/settings" element={<Setting/>} ></Route>
+		      <Route path="/acquirertestingenv" element={<AQTest />}></Route>
+		      <Route path="/paymentresult/:orderNo" element={<AQResult />}></Route>
           <Route path="*" element={<NotFound />} ></Route>
         </Routes>
       </BrowserRouter>

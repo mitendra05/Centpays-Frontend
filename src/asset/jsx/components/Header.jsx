@@ -1,5 +1,6 @@
-import React, { Component, } from "react";
+import React, { Component, useReducer } from "react";
 
+//images
 import { Search, DarkMode, LightMode, Notification, ShortCut, Close, Logout } from "../../media/icon/SVGicons";
 
 import user from "../../media/icon/user-profile.png";
@@ -36,7 +37,7 @@ class Header extends Component {
         this.state = {
             userName: this.getCookie('name'),
             email: this.getCookie('email'),
-            userRole: this.getCookie('role'),
+            // userRole: this.getCookie('role'),
             companyName: this.getCookie('company_name'),
             loginTime: this.getCookie('loginTime'),
             token: this.getCookie('token'),
@@ -59,22 +60,10 @@ class Header extends Component {
                     options: [
                         { name: "Business Type", icon: business, path: "/businesstype" },
                         { name: "Categories", icon: category, path: "/categories" },
-                        {
-                            name: "Business Subcategories",
-                            icon: subcategory,
-                            path: "/businesssubcategories",
-                        },
-                        {
-                            name: "Manage Currencies",
-                            icon: settings,
-                            path: "/managecurrencies",
-                        },
+                        { name: "Business Subcategories", icon: subcategory, path: "/businesssubcategories" },
+                        { name: "Manage Currencies", icon: settings, path: "/managecurrencies" },
                         { name: "Document Type", icon: doc, path: "/documenttype" },
-                        {
-                            name: "Document Categories",
-                            icon: dox,
-                            path: "/documentcategories",
-                        },
+                        { name: "Document Categories", icon: dox, path: "/documentcategories" },
                         { name: "Bank", icon: bank, path: "/bank" },
                     ],
                 },
@@ -82,33 +71,19 @@ class Header extends Component {
                     name: "Report Group",
                     icon: report,
                     options: [
-                        {
-                            name: "Transaction Report",
-                            icon: transaction,
-                            path: "/transactionreport",
-                        },
+                        { name: "Transaction Report", icon: transaction, path: "/transactionreport" },
                         { name: "Temp Report", icon: tempr, path: "/tempreport" },
-                        {
-                            name: "Temp Unique Order Report",
-                            icon: report,
-                            path: "/tempureport",
-                        },
-                        {
-                            name: "Temp Common Order Report",
-                            icon: common,
-                            path: "/tempcreport",
-                        },
+                        { name: "Temp Unique Order Report", icon: report, path: "/tempureport" },
+                        { name: "Temp Common Order Report", icon: common, path: "/tempcreport" },
                         { name: "Payout Report", icon: prereport, path: "/payoutreport" },
                         { name: "Compare", icon: compare, path: "/compare" },
                     ],
                 },
             ],
-
             currency: [],
             merchant: "",
             companyList: [],
             selectedMerchant: "Select Merchant",
-
             selectedCurrency: "",
             currentPage: "dashboard",
         };
@@ -123,7 +98,8 @@ class Header extends Component {
 
     componentDidMount = async () => {
         const savedScrollPosition = localStorage.getItem("Header_ScrollY");
-        const userRole = localStorage.getItem("role");
+        const userRole= localStorage.getItem("role");
+        this.setState({userRole: userRole})
         if (savedScrollPosition) {
             window.scrollTo(0, parseInt(savedScrollPosition, 10));
         }
@@ -147,6 +123,8 @@ class Header extends Component {
         const selectedCurrency = currency[0];
         console.log("selected currency", selectedCurrency)
         this.setState({ currency, selectedCurrency })
+        this.handleCurrencyChange(selectedCurrency)
+
     }
 
     componentWillUnmount() {
@@ -170,6 +148,7 @@ class Header extends Component {
 
     handleCurrencyChange = (currency) => {
         this.setState({ selectedCurrency: currency });
+        console.log(currency, "Hello")
         this.props.onCurrencyChange?.(currency);
     }
 
@@ -311,7 +290,6 @@ class Header extends Component {
             });
         }
     };
-
     handleLogout = async (e) => {
         const { email, companyName } = this.state;
         const backendURL = process.env.REACT_APP_BACKEND_URL;

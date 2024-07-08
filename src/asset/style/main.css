@@ -30,6 +30,7 @@
 	--orange-color: #ffb400;
 	--light-black-color: #0000000a;
 	--red-color: rgb(220, 0, 0);
+	--login-Bg-desing: #ecedf3;
 }
 
 body {
@@ -301,6 +302,10 @@ p {
 	color: var(--primary);
 	background-color: #ffffff;
 	font-size: 0.8rem;
+}
+
+.bold{
+	font-weight: bold;
 }
 
 /*   ------------------------------ Header ------------------------------   */
@@ -757,7 +762,6 @@ input[type="checkbox"] {
 #auth {
 	width: 100vw;
 	height: 100vh;
-
 }
 
 .auth-bg-top {
@@ -796,13 +800,15 @@ input[type="checkbox"] {
 }
 
 .auth-main-container {
-	height: 88vh;
+	height: 80%;
 	background-color: var(--white);
 	border-radius: 8px;
 	box-shadow: var(--box-shadow);
-	padding: 50px;
-	z-index: 99;
-	position: absolute;
+	padding: 0px;
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .forlogin {
@@ -810,8 +816,8 @@ input[type="checkbox"] {
 }
 
 .auth-content {
-	height: 100%;
-	width: 100%;
+	height: 80%;
+	width: 80%;
 }
 
 .logo-container {
@@ -823,6 +829,7 @@ input[type="checkbox"] {
 .auth-content form {
 	text-align: center;
 	margin-top: 30px;
+	position: relative;
 }
 
 .auth-content form .input-group {
@@ -866,6 +873,12 @@ input[type="checkbox"] {
 	margin: 20px 0 15px 0;
 }
 
+.bottom-line{
+	position: absolute;
+	bottom: -55%;
+	width: 100%;
+}
+
 .bottom-line a {
 	padding: 0 5px;
 }
@@ -898,12 +911,17 @@ input[type="checkbox"] {
 
 /*  ------------------------------ Signup Page ------------------------------  */
 
-.forsignup {
-	width: 50vw;
+.forsignup .auth-main-container{
 	height: 90vh;
+	width: 40vw;
 }
 
-.input-group-div {
+.forsignup .auth-content{
+	width: 90%;
+	height: 95%;
+}
+
+.forsignup .input-group-div {
 	display: flex;
 	justify-content: space-between;
 	margin: -20px 0;
@@ -913,36 +931,45 @@ input[type="checkbox"] {
 	display: flex;
 	justify-content: space-between;
 	width: 48%;
-	margin: 0;
 }
 
 .input-group-div .input-group .inputFeild {
 	width: 100%;
 }
 
-.checkbox-container a {
-	padding: 0 5px;
+.checkbox-container p{
+	position: absolute;
+	right: 0%;
 }
+
+.forsignup .bottom-line{
+	bottom: -10%;
+}
+
 
 /* .........Signup Modal.................... */
 
 .loginsuccessful-modal {
 	width: 350px;
 	text-align: center;
-	margin-bottom: 30px;
+	margin-bottom: 5px;
 	align-items: baseline;
 }
 
 .line-spacing {
-	line-height: 3.5;
+	padding: 15px 0;
 }
 
 .content-modal {
+	text-align: left;
 	color: gray;
 }
 
 .loginbutton-modal {
-	margin-top: 30px;
+	margin: 0 auto;
+	margin-top: 15px;
+	margin-bottom: 15px;
+	width: 60%;
 }
 
 .baktologin {
@@ -3873,7 +3900,6 @@ hr {
 	margin-bottom: 20px;
 }
 
-
 .left-section-top {
 	display: flex;
 	flex-direction: column;
@@ -4488,8 +4514,9 @@ hr {
 	border-radius: 10px;
 }
 
-#paymentscreen2 {
-	height: 100vh;
+
+#paymentscreen-result{
+    height: 100vh;
 	width: 99%;
 	display: flex;
 	align-items: center;
@@ -4589,7 +4616,6 @@ hr {
 .max-billingdetals-footer button {
 	height: 60px;
 	width: 98%;
-
 }
 
 .min-cardDetails {
@@ -4750,7 +4776,7 @@ hr {
 
 .paymentResult {
 	background-color: #ffffff;
-	width: 25vw;
+	min-width: 25vw;
 	border-radius: 10px;
 	margin-bottom: 5px;
 	padding: 10px;
@@ -4767,10 +4793,9 @@ hr {
 }
 
 .paymentSuccessfull .statusGif {
-	width: 250px;
+	width: 200px;
 	margin-top: -20px;
 }
-
 
 .paymentSuccessfull {
 	text-align: center;
@@ -4779,7 +4804,9 @@ hr {
 .paymentSuccessfull h5 {
 	position: absolute;
 	top: 42%;
-	left: 26%;
+	left: 50%;
+	transform: translateX(-50%);
+
 }
 
 .paymentDetails {
@@ -4808,19 +4835,21 @@ hr {
 	text-align: right;
 }
 
+.paymentDetails-middle .paymentresult-heading{
+	margin-right: 50px;
+}
+
 .paymentDetails .paymentDetails-middle span {
 	display: flex;
 	justify-content: space-between;
 }
 
 /* ------------------ */
-
-
 .paymentFailed .statusGif {
-	width: 250px;
-	margin-top: -20px;
-}
 
+	width: 200px;
+	margin-top: 0px;
+}
 
 .paymentFailed {
 	text-align: center;
@@ -4829,7 +4858,9 @@ hr {
 .paymentFailed h5 {
 	position: absolute;
 	top: 42%;
-	left: 26%;
+
+	left: 50%;
+	transform: translateX(-50%);
 }
 
 .paymentDetails {
@@ -4940,64 +4971,154 @@ hr {
 	overflow-y: auto;
 }
 
-.preview-table table {
-	width: 100%;
-	font-size: 13px;
+/* .........Compare.......... */
+
+.trans-settle-view{
+	width: 35%;
+	height: 55%;
 }
 
-.preview-totals div {
+.compare-line {
+	height: 2px;
+	margin: 0 -10px;
+	background-color: var(--border-gray);
+}
+
+.header-container {
 	display: flex;
-	align-items: center;
 	justify-content: space-between;
-}
-
-.show-mismatches {
-	/* background-color: #16b1ff62; */
-}
-
-.mismatches-head {
-	display: flex;
 	align-items: center;
-	gap: 15px;
-	margin: 15px 0;
 }
 
-.mismatches-head p {
-	cursor: pointer;
-}
-
-.mismatches-body ul {
-	list-style: none;
-}
-
-.mismatches-body-section {
-	margin-top: 15px;
-}
-
-.mismatch-details-row {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
+.header-container span{
 	margin: 5px 0;
 }
 
-.selected-tab {
+.left-div{
+	display: grid;
+	margin: 10px 0;
+}
+
+.right-div{
+	width:200px;
+	text-align: center;
+	color:var(--success-color);
+	margin-right: 20px;
+}
+
+.p3{
 	color: var(--primary);
-	border-bottom: 1px solid var(--primary-dark);
+	font-weight: 500px;
+	cursor: pointer;
 }
 
-.animate-slide {
-	animation: slideInRight 0.7s forwards;
+.imprt-exprt-div{
+	display: flex;
+	align-items: center;
+	color: var(--primary);
+	margin:5px 0;
+	gap: 5px;
 }
 
-@keyframes slideInRight {
-	0% {
-		transform: translateX(100%);
-		opacity: 0;
-	}
+.settle-btns{
+	display: flex;
+	align-items: center;
+	margin: 10px 0;
+}
 
-	100% {
-		transform: translateX(0);
-		opacity: 1;
-	}
+.p4{
+	color: var(--blue-color);
+	text-decoration: underline;
+}
+
+.compare-table{
+	font-size: 13px;
+	height: 150px;
+}
+
+/* / Compare Reports / */
+
+.upload-row {
+display: flex;
+align-items: center;
+justify-content: space-between;
+color: var(--primary);
+font-size: 13px;
+}
+
+.upload-excel {
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.compare-report-second-row {
+height: 80vh;
+display: flex;
+align-items: center;
+justify-content: space-between;
+}
+
+.report-preview {
+width: 50%;
+padding: 0;
+}
+
+.preview-table {
+height: 100%;
+overflow-y: auto;
+}
+
+.preview-table table {
+width: 100%;
+font-size: 13px;
+}
+
+.preview-totals div {
+display: flex;
+align-items: center;
+justify-content: space-between;
+}
+
+.show-mismatches {
+/* / background-color: #16b1ff62; / */
+}
+
+.mismatches-head {
+display: flex;
+align-items: center;
+gap: 15px;
+margin: 15px 0;
+}
+
+
+.mismatches-head p{
+cursor: pointer;
+}
+
+.mismatches-body ul {
+list-style: none;
+}
+
+
+.mismatches-body-section{
+margin-top: 15px;
+}
+
+.mismatch-details-row{
+display: flex;
+align-items: center;
+justify-content: space-between;
+margin: 5px 0;
+}
+
+.selected-tab{
+color: var(--primary);
+border-bottom: 1px solid var(--primary-dark);
+}
+
+.date-section{
+	display: flex;
+	align-items: center;
+	gap: 0 5px;
 }

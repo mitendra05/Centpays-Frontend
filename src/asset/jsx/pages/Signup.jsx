@@ -80,7 +80,6 @@ class Signup extends Component {
 			if (response.ok) {
 
 				document.cookie = `signupEmail=${userEmail};path=/`;
-				// localStorage.setItem("signupEmail", userEmail);
 				this.setState({
 					userName: "",
 					userEmail: "",
@@ -117,24 +116,21 @@ class Signup extends Component {
 						modalHeading={"Congratulations! 🎉"}
 						modalBody={
 							<div className="auth-content loginsuccessful-modal">
-								<h7 className="line-spacing">
-									Your Account has been set-up successfully.
-								</h7>
-								<p></p>
-								<p></p>
-								<p className="p1 content-modal">Login to access your account</p>
+								<h5 className="line-spacing">Your Account has been set-up successfully.</h5>
 								<button className="btn-primary loginbutton-modal" onClick={() => window.location.href = "/"}>Login</button>
+								<p className="p1 content-modal">*Login to access your account</p> 
 							</div>
 						}
 					/>
 				)}
+
 				<div id="auth">
 					<div className="auth-bg-top"></div>
 					<div className="auth-bg-bottom"></div>
 					<img className="tree1" src={tree1} alt="tree"></img>
 					<img className="tree2" src={tree2} alt="tree"></img>
-					<div className="auth-container">
-						<div className="auth-main-container forsignup">
+					<div className="auth-container forsignup">
+						<div className="auth-main-container ">
 							<div className="auth-content">
 								<div className="logo-container">
 									<img className="logo" src={fullLogo} alt="Centpays"></img>

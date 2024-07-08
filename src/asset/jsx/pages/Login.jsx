@@ -19,13 +19,13 @@ class Login extends Component {
 			isModal: false,
 			userLogged: false,
 			errorMessage: "",
-			messageType:"",
+			messageType: "",
 			isOtpModal: false,
 			isnewPasswordModal: false,
 			new_otp: "",
 			otp_timestamp: null,
-			email:"",
-			password:"",
+			email: "",
+			password: "",
 		};
 	}
 
@@ -34,18 +34,18 @@ class Login extends Component {
 		const parts = value.split(`; ${name}=`);
 		if (parts.length === 2) return parts.pop().split(';').shift();
 		return null;
-	  }
+	}
 
-  componentDidMount() {
-    const storedEmail = this.getCookie("registeredEmail");
-    const storedPassword = this.getCookie("registeredPassword");
-    if (storedEmail && storedPassword) {
-      this.setState({
-        userEmail: storedEmail,
-        userPassword: storedPassword,
-      });
-    }
-  }
+	componentDidMount() {
+		const storedEmail = this.getCookie("registeredEmail");
+		const storedPassword = this.getCookie("registeredPassword");
+		if (storedEmail && storedPassword) {
+			this.setState({
+				userEmail: storedEmail,
+				userPassword: storedPassword,
+			});
+		}
+	}
 
 	handleInputChange = (event) => {
 		this.setState({ [event.target.id]: event.target.value });
@@ -74,13 +74,13 @@ class Login extends Component {
 					document.cookie = `email=${data.user.email};path=/`;
 					document.cookie = `name=${data.user.name};path=/`;
 					document.cookie = `company_name=${data.user.company_name};path=/`;
-					
+
 					this.setState({
-						userEmail:"",
-						userPassword:"",
+						userEmail: "",
+						userPassword: "",
 					});
 					const token = this.getCookie('token');
-					console.log("token in login",token)
+					console.log("token in login", token)
 					this.setState({ userLogged: true });
 					const startTime = Date.now();
 			
@@ -88,129 +88,134 @@ class Login extends Component {
 			
 				}  else {
 					this.setState({ errorMessage: "Token not genrated",messageType:"fail"});
+
 				}
 			} else {
-				this.setState({ errorMessage: "Wrong Username & Password", messageType:"fail"});
+				this.setState({ errorMessage: "Wrong Username & Password", messageType: "fail" });
 			}
 		} catch (error) {
-			this.setState({ errorMessage: "There was a problem with your fetch operation:", messageType: "fail"});
+			this.setState({ errorMessage: "There was a problem with your fetch operation:", messageType: "fail" });
 		}
 	};
 
 	handleModalToggle = (action) => {
-		this.setState({	isModal: action === "open" ? true : false});
+		this.setState({ isModal: action === "open" ? true : false });
 	};
 
 	handleotpModalToggle = (action) => {
 		this.setState((prevState) => ({
-		  isOtpModal: action === "open" ? true : false,
+			isOtpModal: action === "open" ? true : false,
 		}));
-	  };
-	
-	  handlenewpasswordModalToggle = (action) => {
+	};
+
+	handlenewpasswordModalToggle = (action) => {
 		this.setState((prevState) => ({
-		  isnewPasswordModal: action === "open" ? true : false,
+			isnewPasswordModal: action === "open" ? true : false,
 		}));
-	  };
-	
-	  generateOtp = () => {
+	};
+
+	generateOtp = () => {
 		const otp = Math.floor(1000 + Math.random() * 9000).toString();
 		const otp_timestamp = new Date().getTime();
 		this.setState({ new_otp: otp, otp_timestamp });
 		this.otpTimer = setTimeout(() => {
-		  this.setState({ new_otp: "", otp_timestamp: null });
+			this.setState({ new_otp: "", otp_timestamp: null });
 		}, 600000);
 		return otp;
-	  };
-	
-	  handleForgotPassword = async (e) => {
+	};
+
+	handleForgotPassword = async (e) => {
 		e.preventDefault();
 		const otp = this.generateOtp();
 		const backendURL = process.env.REACT_APP_BACKEND_URL;
 		try {
-		  const response = await fetch(
-			`${backendURL}/forgotpassword`,
-			{
-			  method: "POST",
-			  headers: {
-				"Content-Type": "application/json",
-			  },
-			  body: JSON.stringify({
-				email: this.state.userEmail,
-				otp: otp,
-			  }),
-			}
-		  );
-	
-		  if (response.ok) {
-			const data = await response.json();
-			if (data.success) {
-			  this.handleModalToggle("close");
-			  this.handleotpModalToggle("open");
+			const response = await fetch(
+				`${backendURL}/forgotpassword`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						email: this.state.userEmail,
+						otp: otp,
+					}),
+				}
+			);
+
+			if (response.ok) {
+				const data = await response.json();
+				if (data.success) {
+					this.handleModalToggle("close");
+					this.handleotpModalToggle("open");
+				} else {
+					console.log("Something happened wrong");
+				}
 			} else {
-			  console.log("Something happened wrong");
+				console.log("Some Error Occured");
 			}
-		  } else {
-			console.log("Some Error Occured");
-		  }
 		} catch (error) {
-		  console.error("Error:", error);
+			console.error("Error:", error);
 		}
-	  };
-	
-	  handleotpsubmit = async (e) => {
+	};
+
+	handleotpsubmit = async (e) => {
 		e.preventDefault();
 		const currentTime = new Date().getTime();
 		const { new_otp, userotp, otp_timestamp } = this.state;
 		if (!(new_otp === userotp && currentTime - otp_timestamp <= 600000)) {
-		  window.alert("Wrong OTP or expired");
+			window.alert("Wrong OTP or expired");
 		} else {
-		  console.log("Otp is verified");
-		  this.handleotpModalToggle("close");
-		  this.handlenewpasswordModalToggle("open");
+			console.log("Otp is verified");
+			this.handleotpModalToggle("close");
+			this.handlenewpasswordModalToggle("open");
 		}
-	  };
-	
-	  handleResetPassword = async (e) => {
+	};
+
+	handleResetPassword = async (e) => {
 		e.preventDefault();
 		const { userEmail, newpassword, confirmpassword } = this.state;
 		const backendURL = process.env.REACT_APP_BACKEND_URL;
 		try {
-		  const response = await fetch(
-			`${backendURL}/resetpassword`,
-			{
-			  method: "PATCH",
-			  headers: {
-				"Content-Type": "application/json",
-			  },
-			  body: JSON.stringify({
-				email: userEmail,
-				newpassword,
-				confirmpassword,
-			  }),
-			}
-		  );
-	
-		  if (response.ok) {
-			const data = await response.json();
-			if (data.success) {
-			  this.handlenewpasswordModalToggle("close");
-			  window.alert("Password Reset Successfully");
-			} else {
-			  console.log("Something happened wrong");
-			}
-		  } else {
-			console.log("Some Error Occured");
-		  }
-		} catch (error) {
-		  console.error("Error:", error);
-		}
-	  };
+			const response = await fetch(
+				`${backendURL}/resetpassword`,
+				{
+					method: "PATCH",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						email: userEmail,
+						newpassword,
+						confirmpassword,
+					}),
+				}
+			);
 
-	
+			if (response.ok) {
+				const data = await response.json();
+				if (data.success) {
+					this.handlenewpasswordModalToggle("close");
+					window.alert("Password Reset Successfully");
+				} else {
+					console.log("Something happened wrong");
+				}
+			} else {
+				console.log("Some Error Occured");
+			}
+		} catch (error) {
+			console.error("Error:", error);
+		}
+	};
 
 	render() {
-		const {errorMessage, isModal, userLogged, isOtpModal, isnewPasswordModal, messageType } = this.state;
+		const { 
+			errorMessage, 
+			isModal, 
+			userLogged, 
+			isOtpModal, 
+			isnewPasswordModal, 
+			messageType } = this.state;
 
 		if (userLogged) {
 			return <Navigate to="/dashboard" />;
@@ -218,7 +223,7 @@ class Login extends Component {
 
 		return (
 			<>
-				{errorMessage && <MessageBox message={errorMessage}  messageType={messageType} onClose={() => this.setState({ errorMessage: ""})} />} 
+				{errorMessage && <MessageBox message={errorMessage} messageType={messageType} onClose={() => this.setState({ errorMessage: "" })} />}
 				{isModal && (
 					<Modal
 						onClose={() => this.handleModalToggle("close")}
@@ -256,7 +261,7 @@ class Login extends Component {
 										onClick={() => this.handleModalToggle("close")}
 										className="highlight-text baktologin"
 									>
-										<img src={left_ic} alt="left arrow icon" className="icon"/> Back to Login
+										<img src={left_ic} alt="left arrow icon" className="icon" /> Back to Login
 									</p>
 								</form>
 							</div>
@@ -265,103 +270,104 @@ class Login extends Component {
 				)}
 
 				{isOtpModal && (
-						<Modal
-							onClose={() => this.handleotpModalToggle("close")}
-							onDecline={() => this.handleotpModalToggle("decline")}
-							onAccept={() => this.handleotpModalToggle("accept")}
-							// showDeclinebtn={false}
-							// acceptbtnname={'Accept'}
-							showFotter={false}
-							modalHeading={"Enter OTP 🔑"}
-							modalBody={
+					<Modal
+						onClose={() => this.handleotpModalToggle("close")}
+						onDecline={() => this.handleotpModalToggle("decline")}
+						onAccept={() => this.handleotpModalToggle("accept")}
+						// showDeclinebtn={false}
+						// acceptbtnname={'Accept'}
+						showFotter={false}
+						modalHeading={"Enter OTP 🔑"}
+						modalBody={
 							<div className="auth-content forgotpass-modal">
 								<p className="p1">Enter OTP sent to your email address</p>
 								<form onSubmit={this.handleotpsubmit}>
-								<div className="input-group">
-									<input
-									type="text"
-									id="userotp"
-									className="inputFeild auth-input"
-									required
-									onChange={this.handleInputChange}
-									/>
-									<label htmlFor="userotp" className="inputLabel">
-									OTP
-									</label>
-								</div>
-								<button
-									type="submit"
-									className="btn-primary auth-btn modalBtn"
-								>
-									Verify
-								</button>
-								<p
-									onClick={() => this.handleModalToggle("close")}
-									className="highlight-text baktologin"
-								>
-									<img src={left_ic} alt="left arrow icon" className="icon"/> Back to Login
-								</p>
+									<div className="input-group">
+										<input
+											type="text"
+											id="userotp"
+											className="inputFeild auth-input"
+											required
+											onChange={this.handleInputChange}
+										/>
+										<label htmlFor="userotp" className="inputLabel">
+											OTP
+										</label>
+									</div>
+									<button
+										type="submit"
+										className="btn-primary auth-btn modalBtn"
+									>
+										Verify
+									</button>
+									<p
+										onClick={() => this.handleModalToggle("close")}
+										className="highlight-text baktologin"
+									>
+										<img src={left_ic} alt="left arrow icon" className="icon" /> Back to Login
+									</p>
 								</form>
 							</div>
-							}
-						/>
-						)}
+						}
+					/>
+				)}
 
-						{/* New password MOdal*/}
-						{isnewPasswordModal && (
-						<Modal
-							onClose={() => this.handlenewpasswordModalToggle("close")}
-							onDecline={() => this.handlenewpasswordModalToggle("decline")}
-							onAccept={() => this.handlenewpasswordModalToggle("accept")}
-							// showDeclinebtn={false}
-							// acceptbtnname={'Accept'}
-							showFotter={false}
-							modalHeading={"Enter New Password 🔐"}
-							modalBody={
+				{/* New password MOdal*/}
+				{isnewPasswordModal && (
+					<Modal
+						onClose={() => this.handlenewpasswordModalToggle("close")}
+						onDecline={() => this.handlenewpasswordModalToggle("decline")}
+						onAccept={() => this.handlenewpasswordModalToggle("accept")}
+						// showDeclinebtn={false}
+						// acceptbtnname={'Accept'}
+						showFotter={false}
+						modalHeading={"Enter New Password 🔐"}
+						modalBody={
 							<div className="auth-content forgotpass-modal">
 								<p className="p1">Enter New Password</p>
 								<form onSubmit={this.handleResetPassword}>
-								<div className="input-group">
-									<input
-									type="text"
-									id="newpassword"
-									className="inputFeild auth-input"
-									required
-									onChange={this.handleInputChange}
-									/>
-									<label htmlFor="newpassword" className="inputLabel">
-									New Password
-									</label>
-								</div>
-								<div className="input-group">
-									<input
-									type="text"
-									id="confirmpassword"
-									className="inputFeild auth-input"
-									required
-									onChange={this.handleInputChange}
-									/>
-									<label htmlFor="confirmpassword" className="inputLabel">
-									Confirm Password
-									</label>
-								</div>
-								<button
-									type="submit"
-									className="btn-primary auth-btn modalBtn"
-								>
-									Reset Password
-								</button>
-								<p
-									onClick={() => this.handleModalToggle("close")}
-									className="highlight-text baktologin"
-								>
-									<img src={left_ic} alt="left arrow icon" className="icon"/> Back to Login
-								</p>
+									<div className="input-group">
+										<input
+											type="text"
+											id="newpassword"
+											className="inputFeild auth-input"
+											required
+											onChange={this.handleInputChange}
+										/>
+										<label htmlFor="newpassword" className="inputLabel">
+											New Password
+										</label>
+									</div>
+									<div className="input-group">
+										<input
+											type="text"
+											id="confirmpassword"
+											className="inputFeild auth-input"
+											required
+											onChange={this.handleInputChange}
+										/>
+										<label htmlFor="confirmpassword" className="inputLabel">
+											Confirm Password
+										</label>
+									</div>
+									<button
+										type="submit"
+										className="btn-primary auth-btn modalBtn"
+									>
+										Reset Password
+									</button>
+									<p
+										onClick={() => this.handleModalToggle("close")}
+										className="highlight-text baktologin"
+									>
+										<img src={left_ic} alt="left arrow icon" className="icon" /> Back to Login
+									</p>
 								</form>
 							</div>
-							}
-						/>
-						)}
+						}
+					/>
+				)}
+
 				<div id="auth">
 					<div className="auth-bg-top"></div>
 					<div className="auth-bg-bottom"></div>
