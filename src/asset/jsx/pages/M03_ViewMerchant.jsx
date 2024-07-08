@@ -100,14 +100,36 @@ class ViewMerchant extends Component {
   }
 
   fetchSignupKey = async () => {
-    const backendURL = process.env.REACT_APP_BACKEND_URL
-    const {companyName} = this.state;
-    const response = await fetch(`${backendURL}/viewclient?company_name=${companyName}`);
-    const data = await response.json();
-    this.setState({ signupKey: data.signupKey });
-    console.log(data.signupKey);
-  };
+    const backendURL = process.env.REACT_APP_BACKEND_URL;
+    const { role, companyName } = this.state;
 
+    const company_name = role === "merchant" ? companyName : this.state.company_name;
+  
+    try {
+      const response = await fetch(`${backendURL}/viewclient?company_name=${company_name}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${this.state.token}`,
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      this.setState({ signupKey: data.signupKey });
+      console.log(data.signupKey);
+  
+    } catch (error) {
+      this.setState({
+        errorMessage: `Error fetching signup key: ${error.message}`,
+        messageType: "fail",
+      });
+    }
+  };
+  
   componentDidMount() {
     const { company_name: stateCompanyName, companyName, role } = this.state;
 
@@ -118,7 +140,7 @@ class ViewMerchant extends Component {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
     this.fetchSignupKey();
     this.fetchData(
-      `${backendURL}/viewclient?company_name=${companyName}`,
+      `${backendURL}/viewclient?company_name=${company_name}`,
       "overviewData",
       (data) => {
         // Ensure data exists before accessing properties
@@ -179,7 +201,6 @@ class ViewMerchant extends Component {
       `${backendURL}/viewclient?company_name=${company_name}`,
       "overviewData",
       (data) => {
-        // Ensure data exists before accessing properties
         if (data) {
           this.setState({
             overviewData: data,

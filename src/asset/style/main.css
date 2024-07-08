@@ -2377,6 +2377,28 @@ td {
 	justify-content: flex-start;
 }
 
+.search-status-div{
+   margin-right: 36rem;
+   margin-bottom: -3px;
+}
+
+.search-status-div label{
+ margin:0 -2px;
+}
+
+.date-input-mrchnt-div{
+   width: 340px !important;
+}
+
+.txn-monitoring-mrcnt-btn-div{
+	margin-top: -60px;
+	margin-left: 120px;
+}
+
+.id-input-mrchnt-div{
+	width: 356px !important;
+}
+
 .id-label {
 	font-weight: 550;
 	margin-bottom: 5px;
@@ -2385,6 +2407,10 @@ td {
 	height: 30%;
 	text-wrap: nowrap;
 	width: fit-content;
+}
+
+.card-type{
+	margin-left: 10px;
 }
 
 .filled-id-label {
@@ -2639,31 +2665,37 @@ td {
 	height: 15px;
 }
 
-.total-amount-row td {
-	padding: 10px !important;
+.total-amount-row td{
+	padding:10px !important;
 	font-size: 13px;
 }
-
-.txn-amount-blank {
-	border-bottom: none !important;
+  
+.txn-amount-blank{
+border-bottom: none !important;
 }
 
-.txn-amount-head {
+ .txn-amount-head {
+	/* font-weight: 530; */
 	text-align: left !important;
-}
+  }
 
-.txn-amount-value {
+  .txn-amount-value {
+	/* font-weight: 530; */
 	text-align: right !important;
-}
+  }
 
-.txn-search-table-Footer {
+.txn-search-table-Footer{
 	height: 50px;
 }
 
-.id-input-div div {
+.id-input-div div{
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+}
+
+.todate-div{
+	margin-left: 20px;
 }
 
 .Transaction-monitoring-modal {
@@ -2672,19 +2704,19 @@ td {
 	padding: 10px;
 	border-radius: 3px;
 	width: 100%;
-	max-width: 90%;
+	max-width: 90%; 
 	overflow-y: auto;
 	border: 1px solid var(--border-gray);
 	z-index: 999;
 	justify-content: left;
 	margin-left: 15px;
-}
-
-.Transaction-monitoring-modal p {
-	white-space: pre-wrap;
+  }
+  
+  .Transaction-monitoring-modal p {
+	white-space: pre-wrap; 
 	font-size: 14px;
 	line-height: 1.6;
-}
+  }
 
 /* ..........................................search window ............................................................. */
 /* .search-window-overlay {
@@ -4946,15 +4978,17 @@ hr {
 }
 
 .compare-report-second-row {
-	height: 80vh;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	/* height: 60vh !important; */
+	overflow: hidden;
 }
 
 .report-preview {
 	width: 50%;
 	padding: 0;
+	
 }
 
 .preview-table {
@@ -4962,11 +4996,9 @@ hr {
 	overflow-y: auto;
 }
 
-/* .........Compare.......... */
-
 .trans-settle-view{
 	width: 35%;
-	height: 55%;
+	height: fit-content;
 }
 
 .compare-line {
@@ -4982,12 +5014,11 @@ hr {
 }
 
 .header-container span{
-	margin: 5px 0;
+	margin: 8px 5px;
 }
 
 .left-div{
 	display: grid;
-	margin: 10px 0;
 }
 
 .right-div{
@@ -5011,6 +5042,10 @@ hr {
 	gap: 5px;
 }
 
+.imprt-exprt-div div{
+  cursor: pointer;
+}
+
 .settle-btns{
 	display: flex;
 	align-items: center;
@@ -5026,8 +5061,6 @@ hr {
 	font-size: 13px;
 	height: 150px;
 }
-
-/* / Compare Reports / */
 
 .upload-row {
 display: flex;
@@ -5053,6 +5086,7 @@ justify-content: space-between;
 .report-preview {
 width: 50%;
 padding: 0;
+/* margin-bottom: -40px; */
 }
 
 .preview-table {
@@ -5065,15 +5099,25 @@ width: 100%;
 font-size: 13px;
 }
 
-.preview-totals div {
-display: flex;
-align-items: center;
-justify-content: space-between;
+.preview-totals{
+  position: sticky;
+  bottom: -3px;
+  background-color:var(--white);
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  width: 100% !important;
+  /* box-shadow: 0px -1px 5px rgba(0, 0, 0, 0.2); */
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
 }
 
-.show-mismatches {
-/* / background-color: #16b1ff62; / */
-}
+.preview-totals div {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ gap: 5px;
+ }
 
 .mismatches-head {
 display: flex;
@@ -5106,8 +5150,25 @@ color: var(--primary);
 border-bottom: 1px solid var(--primary-dark);
 }
 
-.date-section{
+.date-section {
 	display: flex;
-	align-items: center;
-	gap: 0 5px;
+	gap: 15px;
+  }
+
+.remove-file{
+	position: absolute;
+	cursor: pointer;
+	margin-left: 5px;
+	margin-top: 3px;
+}
+
+.head{
+  position: relative;
+  padding: 5px 15px;
+  color: var(--light-text);
+  text-align: center;
+}
+
+.head h4{
+	font-size: 22px;
 }
