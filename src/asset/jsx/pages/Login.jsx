@@ -82,13 +82,8 @@ class Login extends Component {
 					const token = this.getCookie('token');
 					console.log("token in login", token)
 					this.setState({ userLogged: true });
-					const startTime = Date.now();
-			
-					localStorage.setItem('login_time', startTime.toString());
-			
-				}  else {
-					this.setState({ errorMessage: "Token not genrated",messageType:"fail"});
-
+				} else {
+					this.setState({ errorMessage: "Token not genrated", messageType: "fail" });
 				}
 			} else {
 				this.setState({ errorMessage: "Wrong Username & Password", messageType: "fail" });

@@ -1133,3 +1133,19 @@ export function Export(props) {
     </svg>
   );
 }
+
+export function Bin(props) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"    
+      {...props}
+    >
+      <path
+       d="M17 4h5v2h-2v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6H2V4h5V2h10zM9 9v8h2V9zm4 0v8h2V9z"
+      />
+    </svg>
+  );
+}

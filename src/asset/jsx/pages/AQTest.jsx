@@ -7,6 +7,12 @@ import Sidebar from "../components/Sidebar";
 import cardimage from "../../media/image/credit-card.png";
 import loackicon from "../../media/image/padlock.png";
 import Loader from "../../media/image/Loader.gif";
+import Success from "../../media/image/success.gif"
+import Failed from "../../media/image/Close.gif"
+import AQResult from "../pages/AQResult";
+
+// import { LeftSign } from '../../media/icon/SVGicons';
+import { LeftArrow } from '../../media/icon/SVGicons';
 
 export class AQTest extends Component {
     constructor(props) {
@@ -14,17 +20,17 @@ export class AQTest extends Component {
         this.state = {
             sidebaropen: true,
             errorMessage: "",
-            userName: this.getCookie('name'),
-			token: this.getCookie("token"),
-			userRole: this.getCookie("role"),
+            token: localStorage.getItem("token"),
+            userName: localStorage.getItem("name"),
+            userRole: localStorage.getItem("role"),
             billingName: "",
             billingEmail: "",
             billingPhoneNumber: "",
             amount: "",
             selectedCurrency: "USD",
             proceedClicked: false,
-            
             selectedCard: 'Visa',
+
             cardHolderName: "",
             cardNumder: "",
             expiryDate: "",
@@ -35,14 +41,32 @@ export class AQTest extends Component {
             orderNo: "", 
         };
     }
-
-    getCookie = (name) => {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-        return null;
-    }
   
+    extractOrderNoFromURL() {
+        const currentPath = window.location.pathname;
+        const orderNo = currentPath.split("/acquirertestingenv/")[1];
+        return orderNo;
+    }
+
+    componentDidMount() {
+        const token = localStorage.getItem('token');
+        const userName = localStorage.getItem('company_name'); // Assuming you store 'userName' during login
+        const userRole = localStorage.getItem('role'); // Assuming you store 'userRole' during login
+    
+        console.log("Loaded cookies data:", { token, userName, userRole });
+    
+        if (token && userName && userRole) {
+            this.setState({
+                token: token,
+                userName: userName,
+                userRole: userRole
+            });
+        }
+
+        if (this.state.orderNo) {
+            this.fetchData();
+        }
+    }
 
     fetchData = async () => {
         this.setState({ isLoading: true, error: null });
@@ -110,13 +134,14 @@ export class AQTest extends Component {
             currency: selectedCurrency,
             transactionID: transaction_id,
             orderNo: order_number,
-            backURL: 'https://www.centpays.online/paymentresult',
+            backURL: 'https://www.centpays.online/acquirertestingenv',
             requestMode: 'Card',
             cardnumber: cardNumder,
             cardExpire: expiryDate,
             cardCVV: cvvno
         };
 
+        console.log(payload);
         const headers = {
             'Content-Type': 'application/json',
         };
@@ -133,6 +158,7 @@ export class AQTest extends Component {
             }
 
             const data = await response.json();
+            console.log("data",data)
             if (data.redirectUrl) {
 
                 window.location.href = data.redirectUrl; 
@@ -166,6 +192,8 @@ export class AQTest extends Component {
         const { billingName, billingEmail, billingPhoneNumber, amount, selectedCurrency,
 
             proceedClicked, cardHolderName, cardNumder, expiryDate, cvvno, selectedCard, userName, userRole, status, isLoader } = this.state;
+
+        if (status === " ") {
             return (
                 <>
                     <Header />
@@ -333,8 +361,12 @@ export class AQTest extends Component {
                     </div>
                 </>
             );
+        } else if (this.state.orderNo) {
+            return (
+                <AQResult orderNo={this.state.orderNo} />
+            );
         }
     }
-
+}
 
 export default AQTest

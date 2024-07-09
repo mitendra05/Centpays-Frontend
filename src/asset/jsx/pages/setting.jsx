@@ -23,11 +23,7 @@ export class setting extends Component {
     }
 
     componentDidMount() {
-        const token = this.getCookie('token');
-		if (!token) {
-			window.location.href = '/';
-			return;
-		}
+
     }
 
     render() {
