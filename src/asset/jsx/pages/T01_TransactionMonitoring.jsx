@@ -18,6 +18,7 @@ class TransactionMonitoring extends Component {
       sidebaropen: true,
       token: this.getCookie('token'),
       userRole: this.getCookie('role'),
+      merchantName: this.getCookie('company_name'),
       showMoreOptions: false,
       selectedRowToView: null,
       errorMessage: "",
@@ -77,7 +78,11 @@ class TransactionMonitoring extends Component {
     this.fetchData(`${backendURL}/listofcountries`, "countryList");
     this.fetchData(`${backendURL}/acquirerlist`, "paymentgatewayList");
     window.addEventListener("click", this.handleClickOutside);
+    if (this.state.userRole==="merchant") {
+			this.handleSearch();
+		}
   }
+
   componentWillUnmount() {
     window.removeEventListener("click", this.handleClickOutside);
   }
@@ -165,11 +170,11 @@ class TransactionMonitoring extends Component {
 
   handleSearch = async () => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
-    const { token } = this.state;
+    const { token,userRole, merchantName} = this.state;
     const searchedData = {
       searchIds: this.state.searchIds,
       status: this.state.status,
-      merchant: this.state.merchant,
+      merchant: userRole === 'merchant' ? merchantName : this.state.merchant,
       fromDate: this.state.fromDate,
       toDate: this.state.toDate,
       mid: this.state.mid,
