@@ -341,6 +341,10 @@ class ViewMerchant extends Component {
     }
   };
 
+  handleCancelClick = () => {
+    this.setState({ isEditing: false });
+  };
+
   formatValue = (val) => {
     return `${(val / 1000).toFixed(1)}k`;
   };
@@ -1269,6 +1273,14 @@ class ViewMerchant extends Component {
                         >
                           {isEditing ? "Update" : "Edit"}
                         </button>
+                        {isEditing && (
+                          <button
+                            className="btn-secondary"
+                            onClick={this.handleCancelClick}
+                          >
+                            Cancel
+                          </button>
+                        )}
                       </div>
                     </div>
                   )}
