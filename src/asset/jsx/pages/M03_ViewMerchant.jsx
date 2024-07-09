@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import MerchantForm from "../components/Merchant_Form";
 import MessageBox from "../components/Message_box";
+// import ApprovalRatioChart from "../components/ApprovalRatioChart";
 
 // SVG Icons
 import {
@@ -42,13 +43,13 @@ class ViewMerchant extends Component {
     super(props);
     this.state = {
       sidebaropen: true,
-      token: this.getCookie('token'),
-      userRole: this.getCookie('role'),
-      companyName: this.getCookie('company_name'),
+      token: this.getCookie("token"),
+      userRole: this.getCookie("role"),
+      companyName: this.getCookie("company_name"),
       company_name: this.extractENameFromURL(),
       overviewData: [],
       ratesData: [],
-      // approvalData: [],
+      approvalData: {},
       volumeData: [],
       showApprovalRatio: true,
       showTotalVolume: false,
@@ -91,47 +92,51 @@ class ViewMerchant extends Component {
     return companyName;
   }
 
-  fetchSignupKey = async () => {
-    const backendURL = process.env.REACT_APP_BACKEND_URL;
-    const { company_name: stateCompanyName, companyName, userRole } = this.state;
-    const company_name =
-      userRole === "merchant" ? companyName : stateCompanyName;
-
-    const response = await fetch(
-      `${backendURL}/viewclient?company_name=${company_name}`
-    );
-    const data = await response.json();
-    this.setState({ signupKey: data.signupKey });
-    console.log(data.signupKey);
-  };
-
   getCookie = (name) => {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
+    if (parts.length === 2) return parts.pop().split(";").shift();
     return null;
-  }
+  };
 
-  componentDidMount() {
-    this.interval = setInterval(() => {
-      if (this.state.showApprovalRatio) {
-        this.handleNextArrowclick("showTotalVolume");
-      } else if (this.state.showTotalVolume) {
-        this.handleNextArrowclick("showSettledVolume");
-      } else if (this.state.showSettledVolume) {
-        this.handleNextArrowclick("showApprovalRatio");
-      }
-    }, 2000);
-    const token = this.getCookie('token');
-
-    if (!token) {
-      window.location.href = '/';
-      return;
-    }
-    const { company_name: stateCompanyName, userRole, companyName } = this.state;
+  fetchSignupKey = async () => {
+    const backendURL = process.env.REACT_APP_BACKEND_URL;
+    const { role, companyName } = this.state;
 
     const company_name =
-      userRole === "merchant" ? companyName : stateCompanyName;
+      role === "merchant" ? companyName : this.state.company_name;
+
+    try {
+      const response = await fetch(
+        `${backendURL}/viewclient?company_name=${company_name}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${this.state.token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      this.setState({ signupKey: data.signupKey });
+      console.log(data.signupKey);
+    } catch (error) {
+      this.setState({
+        errorMessage: `Error fetching signup key: ${error.message}`,
+        messageType: "fail",
+      });
+    }
+  };
+
+  componentDidMount() {
+    const { company_name: stateCompanyName, companyName, role } = this.state;
+
+    const company_name = role === "merchant" ? companyName : stateCompanyName;
 
     let date = new Date().toISOString().split("T")[0];
     const backendURL = process.env.REACT_APP_BACKEND_URL;
@@ -140,6 +145,7 @@ class ViewMerchant extends Component {
       `${backendURL}/viewclient?company_name=${company_name}`,
       "overviewData",
       (data) => {
+        // Ensure data exists before accessing properties
         if (data) {
           this.setState({
             overviewData: data,
@@ -152,15 +158,15 @@ class ViewMerchant extends Component {
       }
     );
 
+    this.fetchData(
+      `${backendURL}/approvalratio?merchant=${company_name}&fromDate=${date}&toDate=${date}`,
+      "approvalData"
+    );
 
     this.fetchData(
       `${backendURL}/volumesum?company_name=${company_name}`,
       "volumeData"
     );
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.interval);
   }
 
   fetchData = async (url, dataVariable, callback = null) => {
@@ -242,10 +248,10 @@ class ViewMerchant extends Component {
 
   fetchRatesData = async () => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
-    const { token, companyName, userRole } = this.state;
+    const { token, role, companyName } = this.state;
 
     const company_name =
-      userRole === "merchant" ? companyName : this.state.company_name;
+      role === "merchant" ? companyName : this.state.company_name;
 
     try {
       const response = await fetch(
@@ -605,10 +611,11 @@ class ViewMerchant extends Component {
           <Header />
           <Sidebar />
           <div
-            className={`main-screen ${this.state.sidebaropen
-              ? "collapsed-main-screen"
-              : "expanded-main-screen"
-              }  `}
+            className={`main-screen ${
+              this.state.sidebaropen
+                ? "collapsed-main-screen"
+                : "expanded-main-screen"
+            }  `}
           >
             <div className="view-merchant-container">
               <div className="row-cards left-section">
@@ -616,16 +623,19 @@ class ViewMerchant extends Component {
                   className="icon2"
                   onClick={this.handleBackButtonClick}
                 />
-                {/* <div className="left-section-top">
+                <div className="left-section-top">
                   <div className="profile-image">
                     <img src={profile} alt="user profile"></img>
                   </div>
-                  <h5>{this.state.company_name.split(/[^a-zA-Z\s]+/).join(' ')}</h5>
+                  <h5>
+                    {this.state.company_name.split(/[^a-zA-Z\s]+/).join(" ")}
+                  </h5>
                   <div
-                    className={`status-div ${statusText === "Active"
+                    className={`status-div ${
+                      statusText === "Active"
                         ? "success-status"
                         : "failed-status"
-                      }`}
+                    }`}
                   >
                     <p>{statusText}</p>
                   </div>
@@ -645,7 +655,17 @@ class ViewMerchant extends Component {
                           </div>
                         </div>
                         <div>
-                          <h5>99%</h5>
+                          <h5>
+                            {this.state.approvalData &&
+                            this.state.approvalData.approvalRatio !== undefined
+                              ? parseFloat(
+                                  this.state.approvalData.approvalRatio.toFixed(
+                                    2
+                                  )
+                                )
+                              : "N/A"}%
+                          </h5>
+
                           <p className="p2">Approval Ratio</p>
                         </div>
                       </div>
@@ -723,93 +743,7 @@ class ViewMerchant extends Component {
                       />
                     </div>
                   )}
-                </div> */}
-                <div className="left-section-top">
-                  <div className="profile-image">
-                    <img src={profile} alt="user profile" />
-                  </div>
-                  <h5>{this.state.company_name.split(/[^a-zA-Z\s]+/).join(' ')}</h5>
-                  <div
-                    className={`status-div ${statusText === "Active" ? "success-status" : "failed-status"}`}
-                  >
-                    <p>{statusText}</p>
-                  </div>
-                  {this.state.showApprovalRatio && (
-                    <div className="approve-volume-container">
-                      <LeftSign
-                        className="icon2"
-                        onClick={() => this.handleBackArrowclick("showApprovalRatio")}
-                      ></LeftSign>
-                      <div className="approval-div-section animate-slide">
-                        <div>
-                          <div className="creditcard-div">
-                            <ApprovalRatio className="creditcard-img primary-color-icon" />
-                          </div>
-                        </div>
-                        <div>
-                          <h5>99%</h5>
-                          <p className="p2">Approval Ratio</p>
-                        </div>
-                      </div>
-                      <RightSign
-                        className="icon2"
-                        onClick={() => this.handleNextArrowclick("showApprovalRatio")}
-                      />
-                    </div>
-                  )}
-                  {this.state.showTotalVolume && (
-                    <div className="approve-volume-container">
-                      <LeftSign
-                        className="icon2"
-                        onClick={() => this.handleBackArrowclick("showTotalVolume")}
-                      />
-                      <div className="approval-div-section animate-slide">
-                        <div>
-                          <div className="creditcard-div">
-                            <CreaditCard className="creditcard-img primary-color-icon" />
-                          </div>
-                        </div>
-                        <div>
-                          <h5>
-                            ${this.formatValue(this.state.volumeData["totalVolume"])}
-                          </h5>
-                          <p className="p2">Total Volume</p>
-                        </div>
-                      </div>
-                      <RightSign
-                        className="icon2"
-                        onClick={() => this.handleNextArrowclick("showTotalVolume")}
-                      />
-                    </div>
-                  )}
-                  {this.state.showSettledVolume && (
-                    <div className="approve-volume-container">
-                      <LeftSign
-                        className="icon2"
-                        onClick={() => this.handleBackArrowclick("showSettledVolume")}
-                      />
-                      <div className="approval-div-section animate-slide">
-                        <div>
-                          <div className="creditcard-div">
-                            <DollarCircle className="creditcard-img primary-color-icon" />
-                          </div>
-                        </div>
-                        <div>
-                          <h5>
-                            ${this.formatValue(this.state.volumeData["settledVolume"])}
-                          </h5>
-                          <p className="p2">Settled Volume</p>
-                        </div>
-                      </div>
-                      <RightSign
-                        className="icon2"
-                        onClick={() => this.handleNextArrowclick("showSettledVolume")}
-                      />
-                    </div>
-                  )}
                 </div>
-
-
                 <div className="left-section-middle">
                   <p>Details</p>
                   <div className="create-settelments-horizontal-line"></div>
@@ -818,7 +752,7 @@ class ViewMerchant extends Component {
                     <ul>
                       <li>
                         <div className="p2 icons-div">
-                          <User className="merchant-icon" />
+                          <User className="merchant-icon" width="20" height="20"/>
                           Username:&nbsp;
                           <p>{overviewData.username}</p>
                         </div>
@@ -846,7 +780,7 @@ class ViewMerchant extends Component {
                       </li>
                     </ul>
 
-                    <p className="p2">CONTACTS</p>
+                    <p>CONTACTS</p>
                     <ul>
                       <li>
                         <div className="p2 icons-div">
@@ -881,8 +815,9 @@ class ViewMerchant extends Component {
                     Edit
                   </button>
                   <button
-                    className={`btn-secondary ${statusText === "Active" ? "btn-suspend" : "btn-activate"
-                      }`}
+                    className={`btn-secondary ${
+                      statusText === "Active" ? "btn-suspend" : "btn-activate"
+                    }`}
                     onClick={this.handleStatusChange}
                   >
                     {buttonLabel}
@@ -1161,7 +1096,8 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.chargeback_fee
+                                  `${
+                                    ratesData.chargeback_fee
                                   } ${getCurrencySymbol(ratesData.currency)}`
                                 )}
                               </td>
@@ -1300,7 +1236,8 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.annual_maintenance_fee
+                                  `${
+                                    ratesData.annual_maintenance_fee
                                   } ${getCurrencySymbol(ratesData.currency)}`
                                 )}
                               </td>
@@ -1357,8 +1294,9 @@ class ViewMerchant extends Component {
                           <p className="p2">Root User Sign Up Key</p>
                           <div className="input-container">
                             <div
-                              className={`icon-container copy-icon ${copied.signupKey ? "disabled" : ""
-                                }`}
+                              className={`icon-container copy-icon ${
+                                copied.signupKey ? "disabled" : ""
+                              }`}
                               onClick={() =>
                                 !copied.signupKey &&
                                 this.handleCopy("userSignUpKey", signupKey)
@@ -1536,10 +1474,11 @@ class ViewMerchant extends Component {
           <Header />
           <Sidebar />
           <div
-            className={`main-screen ${this.state.sidebaropen
-              ? "collapsed-main-screen"
-              : "expanded-main-screen"
-              }  `}
+            className={`main-screen ${
+              this.state.sidebaropen
+                ? "collapsed-main-screen"
+                : "expanded-main-screen"
+            }  `}
           >
             <div className="view-merchant-container">
               <div className="row-cards left-section">
@@ -1553,10 +1492,11 @@ class ViewMerchant extends Component {
                   </div>
                   <h5>{this.state.company_name}</h5>
                   <div
-                    className={`status-div ${statusText === "Active"
-                      ? "success-status"
-                      : "failed-status"
-                      }`}
+                    className={`status-div ${
+                      statusText === "Active"
+                        ? "success-status"
+                        : "failed-status"
+                    }`}
                   >
                     <p>{statusText}</p>
                   </div>
@@ -1576,7 +1516,16 @@ class ViewMerchant extends Component {
                           </div>
                         </div>
                         <div>
-                          <h5>99%</h5>
+                        <h5>
+                            {this.state.approvalData &&
+                            this.state.approvalData.approvalRatio !== undefined
+                              ? parseFloat(
+                                  this.state.approvalData.approvalRatio.toFixed(
+                                    2
+                                  )
+                                )
+                              : "N/A"}%
+                          </h5>
                           <p className="p2">Approval Ratio</p>
                         </div>
                       </div>
@@ -1718,20 +1667,21 @@ class ViewMerchant extends Component {
                   </div>
                 </div>
                 <div className="left-section-bottom">
-                  <button
+                  {/* <button
                     className="btn-primary"
                     onClick={() => this.handleAddMerchant()}
                     disabled={isSuspended}
                   >
                     Edit
-                  </button>
-                  <button
-                    className={`btn-secondary ${statusText === "Active" ? "btn-suspend" : "btn-activate"
-                      }`}
+                  </button> */}
+                  {/* <button
+                    className={`btn-secondary ${
+                      statusText === "Active" ? "btn-suspend" : "btn-activate"
+                    }`}
                     onClick={this.handleStatusChange}
                   >
                     {buttonLabel}
-                  </button>
+                  </button> */}
                 </div>
               </div>
               <div className="right-section">
@@ -2006,7 +1956,8 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.chargeback_fee
+                                  `${
+                                    ratesData.chargeback_fee
                                   } ${getCurrencySymbol(ratesData.currency)}`
                                 )}
                               </td>
@@ -2145,7 +2096,8 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.annual_maintenance_fee
+                                  `${
+                                    ratesData.annual_maintenance_fee
                                   } ${getCurrencySymbol(ratesData.currency)}`
                                 )}
                               </td>
@@ -2169,14 +2121,14 @@ class ViewMerchant extends Component {
                         </table>
                       </div>
                       <div className="rates-table-button-container">
-                        <button
+                        {/* <button
                           className="btn-primary"
                           onClick={
                             isEditing ? this.handleSave : this.handleEditClick
                           }
                         >
                           {isEditing ? "Update" : "Edit"}
-                        </button>
+                        </button> */}
                       </div>
                     </div>
                   )}
@@ -2202,8 +2154,9 @@ class ViewMerchant extends Component {
                           <p className="p2">Root User Sign Up Key</p>
                           <div className="input-container">
                             <div
-                              className={`icon-container copy-icon ${copied.signupKey ? "disabled" : ""
-                                }`}
+                              className={`icon-container copy-icon ${
+                                copied.signupKey ? "disabled" : ""
+                              }`}
                               onClick={() =>
                                 !copied.signupKey &&
                                 this.handleCopy("userSignUpKey", signupKey)

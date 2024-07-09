@@ -3,16 +3,16 @@ import * as XLSX from "xlsx";
 
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
-import Modal from "../components/Modal";
+import MessageBox from "../components/Message_box";
 
-import { Folder, Excel } from "../../media/icon/SVGicons";
+import { Folder, Excel, Import, Export } from "../../media/icon/SVGicons";
 
 class Compare extends Component {
   constructor(props) {
     super(props);
     this.state = {
       sidebaropen: true,
-      token: this.getCookie('token'),
+      token: this.getCookie("token"),
       AQlist: [],
       searchedResult: [],
       paymentgateway: "",
@@ -23,30 +23,21 @@ class Compare extends Component {
       excelData: [],
       excelTotals: {},
       searchedTotals: {},
-      idsInExcelNotInSearched: [],
-      idsInSearchedNotInExcel: [],
-      mismatchedDetails: [],
-      isMismatchesModal: false,
-      overallTab: true,
-      bankmissingTab: false,
-      centpaysmissingTab: false,
-      detailsmismatchTab: false,
+      mismatches: {},
+      mismatchModal: false,
+      errorMessage: "",
+      messageType: "",
     };
   }
 
   getCookie = (name) => {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
+    if (parts.length === 2) return parts.pop().split(";").shift();
     return null;
-  }
+  };
 
   componentDidMount() {
-    const token = this.getCookie('token');
-		if (!token) {
-			window.location.href = '/';
-			return;
-		}
     this.fetchAcquirerList();
   }
 
@@ -84,14 +75,16 @@ class Compare extends Component {
 
   handleSearch = async () => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
-    const { token } = this.state;
+    const { token, fromDate, toDate, paymentgateway } = this.state;
+
     const searchedData = {
-      fromDate: this.state.fromDate,
-      toDate: this.state.toDate,
-      paymentgateway: this.state.paymentgateway,
+      fromDate,
+      toDate,
+      paymentgateway,
     };
+
     try {
-      const response = await fetch(`http://localhost:3000/comparereport`, {
+      const response = await fetch(`${backendURL}/comparereport`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -99,19 +92,39 @@ class Compare extends Component {
         },
         body: JSON.stringify(searchedData),
       });
-      if (response.ok) {
-        const data = await response.json();
-        this.setState({ searchedResult: data });
-        const result = this.calculateSearchedTotals(data);
-        this.setState({ searchedTotals: result });
-        console.log(data);
-      } else {
-        this.setState({
-          errorMessage: "Error searching. Please try again later.",
-          messageType: "fail",
-        });
+
+      if (!response.ok) {
+        throw new Error("Error searching. Please try again later.");
       }
+
+      const data = await response.json();
+      console.log("Fetched data:", data);
+
+      if (!Array.isArray(data)) {
+        throw new Error("Invalid data format received.");
+      }
+
+      const totalAmount = data.reduce(
+        (sum, item) => sum + parseFloat(item.amount),
+        0
+      );
+      const countOfAmounts = data.length;
+
+      console.log(countOfAmounts);
+      this.setState(
+        {
+          searchedResult: data,
+          countOfAmounts,
+          totalAmount: totalAmount.toFixed(2),
+          errorMessage: null,
+          messageType: null,
+        },
+        () => {
+          this.findMismatches();
+        }
+      );
     } catch (error) {
+      console.error("Error fetching or processing data:", error);
       this.setState({
         errorMessage: "An unexpected error occurred. Please try again later.",
         messageType: "fail",
@@ -119,25 +132,56 @@ class Compare extends Component {
     }
   };
 
+  handleSettleData = async () => {
+    const backendURL = process.env.REACT_APP_BACKEND_URL;
+    const { token, unmatchedExcelData, unmatchedSelectedData } = this.state;
+  
+    try {
+      const settleDataExcel = unmatchedExcelData.map((data) => data.reference_id).join("");
+      const settleDataSelected = unmatchedSelectedData.map((data) => data.reference_id).join("");
+  
+      const payload = {
+        txnids: settleDataExcel + settleDataSelected,
+      };
+  
+      const response = await fetch(`${backendURL}/settledbybank`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Error response from backend:", errorText);
+        throw new Error("Error settling data. Please try again later.");
+      }
+  
+      const responseData = await response.json();
+      console.log("Settled data response:", responseData);
+  
+      this.setState({
+        errorMessage: "Data sent successfully!",
+        messageType: "success",
+      });
+    } catch (error) {
+      console.error("Error fetching or processing data:", error);
+      this.setState({
+        errorMessage: "An unexpected error occurred. Please try again later.",
+        messageType: "fail",
+      });
+    }
+  };
+  
+  
   handleClear = () => {
     this.setState({
       fromDate: "",
       toDate: "",
       paymentgateway: "",
       searchedResult: [],
-    });
-  };
-
-  handleMismatchesModalToggle = () => {
-    this.setState({ isMismatchesModal: !this.state.isMismatchesModal });
-  };
-
-  handleTabchanges = (tab) => {
-    this.setState({
-      overallTab: tab === "Overall",
-      bankmissingTab: tab === "Missing in Bank",
-      centpaysmissingTab: tab === "Missing in Centpays",
-      detailsmismatchTab: tab === "Mismatched Details",
     });
   };
 
@@ -149,34 +193,57 @@ class Compare extends Component {
       const firstSheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[firstSheetName];
       const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
       const columns = ["reference_id", "amount", "status"];
       const headers = json[0];
       const indices = columns.map((col) => headers.indexOf(col));
+
       const filteredData = json.map((row) =>
         indices.map((index, colIndex) => {
           let cell = row[index];
-          if (colIndex === 2) {
-            if (cell === "process_failed") cell = "Failed";
-            else if (cell === "processed") cell = "Success";
-          }
+          // if (colIndex === 2) {
+          //   if (cell === "process_failed") cell = "Failed";
+          //   else if (cell === "processed") cell = "Success";
+          // }
           return cell;
         })
       );
 
-      this.setState({ excelData: filteredData });
-      console.log(filteredData);
-      const result = this.calculateExcelTotals(filteredData);
-      this.setState({ excelTotals: result });
+      this.setState({ excelData: filteredData }, () => {
+        console.log("Excel Data:", this.state.excelData);
+      });
+
+      const excelTotals = this.calculateExcelTotals(filteredData);
+      this.setState({ excelTotals }, () => {
+        console.log("Excel Totals:", this.state.excelTotals);
+      });
+
+      this.setState(
+        { receivedAmount: excelTotals.totalAmount.toFixed(2) },
+        () => {
+          console.log("Received Amount:", this.state.receivedAmount);
+        }
+      );
     };
     reader.readAsArrayBuffer(file);
   };
 
-  calculateExcelTotals = (data) => {
-    const totalTransactions = data.length;
-    const totalAmount = data
-      .filter((item) => item[2] === "Success")
-      .reduce((sum, item) => sum + item[1], 0);
-    return { totalTransactions, totalAmount };
+  calculateExcelTotals = (filteredData) => {
+    let totalTransactions = 0;
+    let totalAmount = 0;
+
+    filteredData.slice(1).forEach((row) => {
+      const amount = parseFloat(row[1]);
+      if (!isNaN(amount)) {
+        totalTransactions += 1;
+        totalAmount += amount;
+      }
+    });
+
+    return {
+      totalTransactions,
+      totalAmount,
+    };
   };
 
   calculateSearchedTotals = (data) => {
@@ -189,192 +256,188 @@ class Compare extends Component {
 
   findMismatches = () => {
     const { excelData, searchedResult } = this.state;
-    if (excelData.length > 0 && searchedResult.length > 0) {
-      this.handleMismatchesModalToggle();
-      const excelDict = {};
-      excelData.slice(1).forEach((row) => {
-        excelDict[row[0]] = { amount: row[1], status: row[2] };
-      });
-
-      // Convert searchedResult to a dictionary for easy lookup
-      const searchedDict = {};
-      searchedResult.forEach((item) => {
-        searchedDict[item.txnid] = { amount: item.amount, status: item.Status };
-      });
-
-      // Initialize results
-      const idsInExcelNotInSearched = [];
-      const idsInSearchedNotInExcel = [];
-      const mismatchedDetails = [];
-
-      // Find ids present in excelData but not in searchedResult
-      for (const ref_id in excelDict) {
-        if (!searchedDict.hasOwnProperty(ref_id)) {
-          idsInExcelNotInSearched.push(ref_id);
-        }
-      }
-
-      // Find ids present in searchedResult but not in excelData
-      for (const txnid in searchedDict) {
-        if (!excelDict.hasOwnProperty(txnid)) {
-          idsInSearchedNotInExcel.push(txnid);
-        }
-      }
-
-      // Find ids that are present in both but with mismatched amount or status
-      for (const ref_id in excelDict) {
-        if (searchedDict.hasOwnProperty(ref_id)) {
-          const excelEntry = excelDict[ref_id];
-          const searchedEntry = searchedDict[ref_id];
-          if (
-            excelEntry.amount !== searchedEntry.amount ||
-            excelEntry.status !== searchedEntry.status
-          ) {
-            mismatchedDetails.push({
-              id: ref_id,
-              excel_amount: excelEntry.amount,
-              excel_status: excelEntry.status,
-              searched_amount: searchedEntry.amount,
-              searched_status: searchedEntry.status,
-            });
-          }
-        }
-      }
-
-      // Set the results in the state
-      this.setState({
-        idsInExcelNotInSearched,
-        idsInSearchedNotInExcel,
-        mismatchedDetails,
-      });
-    } else {
-      console.log("Data incomplete for mismatching");
+  
+    if (excelData.length === 0 || searchedResult.length === 0) {
+      return;
     }
+  
+    let totalSearchDataCount = searchedResult.length;
+    let matchDataCount = 0;
+  
+    const matchedData = [];
+    const unmatchedExcelData = [];
+    const unmatchedSelectedData = [];
+  
+    const searchedMap = {};
+    searchedResult.forEach((transaction) => {
+      searchedMap[transaction.txnid] = {
+        amount: parseFloat(transaction.amount),
+        status: transaction.Status === "Success" ? "Success" : "Failed",
+      };
+    });
+  
+    excelData.slice(1).forEach((excelTransaction) => {
+      const [reference_id, excelAmountStr, excelStatusRaw] = excelTransaction;
+      const excelAmount = parseFloat(excelAmountStr);
+      const excelStatus = excelStatusRaw === "Success" ? "Success" : "Failed";
+  
+      if (searchedMap[reference_id]) {
+        const searchedTransaction = searchedMap[reference_id];
+        const searchedAmount = searchedTransaction.amount;
+        const searchedStatus = searchedTransaction.status;
+  
+        if (excelAmount === searchedAmount && excelStatus === searchedStatus) {
+          matchedData.push({
+            reference_id,
+            amount: excelAmount,
+            status: excelStatus,
+          });
+          matchDataCount++;
+        } else {
+          unmatchedExcelData.push({
+            reference_id,
+            amount: excelAmount,
+            status: excelStatus,
+          });
+          unmatchedSelectedData.push({
+            reference_id,
+            amount: searchedAmount,
+            status: searchedStatus,
+          });
+        }
+        delete searchedMap[reference_id];
+      } else {
+        unmatchedExcelData.push({
+          reference_id,
+          amount: excelAmount,
+          status: excelStatus,
+        });
+      }
+    });
+  
+    
+    Object.keys(searchedMap).forEach((reference_id) => {
+      const searchedTransaction = searchedMap[reference_id];
+      unmatchedSelectedData.push({
+        reference_id,
+        amount: searchedTransaction.amount,
+        status: searchedTransaction.status,
+      });
+    });
+  
+   
+    let matchPercentage = (matchDataCount / totalSearchDataCount) * 100;
+    matchPercentage = matchPercentage.toFixed(2);
+  
+    let color;
+    let message;
+    if (matchPercentage >= 0 && matchPercentage <= 40) {
+      color = "var(--red-color)";
+      message = "Low match";
+    } else if (matchPercentage >= 41 && matchPercentage <= 60) {
+      color = "var(--orange-color)";
+      message = "Moderate match";
+    } else if (matchPercentage >= 61 && matchPercentage <= 80) {
+      color = "var(--blue-color)";
+      message = "Good match";
+    } else if (matchPercentage >= 81 && matchPercentage <= 99) {
+      color = "var(--purple-color)";
+      message = "High match ";
+    } else if (matchPercentage === "100.00") {
+      color = "var(--green-color)";
+      message = "Perfect match";
+    }
+  
+    this.setState({
+      matchedData,
+      unmatchedExcelData,
+      unmatchedSelectedData,
+      matchDataCount,
+      totalSearchDataCount,
+      matchPercentage,
+      color,
+      message,
+      mismatchModal: true,
+    });
   };
+  
+  closeModal = () => {
+    this.setState({ mismatchModal: false });
+  };
+
+  handleCopyReferenceIds = () => {
+    const { unmatchedExcelData, unmatchedSelectedData } = this.state;
+  
+    const excelReferenceIds = unmatchedExcelData.map((data) => data.reference_id).join("\n");
+    const selectedReferenceIds = unmatchedSelectedData.map((data) => data.reference_id).join("\n");
+    const allReferenceIds = `${excelReferenceIds}\n${selectedReferenceIds}`;
+  
+    navigator.clipboard
+      .writeText(allReferenceIds)
+      .then(() => {
+        this.setState({
+          errorMessage: "Copied!",
+          messageType: "success",
+        });
+      })
+      .catch((err) => {
+        console.error("Error copying IDs:", err);
+        this.setState({
+          errorMessage: "Error copying IDs!",
+          messageType: "fail",
+        });
+      });
+  };
+  
+  handleExcelReferenceIds = () => {
+    const { unmatchedExcelData, unmatchedSelectedData } = this.state;
+
+    const exportData = [
+      ...unmatchedExcelData.map((data, index) => ({
+        "S.NO.": index + 1,
+        "Reference Id": data.reference_id,
+        Amount: data.amount,
+        Status: data.status,
+      })),
+      ...unmatchedSelectedData.map((data, index) => ({
+        "S.NO.": unmatchedExcelData.length + index + 1,
+        "Reference Id": data.reference_id,
+        Amount: data.amount,
+        Status: data.status,
+      })),
+    ];
+  
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Mismatch Data");
+ 
+    XLSX.writeFile(workbook, "Mismatch_Data.xlsx");
+  };
+  
 
   render() {
     const {
       excelData,
       searchedResult,
-      idsInExcelNotInSearched,
-      idsInSearchedNotInExcel,
-      mismatchedDetails,
-      isMismatchesModal,
+      mismatches,
+      mismatchModal,
+      totalAmount,
+      receivedAmount,
+      errorMessage,
+      messageType,
     } = this.state;
-    console.log(
-      idsInExcelNotInSearched,
-      idsInSearchedNotInExcel,
-      mismatchedDetails
-    );
+    console.log(mismatches);
     return (
       <>
-        {isMismatchesModal && (
-          <Modal
-            onClose={() => this.handleMismatchesModalToggle()}
-            onDecline={() => this.handleMismatchesModalToggle()}
-            onAccept={() => this.handleMismatchesModalToggle()}
-            showDeclinebtn={false}
-            acceptbtnname={"Ok"}
-            showFotter={true}
-            modalHeading={"Find Mismatches ⁉️"}
-            modalBody={
-              <>
-                <div className="show-mismatches">
-                  <div className="mismatches-head">
-                    <p
-                      className={`${
-                        this.state.overallTab ? "selected-tab" : ""
-                      } `}
-                      onClick={() => this.handleTabchanges("Overall")}
-                    >
-                      Overall
-                    </p>
-                    <p
-                      className={`${
-                        this.state.bankmissingTab ? "selected-tab" : ""
-                      } `}
-                      onClick={() => this.handleTabchanges("Missing in Bank")}
-                    >
-                      Missing in Bank
-                    </p>
-                    <p
-                      className={`${
-                        this.state.centpaysmissingTab ? "selected-tab" : ""
-                      } `}
-                      onClick={() =>
-                        this.handleTabchanges("Missing in Centpays")
-                      }
-                    >
-                      Missing in Centpays
-                    </p>
-                    <p
-                      className={`${
-                        this.state.detailsmismatchTab ? "selected-tab" : ""
-                      } `}
-                      onClick={() =>
-                        this.handleTabchanges("Mismatched Details")
-                      }
-                    >
-                      Mismatched Details
-                    </p>
-                  </div>
-                  <div className="mismatches-body">
-                    {this.state.overallTab && (
-                      <div>
-                        <div className="mismatches-body-section">
-                          <p className="p2">Bank</p>
-                          <ul>
-                            <li className="mismatch-details-row">
-                              <p>No. of Transactions</p>
-                              <p>{this.state.excelTotals.totalTransactions}</p>
-                            </li>
-                            <li className="mismatch-details-row">
-                              <p>Approved Volume</p>
-                              <p>{this.state.excelTotals.totalAmount}</p>
-                            </li>
-                          </ul>
-                        </div>
-                        <div className="create-settelments-horizontal-line"></div>
-                        <div className="mismatches-body-section">
-                          <p className="p2">Centpays</p>
-                          <ul>
-                            <li className="mismatch-details-row">
-                              <p>No. of Transactions</p>
-                              <p>
-                                {this.state.searchedTotals.totalTransactions}
-                              </p>
-                            </li>
-                            <li className="mismatch-details-row">
-                              <p>Approved Volume</p>
-                              <p>{this.state.searchedTotals.totalAmount}</p>
-                            </li>
-                          </ul>
-                        </div>
-                        <div className="create-settelments-horizontal-line"></div>
-                        <div className="mismatches-body-section">
-                          <ul>
-                            <li className="mismatch-details-row">
-                              <p>Ids mismatched from Bank</p>
-                              <p>{idsInExcelNotInSearched.length}</p>
-                            </li>
-                            <li className="mismatch-details-row">
-                              <p>Ids mismatched from Centpays</p>
-                              <p>{idsInSearchedNotInExcel.length}</p>
-                            </li>
-                            <li className="mismatch-details-row">
-                              <p>Ids with mismatched Details</p>
-                              <p>{mismatchedDetails.length}</p>
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </>
-            }
+        {errorMessage && (
+          <MessageBox
+            message={errorMessage}
+            messageType={messageType}
+            onClose={() => this.setState({ errorMessage: "" })}
           />
         )}
+
         <Header />
         <Sidebar />
         <div
@@ -423,7 +486,7 @@ class Compare extends Component {
                   </label>
                   <input
                     className="date-input"
-                    type="date"
+                    type="datetime-local"
                     id="fromDate"
                     value={this.state.fromDate || ""}
                     onChange={this.handleInputChange}
@@ -440,7 +503,7 @@ class Compare extends Component {
                   </label>
                   <input
                     className="date-input"
-                    type="date"
+                    type="datetime-local"
                     id="toDate"
                     value={this.state.toDate || ""}
                     onChange={this.handleInputChange}
@@ -568,6 +631,97 @@ class Compare extends Component {
               </div>
             )}
           </div>
+
+          {mismatchModal && (
+            <div className="modal">
+              <div className="row-cards trans-settle-view">
+                <h4>Transaction</h4>
+                <div className="compare-line "></div>
+
+                <div className="header-container">
+                  <div className="left-div">
+                    <span className="date-section">From: <p className="p2">{this.state.fromDate}</p>  To: <p className="p2">{this.state.toDate}</p> </span>
+                    <span>Total Amount: {totalAmount} /- </span>
+                    <span>Received Amount: {receivedAmount}/- </span>
+                  </div>
+                  <div className="right-div">
+                    <h4 style={{ color: this.state.color }}>
+                      {this.state.message} {this.state.matchPercentage}%
+                    </h4>
+                  </div>
+                </div>
+
+                <div className="txn-search-table-Body">
+                  <div className="compare-table">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>S.NO.</th>
+                          <th>Reference Id</th>
+                          <th>Amount</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {this.state.unmatchedExcelData.map((data, index) => (
+                          <tr key={index}>
+                            <td>{index + 1}</td>
+                            <td>{data.reference_id}</td>
+                            <td>{data.amount}</td>
+                            <td>{data.status}</td>
+                          </tr>
+                        ))}
+
+                        {this.state.unmatchedSelectedData.map((data, index) => (
+                          <tr
+                            key={index + this.state.unmatchedExcelData.length}
+                          >
+                            <td>
+                              {this.state.unmatchedExcelData.length + index + 1}
+                            </td>
+                            <td>{data.reference_id}</td>
+                            <td>{data.amount}</td>
+                            <td>{data.status}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div className="header-container">
+                  <div className="imprt-exprt-div">
+                    <p>Export: </p>
+                    <div onClick={this.handleExcelReferenceIds}>
+                      <Import className="primary-color-icon" />
+                    </div>
+                    /
+                    <div onClick={this.handleExcelReferenceIds}>
+                      <Export className="primary-color-icon" />
+                    </div>
+                  </div>
+
+                  <p className="p3" onClick={this.handleCopyReferenceIds}>
+                    Copy
+                  </p>
+                </div>
+                <div className="compare-line "></div>
+                <div className="header-container">
+                  <p className="p4">help?</p>
+                  <div className="settle-btns">
+                    <button className="btn-secondary" onClick={this.closeModal}>
+                      Cancel
+                    </button>
+                    <button
+                      className="btn-primary"
+                      onClick={this.handleSettleData}
+                    >
+                      Settle Now
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </>
     );

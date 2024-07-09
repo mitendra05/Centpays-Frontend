@@ -46,12 +46,8 @@ import MerchantSettings from "./asset/jsx/pages/Merchant_Settings";
 
 import AQTest from "./asset/jsx/pages/AQTest";
 import AQResult from "./asset/jsx/pages/AQResult";
-import NotFound from "./asset/jsx/pages/NotFound";
-
 
 import Setting from "./asset/jsx/pages/setting";
-
-import RCompare from "./asset/jsx/pages/R06_Compare";
 
 function App() {
   return (
@@ -91,20 +87,20 @@ function App() {
           <Route path="/payoutreport" element={<PayoutReport />}></Route>
           <Route path="/compare" element={<Compare />}></Route>
 
+          {/* Manage Merchant Routes */}
           <Route path="/allmerchant" element={<AllMerchant />}></Route>
           <Route path="/viewmerchant/:company_name"element={<ViewMerchant />}></Route>
           <Route path="/whitelisted" element={<Whitelisted />}></Route>
           <Route path="/paymentlink" element={<PaymentLink />}></Route>
           <Route path="/merchantsetting" element={<MerchantSettings />}></Route>
 
+          {/* Manage User Routes */}
           <Route path="/alluser" element={<AllUser />}></Route>
           <Route path="/adduser" element={<Adduser />}></Route>
 
-
-          <Route path="/settings" element={<Setting/>} ></Route>
+          <Route path="/settings" element={<Setting />}></Route>
 		      <Route path="/acquirertestingenv" element={<AQTest />}></Route>
 		      <Route path="/paymentresult/:orderNo" element={<AQResult />}></Route>
-          <Route path="*" element={<NotFound />} ></Route>
         </Routes>
       </BrowserRouter>
     </>
