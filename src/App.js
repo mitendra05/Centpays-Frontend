@@ -48,8 +48,6 @@ import AQTest from "./asset/jsx/pages/AQTest";
 import AQResult from "./asset/jsx/pages/AQResult";
 
 import Setting from "./asset/jsx/pages/setting";
-import RCompare from "./asset/jsx/pages/R06_Compare";
-
 
 function App() {
   return (
@@ -103,7 +101,6 @@ function App() {
           <Route path="/settings" element={<Setting />}></Route>
 		      <Route path="/acquirertestingenv" element={<AQTest />}></Route>
 		      <Route path="/paymentresult/:orderNo" element={<AQResult />}></Route>
-          <Route path="/rcompare" element={<RCompare/>} ></Route>
         </Routes>
       </BrowserRouter>
     </>
