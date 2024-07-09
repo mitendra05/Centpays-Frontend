@@ -37,7 +37,7 @@ class Header extends Component {
         this.state = {
             userName: this.getCookie('name'),
             email: this.getCookie('email'),
-            // userRole: this.getCookie('role'),
+            userRole: this.getCookie('role'),
             companyName: this.getCookie('company_name'),
             token: this.getCookie('token'),
             theme: "light",
@@ -97,8 +97,8 @@ class Header extends Component {
 
     componentDidMount = async () => {
         const savedScrollPosition = localStorage.getItem("Header_ScrollY");
-        const userRole= localStorage.getItem("role");
-        this.setState({userRole: userRole})
+        const userRole = this.getCookie('role');
+
         if (savedScrollPosition) {
             window.scrollTo(0, parseInt(savedScrollPosition, 10));
         }
@@ -148,7 +148,7 @@ class Header extends Component {
         this.setState({ selectedCurrency: currency });
         console.log(currency, "Hello")
         this.props.onCurrencyChange?.(currency);
-
+    }
 
     handleScroll = () => {
         if (window.scrollY > 0) {
@@ -158,10 +158,11 @@ class Header extends Component {
                 shortcutModal: false,
             });
         } else {
-          this.setState({
-            scrolled: false,
-          });
+            this.setState({
+                scrolled: false,
+            });
         }
+    }
 
     toggleTheme = () => {
         this.setState((prevState) => ({
