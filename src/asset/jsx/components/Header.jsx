@@ -37,7 +37,7 @@ class Header extends Component {
         this.state = {
             userName: this.getCookie('name'),
             email: this.getCookie('email'),
-            // userRole: this.getCookie('role'),
+            userRole: this.getCookie('role'),
             companyName: this.getCookie('company_name'),
             loginTime: this.getCookie('loginTime'),
             token: this.getCookie('token'),
@@ -98,8 +98,8 @@ class Header extends Component {
 
     componentDidMount = async () => {
         const savedScrollPosition = localStorage.getItem("Header_ScrollY");
-        const userRole= localStorage.getItem("role");
-        this.setState({userRole: userRole})
+        const userRole = this.getCookie('role');
+
         if (savedScrollPosition) {
             window.scrollTo(0, parseInt(savedScrollPosition, 10));
         }
