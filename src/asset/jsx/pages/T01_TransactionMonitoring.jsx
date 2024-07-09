@@ -121,12 +121,6 @@ class TransactionMonitoring extends Component {
     });
   };
 
-  handleKeyDown = (event) => {
-    if (event.key === "Enter") {
-      this.handleSearch();
-    }
-  };
-
   toggleTypedData = () => {
     this.setState((prevState) => ({
       showTypedData: !prevState.showTypedData,
@@ -185,9 +179,7 @@ class TransactionMonitoring extends Component {
       cardtype: this.state.cardtype,
       cardnumber: this.handleCardNumber(this.state.cardnumber),
     };
-
     console.log("searcheddata", searchedData);
-
     try {
       const response = await fetch(`${backendURL}/transactionreport`, {
         method: "POST",
@@ -197,7 +189,6 @@ class TransactionMonitoring extends Component {
         },
         body: JSON.stringify(searchedData),
       });
-
       if (response.ok) {
         const data = await response.json();
         this.setState({ searchedResult: data });
@@ -442,7 +433,6 @@ class TransactionMonitoring extends Component {
                             value={searchIds}
                             placeholder="Txn ID/ Merchant Txn ID"
                             onChange={this.handleInputChange}
-                            onKeyDown={this.handleKeyDown}
                           />
                         </div>
 
@@ -476,7 +466,6 @@ class TransactionMonitoring extends Component {
                           id="status"
                           value={this.state.status}
                           onChange={this.handleInputChange}
-                          onKeyDown={this.handleKeyDown}
                         >
                           <option value="">Select Status</option>
                           <option value="SUccess">Success</option>
@@ -498,7 +487,6 @@ class TransactionMonitoring extends Component {
                           id="merchant"
                           value={this.state.merchant}
                           onChange={this.handleInputChange}
-                          onKeyDown={this.handleKeyDown}
                         >
                           <option value="">Select Merchant</option>
                           {this.state.companyList.map((company) => (
@@ -540,7 +528,6 @@ class TransactionMonitoring extends Component {
                           id="fromDate"
                           value={this.state.fromDate || ""}
                           onChange={this.handleInputChange}
-                          onKeyDown={this.handleKeyDown}
                         ></input>
                       </div>
                       <div className="date-input-div">
@@ -558,7 +545,6 @@ class TransactionMonitoring extends Component {
                           id="toDate"
                           value={this.state.toDate || ""}
                           onChange={this.handleInputChange}
-                          onKeyDown={this.handleKeyDown}
                         ></input>
                       </div>
                     </div>
@@ -716,7 +702,6 @@ class TransactionMonitoring extends Component {
                         id="mid"
                         value={this.state.mid}
                         onChange={this.handleInputChange}
-                        onKeyDown={this.handleKeyDown}
                       >
                         <option value="">Select MID</option>
                         {this.state.midList.map((mid) => (
@@ -740,7 +725,6 @@ class TransactionMonitoring extends Component {
                         id="paymentgateway"
                         value={this.state.paymentgateway}
                         onChange={this.handleInputChange}
-                        onKeyDown={this.handleKeyDown}
                       >
                         <option value="">Select Payment Gateway</option>
                         {this.state.paymentgatewayList.map((paymentgateway) => (
@@ -763,7 +747,6 @@ class TransactionMonitoring extends Component {
                         id="currency"
                         value={this.state.currency}
                         onChange={this.handleInputChange}
-                        onKeyDown={this.handleKeyDown}
                       >
                         <option value="">Select Currency</option>
                         <option value="USD">USD</option>
@@ -783,7 +766,6 @@ class TransactionMonitoring extends Component {
                         id="country"
                         value={this.state.country}
                         onChange={this.handleInputChange}
-                        onKeyDown={this.handleKeyDown}
                       >
                         <option value="">Select Country</option>
                         {this.state.countryList.map((country) => (
@@ -806,7 +788,6 @@ class TransactionMonitoring extends Component {
                         id="cardtype"
                         value={this.state.cardtype}
                         onChange={this.handleInputChange}
-                        onKeyDown={this.handleKeyDown}
                       >
                         <option value="">Select Card Type</option>
                         <option value="Visa">Visa</option>
@@ -828,7 +809,6 @@ class TransactionMonitoring extends Component {
                         value={this.state.cardnumber}
                         placeholder="First 6 and Last 4 digits"
                         onChange={this.handleInputChange}
-                        onKeyDown={this.handleKeyDown}
                       ></input>
                     </div>
                     <div
@@ -869,7 +849,6 @@ class TransactionMonitoring extends Component {
                             value={searchIds}
                             placeholder="Txn ID/ Merchant Txn ID"
                             onChange={this.handleInputChange}
-                            onKeyDown={this.handleKeyDown}
                           />
                         </div>
                         {showTypedData && (
@@ -901,7 +880,6 @@ class TransactionMonitoring extends Component {
                           id="status"
                           value={this.state.status}
                           onChange={this.handleInputChange}
-                          onKeyDown={this.handleKeyDown}
                         >
                           <option value="">Select Status</option>
                           <option value="Success">Success</option>
@@ -923,7 +901,6 @@ class TransactionMonitoring extends Component {
                           id="merchant"
                           value={this.state.merchant}
                           onChange={this.handleInputChange}
-                          onKeyDown={this.handleKeyDown}
                         >
                           <option value="">Select Merchant</option>
                           {this.state.companyList.map((company) => (
@@ -965,7 +942,6 @@ class TransactionMonitoring extends Component {
                           id="fromDate"
                           value={this.state.fromDate}
                           onChange={this.handleInputChange}
-                          onKeyDown={this.handleKeyDown}
                         ></input>
                       </div>
                       <div className="date-input-div">
@@ -983,7 +959,6 @@ class TransactionMonitoring extends Component {
                           id="toDate"
                           value={this.state.toDate}
                           onChange={this.handleInputChange}
-                          onKeyDown={this.handleKeyDown}
                         ></input>
                       </div>
                     </div>
@@ -1230,7 +1205,6 @@ class TransactionMonitoring extends Component {
                           value={searchIds}
                           placeholder="Txn ID/ Merchant Txn ID"
                           onChange={this.handleInputChange}
-                          onKeyDown={this.handleKeyDown}
                         />
                       </div>
                       {showTypedData && (
@@ -1262,7 +1236,6 @@ class TransactionMonitoring extends Component {
                           id="status"
                           value={this.state.status}
                           onChange={this.handleInputChange}
-                          onKeyDown={this.handleKeyDown}
                         >
                           <option value="">Select Status</option>
                           <option value="Success">Success</option>
@@ -1307,7 +1280,6 @@ class TransactionMonitoring extends Component {
                           id="fromDate"
                           value={this.state.fromDate}
                           onChange={this.handleInputChange}
-                          onKeyDown={this.handleKeyDown}
                         ></input>
                       </div>
                       <div className="id-input-div todate-div">
@@ -1325,7 +1297,6 @@ class TransactionMonitoring extends Component {
                           id="toDate"
                           value={this.state.toDate}
                           onChange={this.handleInputChange}
-                          onKeyDown={this.handleKeyDown}
                         ></input>
                       </div>
                       <div className="txn-monitoring-btn-div txn-monitoring-mrcnt-btn-div">
@@ -1491,7 +1462,6 @@ class TransactionMonitoring extends Component {
 												id="mid"
 												value={this.state.mid}
 												onChange={this.handleInputChange}
-                        onKeyDown={this.handleKeyDown}
 											>
 												<option value="">Select MID</option>
 												{this.state.midList.map((mid) => (
@@ -1532,7 +1502,6 @@ class TransactionMonitoring extends Component {
                         id="currency"
                         value={this.state.currency}
                         onChange={this.handleInputChange}
-                        onKeyDown={this.handleKeyDown}
                       >
                         <option value="">Select Currency</option>
                         <option value="USD">USD</option>
@@ -1552,7 +1521,6 @@ class TransactionMonitoring extends Component {
                         id="country"
                         value={this.state.country}
                         onChange={this.handleInputChange}
-                        onKeyDown={this.handleKeyDown}
                       >
                         <option value="">Select Country</option>
                         {this.state.countryList.map((country) => (
@@ -1575,7 +1543,6 @@ class TransactionMonitoring extends Component {
                         id="cardtype"
                         value={this.state.cardtype}
                         onChange={this.handleInputChange}
-                        onKeyDown={this.handleKeyDown}
                       >
                         <option value="">Select Card Type</option>
                         <option value="Visa">Visa</option>
@@ -1597,7 +1564,6 @@ class TransactionMonitoring extends Component {
                         value={this.state.cardnumber}
                         placeholder="First 6 and Last 4 digits"
                         onChange={this.handleInputChange}
-                        onKeyDown={this.handleKeyDown}
                       ></input>
                     </div>
                     <div
@@ -1638,7 +1604,6 @@ class TransactionMonitoring extends Component {
                           value={searchIds}
                           placeholder="Txn ID/ Merchant Txn ID"
                           onChange={this.handleInputChange}
-                          onKeyDown={this.handleKeyDown}
                         />
                       </div>
                       {showTypedData && (
@@ -1670,7 +1635,6 @@ class TransactionMonitoring extends Component {
                           id="status"
                           value={this.state.status}
                           onChange={this.handleInputChange}
-                          onKeyDown={this.handleKeyDown}
                         >
                           <option value="">Select Status</option>
                           <option value="Success">Success</option>
@@ -1678,25 +1642,6 @@ class TransactionMonitoring extends Component {
                           <option value="Incompleted">Incompleted</option>
                         </select>
                       </div>
-                      {/* <div className="search-select-div">
-												<label className={`id-label ${this.state.merchant ? "filled-id-label" : ""} `} htmlFor="merchant">
-													Merchant:
-												</label>
-												<select
-													className="id-input"
-													id="merchant"
-													value={this.state.merchant}
-													onChange={this.handleInputChange}
-												>
-													<option value="">Select Merchant</option>
-													{this.state.companyList.map((company) => (
-														<option key={company} value={company}>
-															{company}
-														</option>
-													))}
-												</select>
-											</div> */}
-                     
                     </div>
 
                     <div className="from-to-input-div">
@@ -1715,7 +1660,6 @@ class TransactionMonitoring extends Component {
                           id="fromDate"
                           value={this.state.fromDate}
                           onChange={this.handleInputChange}
-                          onKeyDown={this.handleKeyDown}
                         ></input>
                       </div>
                       <div className="id-input-div todate-div">
@@ -1733,7 +1677,6 @@ class TransactionMonitoring extends Component {
                           id="toDate"
                           value={this.state.toDate}
                           onChange={this.handleInputChange}
-                          onKeyDown={this.handleKeyDown}
                         ></input>
                       </div>
                       <div className="txn-monitoring-btn-div txn-monitoring-mrcnt-btn-div">
