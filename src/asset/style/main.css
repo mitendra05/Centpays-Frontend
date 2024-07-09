@@ -4546,7 +4546,7 @@ hr {
 	border-radius: 10px;
 }
 
-#paymentscreen2{
+#paymentscreen-result{
     height: 100vh;
 	width: 99%;
 	display: flex;
@@ -4647,7 +4647,6 @@ hr {
 .max-billingdetals-footer button {
 	height: 60px;
 	width: 98%;
-
 }
 
 .min-cardDetails {
@@ -4808,7 +4807,7 @@ hr {
 
 .paymentResult {
 	background-color: #ffffff;
-	width: 25vw;
+	min-width: 25vw;
 	border-radius: 10px;
 	margin-bottom: 5px;
 	padding: 10px;
@@ -4825,10 +4824,9 @@ hr {
 }
 
 .paymentSuccessfull .statusGif {
-	width: 250px;
+	width: 200px;
 	margin-top: -20px;
-  }
-
+}
 
 .paymentSuccessfull {
 	text-align: center;
@@ -4837,8 +4835,9 @@ hr {
 .paymentSuccessfull h5 {
 	position: absolute;
 	top: 42%;
-	left: 26%;
-  }
+	left: 50%;
+	transform: translateX(-50%);
+}
 
 .paymentDetails {
 	text-align: left;
@@ -4866,19 +4865,20 @@ hr {
 	text-align: right;
 }
 
+.paymentDetails-middle .paymentresult-heading{
+	margin-right: 50px;
+}
+
 .paymentDetails .paymentDetails-middle span {
 	display: flex;
 	justify-content: space-between;
 }
 
 /* ------------------ */
-
-
 .paymentFailed .statusGif {
-	width: 250px;
-	margin-top: -20px;
-  }
-
+	width: 200px;
+	margin-top: 0px;
+}
 
 .paymentFailed {
 	text-align: center;
@@ -4887,8 +4887,9 @@ hr {
 .paymentFailed h5 {
 	position: absolute;
 	top: 42%;
-	left: 26%;
-  }
+	left: 50%;
+	transform: translateX(-50%);
+}
 
 .paymentDetails {
 	text-align: left;
