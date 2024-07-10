@@ -24,7 +24,7 @@ class Sidebar extends Component {
 		super(props);
 		this.state = {
 			sidebaropen: true,
-			userRole: this.getCookie('role'),
+			userRole: this.getCookie("role") || localStorage.getItem('userRole'),
 			companyName: this.getCookie('company_name'),
 			menuOpen: {
 				masterSetting: false,

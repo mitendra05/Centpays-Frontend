@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 
 // components
 import Header from "../components/Header";
@@ -15,24 +15,22 @@ export class AQTest extends Component {
             sidebaropen: true,
             errorMessage: "",
             userName: this.getCookie('name'),
-			token: this.getCookie("token"),
-			userRole: this.getCookie("role"),
+            token: this.getCookie("token"),
+            userRole: this.getCookie("role"),
             billingName: "",
             billingEmail: "",
             billingPhoneNumber: "",
             amount: "",
             selectedCurrency: "USD",
             proceedClicked: false,
-            
             selectedCard: 'Visa',
             cardHolderName: "",
-            cardNumder: "",
+            cardNumber: "",
             expiryDate: "",
             cvvno: "",
-
-            status: " ",
-            isLoader: false,   
-            orderNo: "", 
+            status: "",
+            isLoader: false,
+            orderNo: "",
         };
     }
 
@@ -42,7 +40,13 @@ export class AQTest extends Component {
         if (parts.length === 2) return parts.pop().split(';').shift();
         return null;
     }
-  
+
+    componentDidMount() {
+        const userRole = localStorage.getItem('userRole');
+        if (userRole) {
+            this.setState({ userRole });
+        }
+    }
 
     fetchData = async () => {
         this.setState({ isLoading: true, error: null });
@@ -54,9 +58,8 @@ export class AQTest extends Component {
                 throw new Error(`API request failed with status ${response.status}`);
             }
             const data = await response.json();
-            this.setState({ data });
-            console.log("Fetched data:", data);     
-            this.setState({status: data.status})
+            this.setState({ data, status: data.status });
+            console.log("Fetched data:", data);
         } catch (error) {
             this.setState({ error: error.message || 'An error occurred while fetching data.' });
         } finally {
@@ -82,11 +85,10 @@ export class AQTest extends Component {
     };
 
     handlePay = async (e) => {
-        const backendURL = process.env.REACT_APP_BACKEND_URL;
         e.preventDefault();
-        const { billingName, billingEmail, billingPhoneNumber, amount,
-            selectedCurrency, cardHolderName, cardNumder, expiryDate, cvvno, selectedCard, isLoader } = this.state;
-
+        const backendURL = process.env.REACT_APP_BACKEND_URL;
+        const { billingName, billingEmail, billingPhoneNumber, amount, selectedCurrency, cardHolderName, cardNumber, expiryDate, cvvno, selectedCard, userRole } = this.state;
+    
         // Generate random transaction ID and order number
         const generateRandomString = (length) => {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -96,13 +98,12 @@ export class AQTest extends Component {
             }
             return result;
         };
-
+    
         const transaction_id = generateRandomString(6);
         const order_number = generateRandomString(6);
-
+    
         const payload = {
-       
-            merchantID:"1044",
+            merchantID: "1044",
             name: cardHolderName,
             email: billingEmail,
             phone: billingPhoneNumber,
@@ -112,229 +113,137 @@ export class AQTest extends Component {
             orderNo: order_number,
             backURL: 'https://www.centpays.online/paymentresult',
             requestMode: 'Card',
-            cardnumber: cardNumder,
+            cardnumber: cardNumber,
             cardExpire: expiryDate,
-            cardCVV: cvvno
+            cardCVV: cvvno,
         };
-
+    
         const headers = {
             'Content-Type': 'application/json',
         };
-
+    
         try {
+            // Store user details in local storage
+            localStorage.setItem('userRole', userRole);
+    
             const response = await fetch(`${backendURL}/paymentlink`, {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify(payload),
             });
-
+    
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-
+    
             const data = await response.json();
             if (data.redirectUrl) {
-
-                window.location.href = data.redirectUrl; 
-              } else {
+                window.location.href = data.redirectUrl;
+            } else {
                 this.setState({
-                    orderNo: data.orderNo, 
+                    orderNo: data.orderNo,
                 });
                 console.error('No redirect URL found in response');
             }
         } catch (error) {
             console.error('Error:', error);
         }
-
+    
         this.setState({
             billingName: '',
             billingEmail: '',
             billingPhoneNumber: '',
             amount: '',
             cardHolderName: '',
-            cardNumder: '',
+            cardNumber: '',
             expiryDate: '',
             cvvno: '',
             proceedClicked: false,
             isLoader: true,
         });
     };
-
-
+    
 
     render() {
-        const { billingName, billingEmail, billingPhoneNumber, amount, selectedCurrency,
-
-            proceedClicked, cardHolderName, cardNumder, expiryDate, cvvno, selectedCard, userName, userRole, status, isLoader } = this.state;
-            return (
-                <>
-                    <Header />
-                    <Sidebar />
-                    <div className={`main-screen ${this.state.sidebaropen
-                        ? "collapsed-main-screen"
-                        : "expanded-main-screen "
-                        }  `}
-                    >
-                        <div id='paymentscreen'>
-                            <div className='paymentscreen'>
-                                <div className='paymentDetails'>
-                                    {isLoader ? <img src={Loader} className='loadingIcon' alt='loading gif' /> : <>{proceedClicked ?
-                                        <div className='min-cardDetails'>
-                                            <div className='userImage'></div>
-                                            <span className='min-billingdetails-header'><p>{userName}</p><p className='p1'>{userRole}</p></span>
-                                            <div className='min-billingaount-header'>{amount + " " + selectedCurrency}</div>
-                                        </div>
-
-                                        :
-                                        <form className='max-billingdetails' onSubmit={this.handleProceed}>
-                                            <div className='max-billingdetails-header'>
+        const { billingName, billingEmail, billingPhoneNumber, amount, selectedCurrency, proceedClicked, cardHolderName, cardNumber, expiryDate, cvvno, selectedCard, userName, userRole, isLoader } = this.state;
+        return (
+            <>
+                <Header />
+                <Sidebar />
+                <div className={`main-screen ${this.state.sidebaropen ? "collapsed-main-screen" : "expanded-main-screen"}  `}>
+                    <div id='paymentscreen'>
+                        <div className='paymentscreen'>
+                            <div className='paymentDetails'>
+                                {isLoader ? <img src={Loader} className='loadingIcon' alt='loading gif' /> :
+                                    <>
+                                        {proceedClicked ?
+                                            <div className='min-cardDetails'>
                                                 <div className='userImage'></div>
-                                                <span className='max-billingdetails-header-userDetails'><p>{userName}</p><p className='p1'>{userRole}</p></span>
-                                                <div className='currencyToggel'>
-                                                    <p
-                                                        className={`selectedCurrency ${selectedCurrency === 'USD' ? '' : 'nocolor'}`}
-                                                        onClick={() => this.toggleCurrency('USD')}
-                                                    >
-                                                        USD
-                                                    </p>
-                                                    <p
-                                                        className={`selectedCurrency ${selectedCurrency === 'EUR' ? '' : 'nocolor'}`}
-                                                        onClick={() => this.toggleCurrency('EUR')}
-                                                    >
-                                                        EUR
-                                                    </p>
+                                                <span className='min-billingdetails-header'>
+                                                    <p>{userName}</p><p className='p1'>{userRole}</p>
+                                                </span>
+                                                <div className='min-billingaount-header'>{amount + " " + selectedCurrency}</div>
+                                            </div>
+                                            :
+                                            <form className='max-billingdetails' onSubmit={this.handleProceed}>
+                                                <div className='max-billingdetails-header'>
+                                                    <div className='userImage'></div>
+                                                    <span className='max-billingdetails-header-userDetails'>
+                                                        <p>{userName}</p><p className='p1'>{userRole}</p>
+                                                    </span>
+                                                    <div className='currencyToggel'>
+                                                        <p className={`selectedCurrency ${selectedCurrency === 'USD' ? '' : 'nocolor'}`} onClick={() => this.toggleCurrency('USD')}>USD</p>
+                                                        <p className={`selectedCurrency ${selectedCurrency === 'EUR' ? '' : 'nocolor'}`} onClick={() => this.toggleCurrency('EUR')}>EUR</p>
+                                                    </div>
                                                 </div>
-
-                                            </div>
-                                            <div className='max-billingdetals-middle'>
-                                                <input
-                                                    className='paymentInput'
-                                                    type='text'
-                                                    name='billingName'
-                                                    placeholder='Billing Name'
-                                                    value={billingName}
-                                                    required
-                                                    onChange={this.handleInputChange}
-                                                />
-                                                <input
-                                                    className='paymentInput'
-                                                    type='text'
-                                                    name='billingEmail'
-                                                    placeholder='Billing Email'
-                                                    value={billingEmail}
-                                                    required
-                                                    onChange={this.handleInputChange}
-                                                />
-                                                <input
-                                                    className='paymentInput'
-                                                    type='text'
-                                                    name='billingPhoneNumber'
-                                                    placeholder='Billing Phone Number'
-                                                    value={billingPhoneNumber}
-                                                    required
-                                                    onChange={this.handleInputChange}
-                                                />
-                                                <input
-                                                    className='paymentInput'
-                                                    type='text'
-                                                    name='amount'
-                                                    placeholder={`Amount ${selectedCurrency}`}
-                                                    value={amount}
-                                                    required
-                                                    onChange={this.handleInputChange}
-                                                />
-                                            </div>
-                                            <div className='max-billingdetals-footer'>
-                                                <button type='submit' className='btn-primary'>Procced</button>
-                                            </div>
-                                        </form>}
+                                                <div className='max-billingdetals-middle'>
+                                                    <input className='paymentInput' type='text' name='billingName' placeholder='Billing Name' value={billingName} required onChange={this.handleInputChange} />
+                                                    <input className='paymentInput' type='text' name='billingEmail' placeholder='Billing Email' value={billingEmail} required onChange={this.handleInputChange} />
+                                                    <input className='paymentInput' type='text' name='billingPhoneNumber' placeholder='Billing Phone Number' value={billingPhoneNumber} required onChange={this.handleInputChange} />
+                                                    <input className='paymentInput' type='text' name='amount' placeholder={`Amount ${selectedCurrency}`} value={amount} required onChange={this.handleInputChange} />
+                                                </div>
+                                                <div className='max-billingdetals-footer'>
+                                                    <button type='submit' className='btn-primary'>Proceed</button>
+                                                </div>
+                                            </form>}
                                         {proceedClicked ?
                                             <div className='max-carddetails'>
                                                 <div className='max-carddetails-header'>
                                                     <p className='cardDetails-heading'>Payment Method</p>
                                                     <div className='currencyToggel'>
-                                                        <p
-                                                            className={`selectedCurrency ${selectedCard === 'Visa' ? '' : 'nocolor'}`}
-                                                            onClick={() => this.toggleCard('Visa')}
-                                                        >
-                                                            Visa
-                                                        </p>
-                                                        <p
-                                                            className={`selectedCurrency ${selectedCard === 'MC' ? '' : 'nocolor'}`}
-                                                            onClick={() => this.toggleCard('MC')}
-                                                        >
-                                                            Mastercard
-                                                        </p>
+                                                        <p className={`selectedCurrency ${selectedCard === 'Visa' ? '' : 'nocolor'}`} onClick={() => this.toggleCard('Visa')}>Visa</p>
+                                                        <p className={`selectedCurrency ${selectedCard === 'MC' ? '' : 'nocolor'}`} onClick={() => this.toggleCard('MC')}>Mastercard</p>
                                                     </div>
                                                 </div>
                                                 <form className='max-cardDetails-middle' onSubmit={this.handlePay}>
                                                     <p className='p1'>Enter card details</p>
-                                                    <input
-                                                        className='paymentInput'
-                                                        type='text'
-                                                        name='cardHolderName'
-                                                        placeholder='Card Holder Name'
-                                                        value={cardHolderName}
-                                                        required
-                                                        onChange={this.handleInputChange}
-                                                    />
-                                                    <input
-                                                        className='paymentInput'
-                                                        type='text'
-                                                        name='cardNumder'
-                                                        placeholder='Card Number'
-                                                        value={cardNumder}
-                                                        required
-                                                        onChange={this.handleInputChange}
-                                                    />
+                                                    <input className='paymentInput' type='text' name='cardHolderName' placeholder='Card Holder Name' value={cardHolderName} required onChange={this.handleInputChange} />
+                                                    <input className='paymentInput' type='text' name='cardNumber' placeholder='Card Number' value={cardNumber} required onChange={this.handleInputChange} />
                                                     <span>
-                                                        <input
-                                                            className='paymentInput'
-                                                            type='text'
-                                                            name='expiryDate'
-                                                            placeholder='Expiry Date'
-                                                            value={expiryDate}
-                                                            required
-                                                            onChange={this.handleInputChange}
-                                                        />
-                                                        <input
-                                                            className='paymentInput'
-                                                            type='text'
-                                                            name='cvvno'
-                                                            placeholder='CVV/CSS'
-                                                            value={cvvno}
-                                                            required
-                                                            onChange={this.handleInputChange}
-                                                        />
+                                                        <input className='paymentInput' type='text' name='expiryDate' placeholder='Expiry Date' value={expiryDate} required onChange={this.handleInputChange} />
+                                                        <input className='paymentInput' type='text' name='cvvno' placeholder='CVV/CSS' value={cvvno} required onChange={this.handleInputChange} />
                                                     </span>
                                                     <div className='max-billingdetals-footer'>
-                                                        <button type='submit' className='btn-primary' >Pay</button>
+                                                        <button type='submit' className='btn-primary'>Pay</button>
                                                     </div>
                                                 </form>
-
-
-                                                <div className='carddetails-agrementFooter'>
-                                                    <span>
-                                                        <p className='p1'>By clicking pay you accept the</p>
-                                                        <p className='cp-card-agreement'>user agreement</p>
-                                                    </span>
-                                                    <div className='LOCK-icon'><img src={loackicon} alt='Lock icon' /></div>
-                                                </div>
                                             </div>
-                                            :
+                                            :  
                                             <div className='min-cardDetails'>
                                                 <img src={cardimage} alt='credit card icone' className='cardImage' />
                                                 <span><p>Enter Card Details</p><p className='p1'>MasterCard, Visa</p></span>
                                                 <div className='LOCK-icon'><img src={loackicon} alt='Lock icon' /></div>
-                                            </div>}</>}
-                                </div>
+                                            </div>
+                                        }
+                                    </>
+                                }
                             </div>
                         </div>
                     </div>
-                </>
-            );
-        }
+                </div>
+            </>
+        );
     }
+}
 
-
-export default AQTest
+export default AQTest;
