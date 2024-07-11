@@ -32,7 +32,6 @@ export class AQTest extends Component {
 
 		if (this.state.orderNo) {
 			this.fetchData();
-			console.log("Hello")
 		}
 	}
 
