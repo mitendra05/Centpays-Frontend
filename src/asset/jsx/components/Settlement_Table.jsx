@@ -276,7 +276,7 @@ class Table extends Component {
     const paginatedData = dataToRender.slice(startIdx, endIdx);
     const totalPages = Math.ceil(dataToRender.length / rows);
 
-    if (userRole === "admin") {
+    if (userRole === "admin" || userRole === "employee") {
       return (
         <>
           {errorMessage && (
