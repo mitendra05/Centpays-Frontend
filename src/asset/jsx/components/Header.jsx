@@ -108,7 +108,6 @@ class Header extends Component {
         const currentPage = window.location.pathname.split("/")[1];
         this.setState({ currentPage });
 
-        // const userRole = this.state;
         console.log("role user", userRole)
         let currency = []
         if (userRole === "admin") {
@@ -278,12 +277,12 @@ class Header extends Component {
             }
 
             const data = await response.json();
-            this.setState({ companyList: data, errorMessage: "" }); // Clear any previous error message
+            this.setState({ companyList: data, errorMessage: "" });
         } catch (error) {
             console.error("Fetch error:", error);
             this.setState({
                 errorMessage: "Error fetching data. Please try again later.",
-                companyList: [], // Optionally clear existing data if needed
+                companyList: [], 
             });
         }
     };
@@ -348,7 +347,6 @@ class Header extends Component {
                                 <div className="custom-select-div">
                                     <CustomSelect
                                         options={currency}
-                                        defaultLabel={selectedCurrency}
                                         selectedValue={selectedCurrency}
                                         onChange={this.handleCurrencyChange}
                                     />

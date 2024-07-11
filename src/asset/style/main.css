@@ -725,7 +725,7 @@ nav {
 
 .custom-select-option {
 	cursor: pointer;
-	padding: 0.75rem 1.25rem;
+	padding: 10px 10px;
 	transition: background-color 0.2s ease;
 }
 
@@ -2361,6 +2361,15 @@ td {
 	margin: 20px 0;
 }
 
+.id-search-row-div{
+	width: 100%;
+	display: flex;
+	align-items: center;
+	height: 60px;
+	margin: 20px 0;
+	gap:0 20px;
+}
+
 .id-input-div {
 	width: 30%;
 	height: 60px;
@@ -2376,14 +2385,12 @@ td {
 	flex-direction: column;
 	justify-content: flex-start;
 }
-
 .search-status-div{
-   margin-right: 36rem;
-   margin-bottom: -3px;
+	height: 70px !important;  
 }
 
 .search-status-div label{
- margin:0 -2px;
+	padding-top: 9px;
 }
 
 .date-input-mrchnt-div{
@@ -2699,9 +2706,8 @@ border-bottom: none !important;
 }
 
 .Transaction-monitoring-modal {
-	margin-top: 10px;
 	background-color: var(--white);
-	padding: 10px;
+	padding: 20px;
 	border-radius: 3px;
 	width: 100%;
 	max-width: 90%; 
@@ -2710,13 +2716,22 @@ border-bottom: none !important;
 	z-index: 999;
 	justify-content: left;
 	margin-left: 15px;
+	max-height: 600px;
   }
   
-  .Transaction-monitoring-modal p {
+  .Transaction-monitoring-search-modal p {
 	white-space: pre-wrap; 
 	font-size: 14px;
-	line-height: 1.6;
+	line-height: 3;
+	margin-top: -20px;
   }
+
+  .Transaction-monitoring-search-modal{
+	overflow-y: auto;
+	position: relative;
+	
+  }
+  
   
 /* ..........................................search window ............................................................. */
 /* .search-window-overlay {
@@ -3913,6 +3928,15 @@ hr {
 	padding: 2px;
 }
 
+.secret-key{
+	text-align: center;
+	margin-top: 10px;
+}
+
+.secretkey-head{
+	text-align: center;
+}
+
 /* / View Merchant / */
 
 .view-merchant-container {
@@ -3948,21 +3972,30 @@ hr {
 	width: 70px;
 }
 
+.slideshow-container {
+	position: relative;
+	width: 100%;
+	max-width: 600px;
+	margin: auto;
+  }
+  
 .approve-volume-container {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	width: 100%;
 	height: 40px;
-	position: relative;
 	margin-top: 10px;
+	transition: transform 0.5s ease;
 }
+
 
 .approval-div-section {
 	display: flex;
 	align-items: center;
 	width: 45%;
 	height: 100%;
+	margin-left: 50px;
 }
 
 .approval-div-section div {
@@ -4177,43 +4210,8 @@ hr {
 	gap: 5px;
 }
 
-.secretkey-input {
-	width: 50%;
-	border-radius: 0;
-}
-
-.input-container {
-	display: flex;
-	align-items: center;
-}
-
-.copy-icon,
-.eye-icon {
-	border: 2px solid var(--border-gray);
-	border-radius: 5px;
-	height: 50px;
-	width: 50px;
-	transition: border-color 0.2s ease-in-out;
-	color: var(--lightblack);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.copy-icon {
-	border-right: none;
-	border-top-right-radius: 0;
-	border-bottom-right-radius: 0;
-}
-
-.eye-icon {
-	border-left: none;
-	border-top-left-radius: 0;
-	border-bottom-left-radius: 0;
-}
-
-.integration-Key {
-	margin-top: 25px;
+.root-update-btn{
+	margin-top: 30px;
 }
 
 /* ............dashboard weekly card....... */
@@ -4399,6 +4397,12 @@ hr {
 .secretkey-input {
 	width: 50%;
 	border-radius: 0;
+}
+
+.secretkey-input-div{
+	width: 56%;
+	border-top-right-radius: 5px;
+	border-bottom-right-radius: 5px;
 }
 
 .input-container {

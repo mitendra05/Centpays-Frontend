@@ -29,8 +29,8 @@ export class AQTest extends Component {
             expiryDate: "",
             cvvno: "",
             status: "",
-            isLoader: false,
-            orderNo: "",
+            isLoader: false,   
+            orderNo: "", 
         };
     }
 
@@ -39,13 +39,6 @@ export class AQTest extends Component {
         const parts = value.split(`; ${name}=`);
         if (parts.length === 2) return parts.pop().split(';').shift();
         return null;
-    }
-
-    componentDidMount() {
-        const userRole = localStorage.getItem('userRole');
-        if (userRole) {
-            this.setState({ userRole });
-        }
     }
 
     fetchData = async () => {
@@ -162,50 +155,93 @@ export class AQTest extends Component {
             isLoader: true,
         });
     };
-    
 
     render() {
-        const { billingName, billingEmail, billingPhoneNumber, amount, selectedCurrency, proceedClicked, cardHolderName, cardNumber, expiryDate, cvvno, selectedCard, userName, userRole, isLoader } = this.state;
-        return (
-            <>
-                <Header />
-                <Sidebar />
-                <div className={`main-screen ${this.state.sidebaropen ? "collapsed-main-screen" : "expanded-main-screen"}  `}>
-                    <div id='paymentscreen'>
-                        <div className='paymentscreen'>
-                            <div className='paymentDetails'>
-                                {isLoader ? <img src={Loader} className='loadingIcon' alt='loading gif' /> :
-                                    <>
-                                        {proceedClicked ?
-                                            <div className='min-cardDetails'>
+        const { billingName, billingEmail, billingPhoneNumber, amount, selectedCurrency,
+
+            proceedClicked, cardHolderName, cardNumder, expiryDate, cvvno, selectedCard, userName, userRole, isLoader } = this.state;
+            return (
+                <>
+                    <Header />
+                    <Sidebar />
+                    <div className={`main-screen ${this.state.sidebaropen
+                        ? "collapsed-main-screen"
+                        : "expanded-main-screen "
+                        }  `}
+                    >
+                        <div id='paymentscreen'>
+                            <div className='paymentscreen'>
+                                <div className='paymentDetails'>
+                                    {isLoader ? <img src={Loader} className='loadingIcon' alt='loading gif' /> : <>{proceedClicked ?
+                                        <div className='min-cardDetails'>
+                                            <div className='userImage'></div>
+                                            <span className='min-billingdetails-header'><p>{userName}</p><p className='p1'>{userRole}</p></span>
+                                            <div className='min-billingaount-header'>{amount + " " + selectedCurrency}</div>
+                                        </div>
+
+                                        :
+                                        <form className='max-billingdetails' onSubmit={this.handleProceed}>
+                                            <div className='max-billingdetails-header'>
                                                 <div className='userImage'></div>
-                                                <span className='min-billingdetails-header'>
-                                                    <p>{userName}</p><p className='p1'>{userRole}</p>
-                                                </span>
-                                                <div className='min-billingaount-header'>{amount + " " + selectedCurrency}</div>
+                                                <span className='max-billingdetails-header-userDetails'><p>{userName}</p><p className='p1'>{userRole}</p></span>
+                                                <div className='currencyToggel'>
+                                                    <p
+                                                        className={`selectedCurrency ${selectedCurrency === 'USD' ? '' : 'nocolor'}`}
+                                                        onClick={() => this.toggleCurrency('USD')}
+                                                    >
+                                                        USD
+                                                    </p>
+                                                    <p
+                                                        className={`selectedCurrency ${selectedCurrency === 'EUR' ? '' : 'nocolor'}`}
+                                                        onClick={() => this.toggleCurrency('EUR')}
+                                                    >
+                                                        EUR
+                                                    </p>
+                                                </div>
+
                                             </div>
-                                            :
-                                            <form className='max-billingdetails' onSubmit={this.handleProceed}>
-                                                <div className='max-billingdetails-header'>
-                                                    <div className='userImage'></div>
-                                                    <span className='max-billingdetails-header-userDetails'>
-                                                        <p>{userName}</p><p className='p1'>{userRole}</p>
-                                                    </span>
-                                                    <div className='currencyToggel'>
-                                                        <p className={`selectedCurrency ${selectedCurrency === 'USD' ? '' : 'nocolor'}`} onClick={() => this.toggleCurrency('USD')}>USD</p>
-                                                        <p className={`selectedCurrency ${selectedCurrency === 'EUR' ? '' : 'nocolor'}`} onClick={() => this.toggleCurrency('EUR')}>EUR</p>
-                                                    </div>
-                                                </div>
-                                                <div className='max-billingdetals-middle'>
-                                                    <input className='paymentInput' type='text' name='billingName' placeholder='Billing Name' value={billingName} required onChange={this.handleInputChange} />
-                                                    <input className='paymentInput' type='text' name='billingEmail' placeholder='Billing Email' value={billingEmail} required onChange={this.handleInputChange} />
-                                                    <input className='paymentInput' type='text' name='billingPhoneNumber' placeholder='Billing Phone Number' value={billingPhoneNumber} required onChange={this.handleInputChange} />
-                                                    <input className='paymentInput' type='text' name='amount' placeholder={`Amount ${selectedCurrency}`} value={amount} required onChange={this.handleInputChange} />
-                                                </div>
-                                                <div className='max-billingdetals-footer'>
-                                                    <button type='submit' className='btn-primary'>Proceed</button>
-                                                </div>
-                                            </form>}
+                                            <div className='max-billingdetals-middle'>
+                                                <input
+                                                    className='paymentInput'
+                                                    type='text'
+                                                    name='billingName'
+                                                    placeholder='Billing Name'
+                                                    value={billingName}
+                                                    required
+                                                    onChange={this.handleInputChange}
+                                                />
+                                                <input
+                                                    className='paymentInput'
+                                                    type='text'
+                                                    name='billingEmail'
+                                                    placeholder='Billing Email'
+                                                    value={billingEmail}
+                                                    required
+                                                    onChange={this.handleInputChange}
+                                                />
+                                                <input
+                                                    className='paymentInput'
+                                                    type='text'
+                                                    name='billingPhoneNumber'
+                                                    placeholder='Billing Phone Number'
+                                                    value={billingPhoneNumber}
+                                                    required
+                                                    onChange={this.handleInputChange}
+                                                />
+                                                <input
+                                                    className='paymentInput'
+                                                    type='text'
+                                                    name='amount'
+                                                    placeholder={`Amount ${selectedCurrency}`}
+                                                    value={amount}
+                                                    required
+                                                    onChange={this.handleInputChange}
+                                                />
+                                            </div>
+                                            <div className='max-billingdetals-footer'>
+                                                <button type='submit' className='btn-primary'>Procced</button>
+                                            </div>
+                                        </form>}
                                         {proceedClicked ?
                                             <div className='max-carddetails'>
                                                 <div className='max-carddetails-header'>
