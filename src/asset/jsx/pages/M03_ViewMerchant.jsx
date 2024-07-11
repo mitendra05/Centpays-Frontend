@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CryptoJS from "crypto-js";
 
 //Components
 import Header from "../components/Header";
@@ -51,6 +52,7 @@ class ViewMerchant extends Component {
       ratesData: [],
       approvalData: {},
       volumeData: [],
+      states: ["showApprovalRatio", "showTotalVolume", "showSettledVolume"],
       showApprovalRatio: true,
       showTotalVolume: false,
       showSettledVolume: false,
@@ -72,14 +74,13 @@ class ViewMerchant extends Component {
       buttonLabel: "Suspend",
       errorMessage: "",
       messageType: "",
-      signupKey: " ",
+      rootAccountKey: "",
       apiKey: "0987654321",
       secretKey: "1122334455",
-      showUserSignUpKey: false,
       showApiKey: false,
       showSecretKey: false,
       copied: {
-        signupKey: false,
+        rootAccountKey: false,
         apiKey: false,
         secretKey: false,
       },
@@ -99,40 +100,6 @@ class ViewMerchant extends Component {
     return null;
   };
 
-  fetchSignupKey = async () => {
-    const backendURL = process.env.REACT_APP_BACKEND_URL;
-    const { role, companyName } = this.state;
-
-    const company_name =
-      role === "merchant" ? companyName : this.state.company_name;
-
-    try {
-      const response = await fetch(
-        `${backendURL}/viewclient?company_name=${company_name}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${this.state.token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      this.setState({ signupKey: data.signupKey });
-      console.log(data.signupKey);
-    } catch (error) {
-      this.setState({
-        errorMessage: `Error fetching signup key: ${error.message}`,
-        messageType: "fail",
-      });
-    }
-  };
-
   componentDidMount() {
     const { company_name: stateCompanyName, companyName, role } = this.state;
 
@@ -140,7 +107,6 @@ class ViewMerchant extends Component {
 
     let date = new Date().toISOString().split("T")[0];
     const backendURL = process.env.REACT_APP_BACKEND_URL;
-    this.fetchSignupKey();
     this.fetchData(
       `${backendURL}/viewclient?company_name=${company_name}`,
       "overviewData",
@@ -393,89 +359,113 @@ class ViewMerchant extends Component {
   };
 
   handleBackArrowclick = (current) => {
-    if (current === "showApprovalRatio") {
-      this.setState({
-        showApprovalRatio: false,
-        showSettledVolume: true,
-        showTotalVolume: false,
-      });
-    } else if (current === "showTotalVolume") {
-      this.setState({
-        showApprovalRatio: true,
-        showSettledVolume: false,
-        showTotalVolume: false,
-      });
-    } else if (current === "showSettledVolume") {
-      this.setState({
-        showApprovalRatio: false,
-        showSettledVolume: false,
-        showTotalVolume: true,
-      });
-    }
+    const { states } = this.state;
+    const currentIndex = states.indexOf(current);
+    const newIndex = (currentIndex - 1 + states.length) % states.length;
+    this.setState({
+      showApprovalRatio: newIndex === 0,
+      showTotalVolume: newIndex === 1,
+      showSettledVolume: newIndex === 2,
+    });
   };
 
   handleNextArrowclick = (current) => {
-    if (current === "showApprovalRatio") {
-      this.setState({
-        showApprovalRatio: false,
-        showSettledVolume: false,
-        showTotalVolume: true,
-      });
-    } else if (current === "showTotalVolume") {
-      this.setState({
-        showApprovalRatio: false,
-        showSettledVolume: true,
-        showTotalVolume: false,
-      });
-    } else if (current === "showSettledVolume") {
-      this.setState({
-        showApprovalRatio: true,
-        showSettledVolume: false,
-        showTotalVolume: false,
-      });
-    }
+    const { states } = this.state;
+    const currentIndex = states.indexOf(current);
+    const newIndex = (currentIndex + 1) % states.length;
+    this.setState({
+      showApprovalRatio: newIndex === 0,
+      showTotalVolume: newIndex === 1,
+      showSettledVolume: newIndex === 2,
+    });
   };
 
   handleButtonClick = (buttonName) => {
-    if (buttonName === "overviewInfo") {
-      this.setState({
-        overviewInfo: true,
-        ratesInfo: false,
-        settlementInfo: false,
-        secretsInfo: false,
-      });
-    } else if (buttonName === "ratesInfo") {
-      this.setState({
-        overviewInfo: false,
-        ratesInfo: true,
-        settlementInfo: false,
-        secretsInfo: false,
-      });
-      this.fetchRatesData();
-    } else if (buttonName === "settlementInfo") {
-      this.setState({
-        overviewInfo: false,
-        ratesInfo: false,
-        settlementInfo: true,
-        secretsInfo: false,
-      });
-    } else if (buttonName === "secretsInfo") {
-      this.setState({
-        overviewInfo: false,
-        ratesInfo: false,
-        settlementInfo: false,
-        secretsInfo: true,
-      });
-    }
+    const newState = {
+      overviewInfo: false,
+      ratesInfo: false,
+      settlementInfo: false,
+      secretsInfo: false,
+    };
+
+    newState[buttonName] = true;
+
+    this.setState(newState, () => {
+      if (buttonName === "ratesInfo") {
+        this.fetchRatesData();
+      } else if (buttonName === "secretsInfo") {
+        const overviewData = this.state;
+        if (!overviewData.rootAccountCreated) {
+          const rootAccountKey = this.generateSignedToken(
+            overviewData.client_id,
+            "root"
+          );
+          this.setState({ rootAccountKey });
+        }
+      }
+    });
   };
 
-  formatNumber = (number) => {
-    const numStr = String(number);
-    if (numStr.length > 12) {
-      const stars = "*".repeat(numStr.length - 12);
-      return `${numStr.slice(0, 7)}${stars}${numStr.slice(-5)}`;
+  renderButton = (buttonName, isActive, IconComponent, label) => {
+    return isActive ? (
+      <button className="btn-primary btn3">
+        <div className="Info-btn">
+          <IconComponent className="white-icon" width="20" height="20" />
+          <p>{label}</p>
+        </div>
+      </button>
+    ) : (
+      <div
+        onClick={() => this.handleButtonClick(buttonName)}
+        className="btn-secondary btn-inactive"
+      >
+        <IconComponent className="black-icon" width="20" height="20" />
+        <p className="p2">{label}</p>
+      </div>
+    );
+  };
+
+  renderButtons = () => {
+    const { overviewInfo, ratesInfo, settlementInfo, secretsInfo } = this.state;
+
+    return (
+      <div className="btn-container">
+        {this.renderButton(
+          "overviewInfo",
+          overviewInfo,
+          PendingUserIcon,
+          "Overview"
+        )}
+        {this.renderButton("ratesInfo", ratesInfo, MerchantRates, "Rates")}
+        {this.renderButton(
+          "settlementInfo",
+          settlementInfo,
+          MerchantSettlements,
+          "Settlements"
+        )}
+        {this.renderButton("secretsInfo", secretsInfo, Eye, "Secrets")}
+      </div>
+    );
+  };
+
+  generateSignedToken = (clientId, role) => {
+    const payload = { clientId, role };
+    console.log(payload);
+    const payloadString = JSON.stringify(payload);
+    console.log(payloadString);
+    const token = CryptoJS.AES.encrypt(
+      payloadString,
+      process.env.REACT_APP_KEY_SECRET
+    ).toString();
+    return token;
+  };
+
+  maskString = (key) => {
+    if (key.length > 12) {
+      const stars = "*".repeat(key.length - 12);
+      return `${key.slice(0, 6)}${stars}${key.slice(-6)}`;
     }
-    return numStr;
+    return key;
   };
 
   handleCopy = (key, text) => {
@@ -493,79 +483,15 @@ class ViewMerchant extends Component {
     this.setState((prevState) => ({ [key]: !prevState[key] }));
   };
 
-  renderButtons = () => {
-    const { overviewInfo, ratesInfo, settlementInfo, secretsInfo } = this.state;
-    return (
-      <div className="btn-container">
-        {overviewInfo ? (
-          <button className="btn-primary btn3">
-            <div className="Info-btn">
-              <PendingUserIcon className=" white-icon" width="20" height="20" />
-              <p>Overview</p>
-            </div>
-          </button>
-        ) : (
-          <div
-            onClick={() => this.handleButtonClick("overviewInfo")}
-            className="btn-secondary btn-inactive"
-          >
-            {/* <img className="" src={overviewBlack} alt="overview"></img> */}
-            <PendingUserIcon className=" black-icon" width="20" height="20" />
-            <p className="p2">Overview</p>
-          </div>
-        )}
-        {ratesInfo ? (
-          <button className="btn-primary btn3">
-            <div className="Info-btn">
-              <MerchantRates className=" white-icon" />
-              <p>Rates</p>
-            </div>
-          </button>
-        ) : (
-          <div
-            onClick={() => this.handleButtonClick("ratesInfo")}
-            className="btn-secondary btn-inactive"
-          >
-            <MerchantRates className=" black-icon" />
-            <p className="p2">Rates</p>
-          </div>
-        )}
-        {settlementInfo ? (
-          <button className="btn-primary btn3">
-            <div className="Info-btn">
-              <MerchantSettlements className=" white-icon" />
-
-              <p>Settlements</p>
-            </div>
-          </button>
-        ) : (
-          <div
-            onClick={() => this.handleButtonClick("settlementInfo")}
-            className="btn-secondary btn-inactive"
-          >
-            <MerchantSettlements className=" black-icon" />
-            <p className="p2">Settlements</p>
-          </div>
-        )}
-        {secretsInfo ? (
-          <button className="btn-primary btn3">
-            <div className="Info-btn">
-              <Eye className=" white-icon" />
-
-              <p>Secrets</p>
-            </div>
-          </button>
-        ) : (
-          <div
-            onClick={() => this.handleButtonClick("secretsInfo")}
-            className="btn-secondary btn-inactive"
-          >
-            <Eye className=" black-icon" />
-            <p className="p2">Secrets</p>
-          </div>
-        )}
-      </div>
-    );
+  getCurrencySymbol = (currencyCode) => {
+    switch (currencyCode) {
+      case "USD":
+        return "$";
+      case "EUR":
+        return "€";
+      default:
+        return currencyCode;
+    }
   };
 
   render() {
@@ -579,24 +505,13 @@ class ViewMerchant extends Component {
       errorMessage,
       messageType,
       userRole,
-      signupKey,
       apiKey,
       secretKey,
-      showUserSignUpKey,
       showApiKey,
       showSecretKey,
       copied,
+      rootAccountKey,
     } = this.state;
-    const getCurrencySymbol = (currencyCode) => {
-      switch (currencyCode) {
-        case "USD":
-          return "$";
-        case "EUR":
-          return "€";
-        default:
-          return currencyCode;
-      }
-    };
 
     if (userRole === "admin") {
       return (
@@ -663,7 +578,8 @@ class ViewMerchant extends Component {
                                     2
                                   )
                                 )
-                              : "N/A"}%
+                              : "N/A"}
+                            %
                           </h5>
 
                           <p className="p2">Approval Ratio</p>
@@ -752,7 +668,11 @@ class ViewMerchant extends Component {
                     <ul>
                       <li>
                         <div className="p2 icons-div">
-                          <User className="merchant-icon" width="20" height="20"/>
+                          <User
+                            className="merchant-icon"
+                            width="20"
+                            height="20"
+                          />
                           Username:&nbsp;
                           <p>{overviewData.username}</p>
                         </div>
@@ -1031,7 +951,9 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.txn_app} ${getCurrencySymbol(
+                                  `${
+                                    ratesData.txn_app
+                                  } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
                                 )}
@@ -1054,7 +976,9 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.txn_dec} ${getCurrencySymbol(
+                                  `${
+                                    ratesData.txn_dec
+                                  } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
                                 )}
@@ -1075,7 +999,9 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.refund_fee} ${getCurrencySymbol(
+                                  `${
+                                    ratesData.refund_fee
+                                  } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
                                 )}
@@ -1098,7 +1024,9 @@ class ViewMerchant extends Component {
                                 ) : (
                                   `${
                                     ratesData.chargeback_fee
-                                  } ${getCurrencySymbol(ratesData.currency)}`
+                                  } ${this.getCurrencySymbol(
+                                    ratesData.currency
+                                  )}`
                                 )}
                               </td>
                               <td>-</td>
@@ -1148,7 +1076,9 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.setup_fee} ${getCurrencySymbol(
+                                  `${
+                                    ratesData.setup_fee
+                                  } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
                                 )}
@@ -1238,7 +1168,9 @@ class ViewMerchant extends Component {
                                 ) : (
                                   `${
                                     ratesData.annual_maintenance_fee
-                                  } ${getCurrencySymbol(ratesData.currency)}`
+                                  } ${this.getCurrencySymbol(
+                                    ratesData.currency
+                                  )}`
                                 )}
                               </td>
                               <td>
@@ -1289,47 +1221,6 @@ class ViewMerchant extends Component {
                   {this.state.secretsInfo && (
                     <div className="right-section-middle-body">
                       <div className="settlements-container">
-                        <h5>Account Creation Key</h5>
-                        <div className="secret-field">
-                          <p className="p2">Root User Sign Up Key</p>
-                          <div className="input-container">
-                            <div
-                              className={`icon-container copy-icon ${
-                                copied.signupKey ? "disabled" : ""
-                              }`}
-                              onClick={() =>
-                                !copied.signupKey &&
-                                this.handleCopy("userSignUpKey", signupKey)
-                              }
-                            >
-                              <Copy className="grey-icon" />
-                            </div>
-                            <input
-                              className="inputFeild secretkey-input"
-                              type="text"
-                              id="signupKey"
-                              value={
-                                showUserSignUpKey
-                                  ? signupKey
-                                  : this.formatNumber(signupKey)
-                              }
-                              readOnly
-                            />
-                            {/* <div
-                              className="icon-container eye-icon"
-                              onClick={() =>
-                                this.toggleVisibility("showUserSignUpKey")
-                              }
-                            >
-                              {showUserSignUpKey ? (
-                                <Eye className="grey-icon" />
-                              ) : (
-                                <Eye className="grey-icon" />
-                              )}
-                            </div> */}
-                          </div>
-                        </div>
-
                         <div className="integration-Key">
                           <h5>Integration Key</h5>
                           <div className="secret-field">
@@ -1346,9 +1237,7 @@ class ViewMerchant extends Component {
                                 type="text"
                                 id="apiKey"
                                 value={
-                                  showApiKey
-                                    ? apiKey
-                                    : this.formatNumber(apiKey)
+                                  showApiKey ? apiKey : this.maskString(apiKey)
                                 }
                                 readOnly
                               />
@@ -1383,7 +1272,7 @@ class ViewMerchant extends Component {
                                 value={
                                   showSecretKey
                                     ? secretKey
-                                    : this.formatNumber(secretKey)
+                                    : this.maskString(secretKey)
                                 }
                                 readOnly
                               />
@@ -1402,6 +1291,38 @@ class ViewMerchant extends Component {
                             </div>
                           </div>
                         </div>
+                        {!overviewData.rootAccountCreated && (
+                          <>
+                            <h5>Account Creation Key</h5>
+                            <div className="secret-field">
+                              <p className="p2">Root User Sign Up Key</p>
+                              <div className="input-container">
+                                <div
+                                  className={`icon-container copy-icon ${
+                                    copied.rootAccountKey ? "disabled" : ""
+                                  }`}
+                                  onClick={() =>
+                                    !copied.rootAccountKey &&
+                                    this.handleCopy(
+                                      "userSignUpKey",
+                                      rootAccountKey
+                                    )
+                                  }
+                                >
+                                  <Copy className="grey-icon" />
+                                </div>
+                                <input
+                                  className="inputFeild secretkey-input"
+                                  type="text"
+                                  id="rootAccountKey"
+                                  value={this.maskString(rootAccountKey)}
+                                  readOnly
+                                />
+                              </div>
+                              <p className="p2">Root account not created</p>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   )}
@@ -1516,7 +1437,7 @@ class ViewMerchant extends Component {
                           </div>
                         </div>
                         <div>
-                        <h5>
+                          <h5>
                             {this.state.approvalData &&
                             this.state.approvalData.approvalRatio !== undefined
                               ? parseFloat(
@@ -1524,7 +1445,8 @@ class ViewMerchant extends Component {
                                     2
                                   )
                                 )
-                              : "N/A"}%
+                              : "N/A"}
+                            %
                           </h5>
                           <p className="p2">Approval Ratio</p>
                         </div>
@@ -1891,7 +1813,9 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.txn_app} ${getCurrencySymbol(
+                                  `${
+                                    ratesData.txn_app
+                                  } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
                                 )}
@@ -1914,7 +1838,9 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.txn_dec} ${getCurrencySymbol(
+                                  `${
+                                    ratesData.txn_dec
+                                  } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
                                 )}
@@ -1935,7 +1861,9 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.refund_fee} ${getCurrencySymbol(
+                                  `${
+                                    ratesData.refund_fee
+                                  } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
                                 )}
@@ -1958,7 +1886,9 @@ class ViewMerchant extends Component {
                                 ) : (
                                   `${
                                     ratesData.chargeback_fee
-                                  } ${getCurrencySymbol(ratesData.currency)}`
+                                  } ${this.getCurrencySymbol(
+                                    ratesData.currency
+                                  )}`
                                 )}
                               </td>
                               <td>-</td>
@@ -2008,7 +1938,9 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.setup_fee} ${getCurrencySymbol(
+                                  `${
+                                    ratesData.setup_fee
+                                  } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
                                 )}
@@ -2098,7 +2030,9 @@ class ViewMerchant extends Component {
                                 ) : (
                                   `${
                                     ratesData.annual_maintenance_fee
-                                  } ${getCurrencySymbol(ratesData.currency)}`
+                                  } ${this.getCurrencySymbol(
+                                    ratesData.currency
+                                  )}`
                                 )}
                               </td>
                               <td>
@@ -2149,47 +2083,6 @@ class ViewMerchant extends Component {
                   {this.state.secretsInfo && (
                     <div className="right-section-middle-body">
                       <div className="settlements-container">
-                        <h5>Account Creation Key</h5>
-                        <div className="secret-field">
-                          <p className="p2">Root User Sign Up Key</p>
-                          <div className="input-container">
-                            <div
-                              className={`icon-container copy-icon ${
-                                copied.signupKey ? "disabled" : ""
-                              }`}
-                              onClick={() =>
-                                !copied.signupKey &&
-                                this.handleCopy("userSignUpKey", signupKey)
-                              }
-                            >
-                              <Copy className="grey-icon" />
-                            </div>
-                            <input
-                              className="inputFeild secretkey-input"
-                              type="text"
-                              id="signupKey"
-                              value={
-                                showUserSignUpKey
-                                  ? signupKey
-                                  : this.formatNumber(signupKey)
-                              }
-                              readOnly
-                            />
-                            {/* <div
-                              className="icon-container eye-icon"
-                              onClick={() =>
-                                this.toggleVisibility("showUserSignUpKey")
-                              }
-                            >
-                              {showUserSignUpKey ? (
-                                <Eye className="grey-icon" />
-                              ) : (
-                                <Eye className="grey-icon" />
-                              )}
-                            </div> */}
-                          </div>
-                        </div>
-
                         <div className="integration-Key">
                           <h5>Integration Key</h5>
                           <div className="secret-field">
@@ -2206,9 +2099,7 @@ class ViewMerchant extends Component {
                                 type="text"
                                 id="apiKey"
                                 value={
-                                  showApiKey
-                                    ? apiKey
-                                    : this.formatNumber(apiKey)
+                                  showApiKey ? apiKey : this.maskString(apiKey)
                                 }
                                 readOnly
                               />
@@ -2243,7 +2134,7 @@ class ViewMerchant extends Component {
                                 value={
                                   showSecretKey
                                     ? secretKey
-                                    : this.formatNumber(secretKey)
+                                    : this.maskString(secretKey)
                                 }
                                 readOnly
                               />
@@ -2262,6 +2153,34 @@ class ViewMerchant extends Component {
                             </div>
                           </div>
                         </div>
+                        <h5>Account Creation Key</h5>
+                        {/* <div className="secret-field">
+                          <p className="p2">Root User Sign Up Key</p>
+                          <div className="input-container">
+                            <div
+                              className={`icon-container copy-icon ${
+                                copied.signupKey ? "disabled" : ""
+                              }`}
+                              onClick={() =>
+                                !copied.signupKey &&
+                                this.handleCopy("userSignUpKey", signupKey)
+                              }
+                            >
+                              <Copy className="grey-icon" />
+                            </div>
+                            <input
+                              className="inputFeild secretkey-input"
+                              type="text"
+                              id="signupKey"
+                              value={
+                                showUserSignUpKey
+                                  ? signupKey
+                                  : this.maskString(signupKey)
+                              }
+                              readOnly
+                            />
+                          </div>
+                        </div> */}
                       </div>
                     </div>
                   )}

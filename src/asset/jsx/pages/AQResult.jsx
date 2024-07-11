@@ -8,28 +8,23 @@ import Failed from "../../media/image/Close.gif";
 // import { LeftSign } from '../../media/icon/SVGicons';
 import { LeftArrow } from "../../media/icon/SVGicons";
 
-export class AQTest extends Component {
+class AQResult extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			sidebaropen: true,
 			errorMessage: "",
-
 			orderNo: this.extractOrderNoFromURL(), // Initialize orderNo from URL
-
 			AqresultData: null,
 			error: null,
 		};
 	}
 
 	extractOrderNoFromURL() {
-		const currentPath = window.location.pathname;
-		const orderNo = currentPath.split("/paymentresult/")[1];
-		return orderNo;
+		return window.location.pathname.split("/paymentresult/")[1];
 	}
 
 	componentDidMount() {
-
 		if (this.state.orderNo) {
 			this.fetchData();
 			console.log("Hello")
@@ -48,6 +43,7 @@ export class AQTest extends Component {
 			}
 			const data = await response.json();
 			this.setState({ AqresultData: data.data });
+			console.log("aq result data",data)
 			this.setState({ status: data.status })
 		} catch (error) {
 			this.setState({ error: error.message || 'An error occurred while fetching data.' });
@@ -82,7 +78,7 @@ export class AQTest extends Component {
 	}
 
 	render() {
-		const { status } = this.props;
+		const { status } = this.state;
 		const { AqresultData } = this.state;
 
 		// Rendering based on whether AqresultData is available
@@ -93,7 +89,7 @@ export class AQTest extends Component {
 						<>
 							{status === "Success" ? (
 								<div className="paymentSuccessfull">
-									<Link to="/acquirertestingenv"><LeftArrow className="paymentBack" /></Link>
+									<button onClick={() => window.location.replace("https://centpays.online/acquirertestingenv")} className="paymentBack"><LeftArrow /></button>
 									<img src={Success} alt="Success GIF" className="statusGif" />
 									<h5>Transaction Successful!</h5>
 									<div className="paymentDetails">
@@ -131,7 +127,7 @@ export class AQTest extends Component {
 								</div>
 							) : (
 								<div className="paymentFailed">
-									<Link to="/acquirertestingenv"><LeftArrow className="paymentBack" /></Link>
+									<button onClick={() => window.location.replace("https://centpays.online/acquirertestingenv")} className="paymentBack"><LeftArrow /></button>
 									<img src={Failed} alt="Failed GIF" className="statusGif" />
 									<h5>Transaction Failed!</h5>
 									<div className="paymentDetails">
@@ -179,4 +175,4 @@ export class AQTest extends Component {
 
 }
 
-export default AQTest;
+export default AQResult;

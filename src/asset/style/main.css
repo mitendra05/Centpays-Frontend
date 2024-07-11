@@ -3913,6 +3913,15 @@ hr {
 	padding: 2px;
 }
 
+.secret-key{
+	text-align: center;
+	margin-top: 10px;
+}
+
+.secretkey-head{
+	text-align: center;
+}
+
 /* / View Merchant / */
 
 .view-merchant-container {
