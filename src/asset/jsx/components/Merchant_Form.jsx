@@ -6,7 +6,7 @@ import MessageBox from "./Message_box";
 import Modal from "./Modal";
 
 //SVG icons
-import { LeftArrow, RightArrow, Reset, Close } from "../../media/icon/SVGicons";
+import { LeftArrow, RightArrow, Reset, Close,Copy } from "../../media/icon/SVGicons";
 import CustomTooltip from "./Custom-tooltip";
 
 class MerchantForm extends Component {
@@ -130,119 +130,121 @@ decodeSignedToken = (token) => {
   }
 };
 
+ handleSubmit = async (event) => {
+  event.preventDefault();
+  const backendURL = process.env.REACT_APP_BACKEND_URL;
+  const { companyInfo, businessInfo, directorInfo, token } = this.state;
 
-  handleSubmit = async (event) => {
-    event.preventDefault();
-    const backendURL = process.env.REACT_APP_BACKEND_URL;
-    const { companyInfo, businessInfo, directorInfo, token } = this.state;
+  const newData = {
+    company_name: this.state.company_name,
+    username: this.state.username,
+    email: this.state.email,
+    phone_number: this.state.phone_number,
+    postal_code: this.state.postal_code,
+    country: this.state.country,
+    state: this.state.state,
+    city: this.state.city,
+    street_address: this.state.street_address,
+    street_address2: this.state.street_address2,
+    industries_id: this.state.industries_id,
+    business_type: this.state.business_type,
+    business_category: this.state.business_category,
+    business_subcategory: this.state.business_subcategory,
+    business_registered_on: this.state.business_registered_on,
+    merchant_pay_in: this.state.merchant_pay_in,
+    merchant_pay_out: this.state.merchant_pay_out,
+    turnover: this.state.turnover,
+    website_url: this.state.website_url,
+    settlement_charge: this.state.settlement_charge,
+    expected_chargeback_percentage: this.state.expected_chargeback_percentage,
+    director_first_name: this.state.director_first_name,
+    director_last_name: this.state.director_last_name,
+    skype_id: this.state.skype_id,
+  };
+  const isUpdate = !!this.state._id;
 
-    const newData = {
-      company_name: this.state.company_name,
-      username: this.state.username,
-      email: this.state.email,
-      phone_number: this.state.phone_number,
-      postal_code: this.state.postal_code,
-      country: this.state.country,
-      state: this.state.state,
-      city: this.state.city,
-      street_address: this.state.street_address,
-      street_address2: this.state.street_address2,
-      industries_id: this.state.industries_id,
-      business_type: this.state.business_type,
-      business_category: this.state.business_category,
-      business_subcategory: this.state.business_subcategory,
-      business_registered_on: this.state.business_registered_on,
-      merchant_pay_in: this.state.merchant_pay_in,
-      merchant_pay_out: this.state.merchant_pay_out,
-      turnover: this.state.turnover,
-      website_url: this.state.website_url,
-      settlement_charge: this.state.settlement_charge,
-      expected_chargeback_percentage: this.state.expected_chargeback_percentage,
-      director_first_name: this.state.director_first_name,
-      director_last_name: this.state.director_last_name,
-      skype_id: this.state.skype_id,
-    };
-    const isUpdate = !!this.state._id;
+  const url = isUpdate ? `${backendURL}/updateclient/` : `${backendURL}/clients`;
+  const method = isUpdate ? "PATCH" : "POST";
+  const data = isUpdate ? { id: this.state._id, ...newData } : newData;
 
-    const url = isUpdate
-      ? `${backendURL}/updateclient/`
-      : `${backendURL}/clients`;
-    const method = isUpdate ? "PATCH" : "POST";
-    const data = isUpdate ? { id: this.state._id, ...newData } : newData;
+  if (companyInfo) {
+    this.setState({ companyInfo: false, businessInfo: true });
+  } else if (businessInfo) {
+    this.setState({ businessInfo: false, directorInfo: true });
+  } else if (directorInfo) {
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
 
-    if (companyInfo) {
-      this.setState({ companyInfo: false, businessInfo: true });
-    } else if (businessInfo) {
-      this.setState({ businessInfo: false, directorInfo: true });
-    } else if (directorInfo) {
-      try {
-        const response = await fetch(url, {
-          method,
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(data),
-        });
-
-        if (response.ok) {
-          const client_data = await response.json();
-          console.log("client",client_data)
-          if (!isUpdate) {
-            const rootAccountKey = this.generateSignedToken(client_data.client.client_id, 'root');
-            this.setState({rootAccountKey, isAddMerchantPanelOpen:false,showSeceretKeyModal:true})
-          }
-          
-          this.setState({
-            errorMessage: isUpdate
-              ? "Data Updated Successfully"
-              : `Data Submitted Successfully`,
-            messageType: "success",
-            companyInfo: true,
-            businessInfo: false,
-            directorInfo: false,
-            company_name: "",
-            username: "",
-            email: "",
-            phone_number: "",
-            postal_code: "",
-            country: "",
-            state: "",
-            city: "",
-            street_address: "",
-            street_address2: "",
-            industries_id: "",
-            business_type: "",
-            business_category: "",
-            business_subcategory: "",
-            business_registered_on: "",
-            merchant_pay_in: "",
-            merchant_pay_out: "",
-            turnover: "",
-            website_url: "",
-            settlement_charge: "",
-            expected_chargeback_percentage: "",
-            director_first_name: "",
-            director_last_name: "",
-            skype_id: "",
-          });
-          // this.props.refreshMerchantData() ;
-        } else {
-          const errorData = await response.json();
-          this.setState({
-            errorMessage: errorData.message || "Please fill all the fields",
-            messageType: "fail",
-          });
+      if (response.ok) {
+        const client_data = await response.json();
+        let rootAccountKey, decodedKey;
+        if (!isUpdate) {
+          rootAccountKey = this.generateSignedToken(client_data.client.client_id, 'root');
+          this.setState({isAddMerchantPanelOpen:false,showSeceretKeyModal:true})
         }
-      } catch (error) {
+
         this.setState({
-          errorMessage: "Error submitting data",
+          generatedKey: rootAccountKey || '',
+          showSeceretKeyModal: !isUpdate,
+          errorMessage: isUpdate
+            ? "Data Updated Successfully"
+            : "Data Submitted Successfully",
+          messageType: "success",
+          companyInfo: true,
+          businessInfo: false,
+          directorInfo: false,
+          company_name: "",
+          username: "",
+          email: "",
+          phone_number: "",
+          postal_code: "",
+          country: "",
+          state: "",
+          city: "",
+          street_address: "",
+          street_address2: "",
+          industries_id: "",
+          business_type: "",
+          business_category: "",
+          business_subcategory: "",
+          business_registered_on: "",
+          merchant_pay_in: "",
+          merchant_pay_out: "",
+          turnover: "",
+          website_url: "",
+          settlement_charge: "",
+          expected_chargeback_percentage: "",
+          director_first_name: "",
+          director_last_name: "",
+          skype_id: "",
+        });
+        
+        if (isUpdate) {
+          this.props.refreshMerchantData();
+        }
+      } else {
+        const errorData = await response.json();
+        this.setState({
+          errorMessage: errorData.message || "Please fill all the fields",
           messageType: "fail",
         });
-        console.error(error);
       }
+    } catch (error) {
+      this.setState({
+        errorMessage: "Error submitting data",
+        messageType: "fail",
+      });
+      console.error(error);
     }
-  };
+  }
+};
 
   SecerectKeyModalClose = () => {
     this.setState({ showSeceretKeyModal: false });
@@ -270,6 +272,7 @@ decodeSignedToken = (token) => {
   render() {
     const { handleAddMerchant, submitButtonText, heading,isDisable} = this.props;
     const { errorMessage, messageType, showSeceretKeyModal, rootAccountKey } = this.state;
+
     return (
       <>
         {errorMessage && (
@@ -279,7 +282,8 @@ decodeSignedToken = (token) => {
             onClose={() => this.setState({ errorMessage: "" })}
           />
         )}
-{showSeceretKeyModal && (
+
+        {showSeceretKeyModal && (
            <Modal
            onClose={() => this.SecerectKeyModalClose()}
            onDecline={() => this.SecerectKeyModalClose()}
@@ -296,6 +300,7 @@ decodeSignedToken = (token) => {
            }
          />
        )}
+
        {this.state.isAddMerchantPanelOpen && (<><div className="overlay"></div>
         <div className="sendPanel">
           <div className="sendPanel-header">
@@ -709,7 +714,7 @@ decodeSignedToken = (token) => {
             )}
           </div>
         </div></>)}
-        
+
       </>
     );
   }

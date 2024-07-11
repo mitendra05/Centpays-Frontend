@@ -27,7 +27,6 @@ class AQResult extends Component {
 	componentDidMount() {
 		if (this.state.orderNo) {
 			this.fetchData();
-			console.log("Hello")
 		}
 	}
 

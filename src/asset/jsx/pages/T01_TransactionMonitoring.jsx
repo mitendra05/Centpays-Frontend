@@ -16,8 +16,9 @@ class TransactionMonitoring extends Component {
     super(props);
     this.state = {
       sidebaropen: true,
-      token: this.getCookie('token'),
-      userRole: this.getCookie('role'),
+      token: this.getCookie("token"),
+      userRole: this.getCookie("role"),
+      merchantName: this.getCookie("company_name"),
       showMoreOptions: false,
       selectedRowToView: null,
       errorMessage: "",
@@ -66,9 +67,9 @@ class TransactionMonitoring extends Component {
   getCookie = (name) => {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
+    if (parts.length === 2) return parts.pop().split(";").shift();
     return null;
-  }
+  };
 
   componentDidMount() {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
@@ -77,7 +78,11 @@ class TransactionMonitoring extends Component {
     this.fetchData(`${backendURL}/listofcountries`, "countryList");
     this.fetchData(`${backendURL}/acquirerlist`, "paymentgatewayList");
     window.addEventListener("click", this.handleClickOutside);
+    if (this.state.userRole === "merchant") {
+      this.handleSearch();
+    }
   }
+
   componentWillUnmount() {
     window.removeEventListener("click", this.handleClickOutside);
   }
@@ -119,6 +124,14 @@ class TransactionMonitoring extends Component {
       [id]: value,
       showTypedData: false,
     });
+    this.handleSearch();
+  };
+
+  handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      this.handleSearch();
+    }
   };
 
   toggleTypedData = () => {
@@ -165,11 +178,11 @@ class TransactionMonitoring extends Component {
 
   handleSearch = async () => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
-    const { token } = this.state;
+    const { token, userRole, merchantName } = this.state;
     const searchedData = {
       searchIds: this.state.searchIds,
       status: this.state.status,
-      merchant: this.state.merchant,
+      merchant: userRole === "merchant" ? merchantName : this.state.merchant,
       fromDate: this.state.fromDate,
       toDate: this.state.toDate,
       mid: this.state.mid,
@@ -282,9 +295,7 @@ class TransactionMonitoring extends Component {
         toDate: to,
         activeQuickSearchbtn: buttonName,
       });
-    }
-
-    else if (buttonName === "Last Week") {
+    } else if (buttonName === "Last Week") {
       const today = new Date();
       const dayOfWeek = today.getDay();
       const daysSinceLastMonday = ((dayOfWeek + 6) % 7) + 7;
@@ -311,7 +322,6 @@ class TransactionMonitoring extends Component {
         toDate: to,
         activeQuickSearchbtn: buttonName,
       });
-
     } else if (buttonName === "This Month") {
       const currentDate = new Date();
 
@@ -331,7 +341,6 @@ class TransactionMonitoring extends Component {
         toDate: to,
         activeQuickSearchbtn: buttonName,
       });
-
     } else if (buttonName === "Last Month") {
       const currentDate = new Date();
       const endDate = new Date(
@@ -354,7 +363,6 @@ class TransactionMonitoring extends Component {
         toDate: to,
         activeQuickSearchbtn: buttonName,
       });
-
     } else if (buttonName === "This Year") {
       const currentDate = new Date();
 
@@ -433,20 +441,16 @@ class TransactionMonitoring extends Component {
                             value={searchIds}
                             placeholder="Txn ID/ Merchant Txn ID"
                             onChange={this.handleInputChange}
+                            onKeyDown={this.handleKeyDown}
                           />
                         </div>
 
                         {showTypedData && (
-                          <div ref={(ref) => (this.modalRef = ref)}>
-                            <div className="Transaction-monitoring-modal">
-                              <p>
-                                {searchIdsArray.map((line, index) => (
-                                  <span key={index}>
-                                    {line}
-                                    <br />
-                                  </span>
-                                ))}
-                              </p>
+                          <div className="Transaction-monitoring-modal">
+                            <div className="Transaction-monitoring-search-modal">
+                              {searchIdsArray.map((line, index) => (
+                                <p key={index}>{line}</p>
+                              ))}
                             </div>
                           </div>
                         )}
@@ -466,6 +470,7 @@ class TransactionMonitoring extends Component {
                           id="status"
                           value={this.state.status}
                           onChange={this.handleInputChange}
+                          onKeyDown={this.handleKeyDown}
                         >
                           <option value="">Select Status</option>
                           <option value="SUccess">Success</option>
@@ -487,6 +492,7 @@ class TransactionMonitoring extends Component {
                           id="merchant"
                           value={this.state.merchant}
                           onChange={this.handleInputChange}
+                          onKeyDown={this.handleKeyDown}
                         >
                           <option value="">Select Merchant</option>
                           {this.state.companyList.map((company) => (
@@ -528,6 +534,7 @@ class TransactionMonitoring extends Component {
                           id="fromDate"
                           value={this.state.fromDate || ""}
                           onChange={this.handleInputChange}
+                          onKeyDown={this.handleKeyDown}
                         ></input>
                       </div>
                       <div className="date-input-div">
@@ -545,6 +552,7 @@ class TransactionMonitoring extends Component {
                           id="toDate"
                           value={this.state.toDate || ""}
                           onChange={this.handleInputChange}
+                          onKeyDown={this.handleKeyDown}
                         ></input>
                       </div>
                     </div>
@@ -557,6 +565,7 @@ class TransactionMonitoring extends Component {
                             <button
                               className="active-quick-search-btn"
                               onClick={() => this.handleQuickSearch("Today")}
+                              onKeyDown={this.handleKeyDown}
                             >
                               Today
                             </button>
@@ -575,6 +584,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("Yesterday")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               Yesterday
                             </button>
@@ -595,6 +605,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("This Week")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               This Week
                             </button>
@@ -614,6 +625,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("Last Week")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               Last Week
                             </button>
@@ -633,6 +645,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("This Month")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               This Month
                             </button>
@@ -652,6 +665,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("Last Month")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               Last Month
                             </button>
@@ -671,6 +685,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("This Year")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               This Year
                             </button>
@@ -702,6 +717,7 @@ class TransactionMonitoring extends Component {
                         id="mid"
                         value={this.state.mid}
                         onChange={this.handleInputChange}
+                        onKeyDown={this.handleKeyDown}
                       >
                         <option value="">Select MID</option>
                         {this.state.midList.map((mid) => (
@@ -725,6 +741,7 @@ class TransactionMonitoring extends Component {
                         id="paymentgateway"
                         value={this.state.paymentgateway}
                         onChange={this.handleInputChange}
+                        onKeyDown={this.handleKeyDown}
                       >
                         <option value="">Select Payment Gateway</option>
                         {this.state.paymentgatewayList.map((paymentgateway) => (
@@ -747,6 +764,7 @@ class TransactionMonitoring extends Component {
                         id="currency"
                         value={this.state.currency}
                         onChange={this.handleInputChange}
+                        onKeyDown={this.handleKeyDown}
                       >
                         <option value="">Select Currency</option>
                         <option value="USD">USD</option>
@@ -766,6 +784,7 @@ class TransactionMonitoring extends Component {
                         id="country"
                         value={this.state.country}
                         onChange={this.handleInputChange}
+                        onKeyDown={this.handleKeyDown}
                       >
                         <option value="">Select Country</option>
                         {this.state.countryList.map((country) => (
@@ -788,6 +807,7 @@ class TransactionMonitoring extends Component {
                         id="cardtype"
                         value={this.state.cardtype}
                         onChange={this.handleInputChange}
+                        onKeyDown={this.handleKeyDown}
                       >
                         <option value="">Select Card Type</option>
                         <option value="Visa">Visa</option>
@@ -809,6 +829,7 @@ class TransactionMonitoring extends Component {
                         value={this.state.cardnumber}
                         placeholder="First 6 and Last 4 digits"
                         onChange={this.handleInputChange}
+                        onKeyDown={this.handleKeyDown}
                       ></input>
                     </div>
                     <div
@@ -849,19 +870,15 @@ class TransactionMonitoring extends Component {
                             value={searchIds}
                             placeholder="Txn ID/ Merchant Txn ID"
                             onChange={this.handleInputChange}
+                            onKeyDown={this.handleKeyDown}
                           />
                         </div>
                         {showTypedData && (
-                          <div ref={(ref) => (this.modalRef = ref)}>
-                            <div className="Transaction-monitoring-modal">
-                              <p>
-                                {searchIdsArray.map((line, index) => (
-                                  <span key={index}>
-                                    {line}
-                                    <br />
-                                  </span>
-                                ))}
-                              </p>
+                          <div className="Transaction-monitoring-modal">
+                            <div className="Transaction-monitoring-search-modal">
+                              {searchIdsArray.map((line, index) => (
+                                <p key={index}>{line}</p>
+                              ))}
                             </div>
                           </div>
                         )}
@@ -880,6 +897,7 @@ class TransactionMonitoring extends Component {
                           id="status"
                           value={this.state.status}
                           onChange={this.handleInputChange}
+                          onKeyDown={this.handleKeyDown}
                         >
                           <option value="">Select Status</option>
                           <option value="Success">Success</option>
@@ -901,6 +919,7 @@ class TransactionMonitoring extends Component {
                           id="merchant"
                           value={this.state.merchant}
                           onChange={this.handleInputChange}
+                          onKeyDown={this.handleKeyDown}
                         >
                           <option value="">Select Merchant</option>
                           {this.state.companyList.map((company) => (
@@ -970,6 +989,7 @@ class TransactionMonitoring extends Component {
                             <button
                               className="active-quick-search-btn"
                               onClick={() => this.handleQuickSearch("Today")}
+                              onKeyDown={this.handleKeyDown}
                             >
                               Today
                             </button>
@@ -988,6 +1008,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("Yesterday")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               Yesterday
                             </button>
@@ -1008,6 +1029,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("This Week")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               This Week
                             </button>
@@ -1027,6 +1049,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("Last Week")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               Last Week
                             </button>
@@ -1046,6 +1069,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("This Month")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               This Month
                             </button>
@@ -1065,6 +1089,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("Last Month")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               Last Month
                             </button>
@@ -1084,6 +1109,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("This Year")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               This Year
                             </button>
@@ -1175,54 +1201,50 @@ class TransactionMonitoring extends Component {
               }  `}
             >
               <div className="main-screen-rows transaction-monitoring-first-row">
-              {this.state.showMoreOptions ? (
+                {this.state.showMoreOptions ? (
                   <div className="row-cards search-card">
-                  <div className="id-search-row">
-                    <div className="id-input-div">
-                      <div>
-                        <label
-                          className={`id-label ${
-                            searchIds ? "filled-id-label" : ""
-                          }`}
-                          htmlFor="searchIds"
-                        >
-                          Id:
-                        </label>
-                        {searchIdsArray.length > 1 && (
-                          <div
-                            className="icon-container"
-                            ref={(ref) => (this.iconContainerRef = ref)}
+                    <div className="id-search-row-div">
+                      <div className="id-input-div">
+                        <div>
+                          <label
+                            className={`id-label ${
+                              searchIds ? "filled-id-label" : ""
+                            }`}
+                            htmlFor="searchIds"
                           >
-                            <Eye onClick={this.toggleTypedData} />
+                            Id:
+                          </label>
+                          {searchIdsArray.length > 1 && (
+                            <div
+                              className="icon-container"
+                              ref={(ref) => (this.iconContainerRef = ref)}
+                            >
+                              <Eye onClick={this.toggleTypedData} />
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <input
+                            className="id-input "
+                            type="text"
+                            id="searchIds"
+                            value={searchIds}
+                            placeholder="Txn ID/ Merchant Txn ID"
+                            onChange={this.handleInputChange}
+                            onKeyDown={this.handleKeyDown}
+                          />
+                        </div>
+                        {showTypedData && (
+                          <div className="Transaction-monitoring-modal">
+                            <div className="Transaction-monitoring-search-modal">
+                              {searchIdsArray.map((line, index) => (
+                                <p key={index}>{line}</p>
+                              ))}
+                            </div>
                           </div>
                         )}
                       </div>
-                      <div>
-                        <input
-                          className="id-input "
-                          type="text"
-                          id="searchIds"
-                          value={searchIds}
-                          placeholder="Txn ID/ Merchant Txn ID"
-                          onChange={this.handleInputChange}
-                        />
-                      </div>
-                      {showTypedData && (
-                        <div ref={(ref) => (this.modalRef = ref)}>
-                          <div className="Transaction-monitoring-modal">
-                            <p>
-                              {searchIdsArray.map((line, index) => (
-                                <span key={index}>
-                                  {line}
-                                  <br />
-                                </span>
-                              ))}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="search-select-div search-status-div">
+                      <div className="search-select-div search-status-div">
                         <label
                           className={`id-label ${
                             this.state.status ? "filled-id-label" : ""
@@ -1236,6 +1258,7 @@ class TransactionMonitoring extends Component {
                           id="status"
                           value={this.state.status}
                           onChange={this.handleInputChange}
+                          onKeyDown={this.handleKeyDown}
                         >
                           <option value="">Select Status</option>
                           <option value="Success">Success</option>
@@ -1261,7 +1284,6 @@ class TransactionMonitoring extends Component {
 													))}
 												</select>
 											</div> */}
-                     
                     </div>
 
                     <div className="from-to-input-div">
@@ -1280,6 +1302,7 @@ class TransactionMonitoring extends Component {
                           id="fromDate"
                           value={this.state.fromDate}
                           onChange={this.handleInputChange}
+                          onKeyDown={this.handleKeyDown}
                         ></input>
                       </div>
                       <div className="id-input-div todate-div">
@@ -1297,6 +1320,7 @@ class TransactionMonitoring extends Component {
                           id="toDate"
                           value={this.state.toDate}
                           onChange={this.handleInputChange}
+                          onKeyDown={this.handleKeyDown}
                         ></input>
                       </div>
                       <div className="txn-monitoring-btn-div txn-monitoring-mrcnt-btn-div">
@@ -1322,6 +1346,7 @@ class TransactionMonitoring extends Component {
                             <button
                               className="active-quick-search-btn"
                               onClick={() => this.handleQuickSearch("Today")}
+                              onKeyDown={this.handleKeyDown}
                             >
                               Today
                             </button>
@@ -1349,6 +1374,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("Yesterday")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               Yesterday
                             </button>
@@ -1360,6 +1386,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("This Week")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               This Week
                             </button>
@@ -1379,6 +1406,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("Last Week")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               Last Week
                             </button>
@@ -1398,6 +1426,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("This Month")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               This Month
                             </button>
@@ -1417,6 +1446,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("Last Month")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               Last Month
                             </button>
@@ -1436,6 +1466,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("This Year")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               This Year
                             </button>
@@ -1453,23 +1484,29 @@ class TransactionMonitoring extends Component {
                       </div>
                     </div>
                     <div className="more-options-div">
-                      <label className={`id-label ${this.state.mid ? "filled-id-label" : ""} `} htmlFor="mid">
-												MID:
-											</label>
-	
-											<select
-												className="id-input card-type"
-												id="mid"
-												value={this.state.mid}
-												onChange={this.handleInputChange}
-											>
-												<option value="">Select MID</option>
-												{this.state.midList.map((mid) => (
-													<option key={mid} value={mid}>
-														{mid}
-													</option>
-												))}
-											</select>
+                      <label
+                        className={`id-label ${
+                          this.state.mid ? "filled-id-label" : ""
+                        } `}
+                        htmlFor="mid"
+                      >
+                        MID:
+                      </label>
+
+                      <select
+                        className="id-input card-type"
+                        id="mid"
+                        value={this.state.mid}
+                        onChange={this.handleInputChange}
+                        onKeyDown={this.handleKeyDown}
+                      >
+                        <option value="">Select MID</option>
+                        {this.state.midList.map((mid) => (
+                          <option key={mid} value={mid}>
+                            {mid}
+                          </option>
+                        ))}
+                      </select>
 
                       {/* <label className={`id-label ${this.state.paymentgateway ? "filled-id-label" : ""} `} htmlFor="paymentgateway">
 												Payment Gateway:
@@ -1502,6 +1539,7 @@ class TransactionMonitoring extends Component {
                         id="currency"
                         value={this.state.currency}
                         onChange={this.handleInputChange}
+                        onKeyDown={this.handleKeyDown}
                       >
                         <option value="">Select Currency</option>
                         <option value="USD">USD</option>
@@ -1521,6 +1559,7 @@ class TransactionMonitoring extends Component {
                         id="country"
                         value={this.state.country}
                         onChange={this.handleInputChange}
+                        onKeyDown={this.handleKeyDown}
                       >
                         <option value="">Select Country</option>
                         {this.state.countryList.map((country) => (
@@ -1543,6 +1582,7 @@ class TransactionMonitoring extends Component {
                         id="cardtype"
                         value={this.state.cardtype}
                         onChange={this.handleInputChange}
+                        onKeyDown={this.handleKeyDown}
                       >
                         <option value="">Select Card Type</option>
                         <option value="Visa">Visa</option>
@@ -1564,6 +1604,7 @@ class TransactionMonitoring extends Component {
                         value={this.state.cardnumber}
                         placeholder="First 6 and Last 4 digits"
                         onChange={this.handleInputChange}
+                        onKeyDown={this.handleKeyDown}
                       ></input>
                     </div>
                     <div
@@ -1576,52 +1617,48 @@ class TransactionMonitoring extends Component {
                   </div>
                 ) : (
                   <div className="row-cards search-card">
-                  <div className="id-search-row">
-                    <div className="id-input-div">
-                      <div>
-                        <label
-                          className={`id-label ${
-                            searchIds ? "filled-id-label" : ""
-                          }`}
-                          htmlFor="searchIds"
-                        >
-                          Id:
-                        </label>
-                        {searchIdsArray.length > 1 && (
-                          <div
-                            className="icon-container"
-                            ref={(ref) => (this.iconContainerRef = ref)}
+                    <div className="id-search-row-div">
+                      <div className="id-input-div">
+                        <div>
+                          <label
+                            className={`id-label ${
+                              searchIds ? "filled-id-label" : ""
+                            }`}
+                            htmlFor="searchIds"
                           >
-                            <Eye onClick={this.toggleTypedData} />
+                            Id:
+                          </label>
+                          {searchIdsArray.length > 1 && (
+                            <div
+                              className="icon-container"
+                              ref={(ref) => (this.iconContainerRef = ref)}
+                            >
+                              <Eye onClick={this.toggleTypedData} />
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <input
+                            className="id-input "
+                            type="text"
+                            id="searchIds"
+                            value={searchIds}
+                            placeholder="Txn ID/ Merchant Txn ID"
+                            onChange={this.handleInputChange}
+                            onKeyDown={this.handleKeyDown}
+                          />
+                        </div>
+                        {showTypedData && (
+                          <div className="Transaction-monitoring-modal">
+                            <div className="Transaction-monitoring-search-modal">
+                              {searchIdsArray.map((line, index) => (
+                                <p key={index}>{line}</p>
+                              ))}
+                            </div>
                           </div>
                         )}
                       </div>
-                      <div>
-                        <input
-                          className="id-input "
-                          type="text"
-                          id="searchIds"
-                          value={searchIds}
-                          placeholder="Txn ID/ Merchant Txn ID"
-                          onChange={this.handleInputChange}
-                        />
-                      </div>
-                      {showTypedData && (
-                        <div ref={(ref) => (this.modalRef = ref)}>
-                          <div className="Transaction-monitoring-modal">
-                            <p>
-                              {searchIdsArray.map((line, index) => (
-                                <span key={index}>
-                                  {line}
-                                  <br />
-                                </span>
-                              ))}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="search-select-div search-status-div">
+                      <div className="search-select-div search-status-div">
                         <label
                           className={`id-label ${
                             this.state.status ? "filled-id-label" : ""
@@ -1635,6 +1672,7 @@ class TransactionMonitoring extends Component {
                           id="status"
                           value={this.state.status}
                           onChange={this.handleInputChange}
+                          onKeyDown={this.handleKeyDown}
                         >
                           <option value="">Select Status</option>
                           <option value="Success">Success</option>
@@ -1660,6 +1698,7 @@ class TransactionMonitoring extends Component {
                           id="fromDate"
                           value={this.state.fromDate}
                           onChange={this.handleInputChange}
+                          onKeyDown={this.handleKeyDown}
                         ></input>
                       </div>
                       <div className="id-input-div todate-div">
@@ -1677,6 +1716,7 @@ class TransactionMonitoring extends Component {
                           id="toDate"
                           value={this.state.toDate}
                           onChange={this.handleInputChange}
+                          onKeyDown={this.handleKeyDown}
                         ></input>
                       </div>
                       <div className="txn-monitoring-btn-div txn-monitoring-mrcnt-btn-div">
@@ -1702,6 +1742,7 @@ class TransactionMonitoring extends Component {
                             <button
                               className="active-quick-search-btn"
                               onClick={() => this.handleQuickSearch("Today")}
+                              onKeyDown={this.handleKeyDown}
                             >
                               Today
                             </button>
@@ -1720,6 +1761,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("Yesterday")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               Yesterday
                             </button>
@@ -1740,6 +1782,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("This Week")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               This Week
                             </button>
@@ -1759,6 +1802,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("Last Week")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               Last Week
                             </button>
@@ -1778,6 +1822,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("This Month")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               This Month
                             </button>
@@ -1797,6 +1842,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("Last Month")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               Last Month
                             </button>
@@ -1816,6 +1862,7 @@ class TransactionMonitoring extends Component {
                               onClick={() =>
                                 this.handleQuickSearch("This Year")
                               }
+                              onKeyDown={this.handleKeyDown}
                             >
                               This Year
                             </button>

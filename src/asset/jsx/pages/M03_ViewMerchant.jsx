@@ -84,26 +84,34 @@ class ViewMerchant extends Component {
         apiKey: false,
         secretKey: false,
       },
+      slideIndex: 0,
+      slides: [
+        { type: "approvalRatio", label: "Approval Ratio" },
+        { type: "totalVolume", label: "Total Volume" },
+        { type: "settledVolume", label: "Settled Volume" },
+      ],
     };
   }
 
-  extractENameFromURL() {
-    const currentPath = window.location.pathname;
-    const companyName = currentPath.split("/viewmerchant/")[1];
-    return companyName;
-  }
+  extractENameFromURL = () => {
+    return window.location.pathname.split("/viewmerchant/")[1];
+  };
 
   getCookie = (name) => {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(";").shift();
-    return null;
+    return parts.length === 2 ? parts.pop().split(";").shift() : null;
   };
 
   componentDidMount() {
-    const { company_name: stateCompanyName, companyName, role } = this.state;
+    const {
+      company_name: stateCompanyName,
+      companyName,
+      userRole,
+    } = this.state;
 
-    const company_name = role === "merchant" ? companyName : stateCompanyName;
+    const company_name =
+      userRole === "merchant" ? companyName : stateCompanyName;
 
     let date = new Date().toISOString().split("T")[0];
     const backendURL = process.env.REACT_APP_BACKEND_URL;
@@ -111,7 +119,6 @@ class ViewMerchant extends Component {
       `${backendURL}/viewclient?company_name=${company_name}`,
       "overviewData",
       (data) => {
-        // Ensure data exists before accessing properties
         if (data) {
           this.setState({
             overviewData: data,
@@ -133,7 +140,24 @@ class ViewMerchant extends Component {
       `${backendURL}/volumesum?company_name=${company_name}`,
       "volumeData"
     );
+    this.startSlideshow();
   }
+
+  componentWillUnmount() {
+    clearInterval(this.interval);
+  }
+
+  startSlideshow = () => {
+    this.interval = setInterval(() => {
+      this.nextSlide();
+    }, 2000);
+  };
+
+  nextSlide = () => {
+    const { slideIndex, slides } = this.state;
+    const nextIndex = (slideIndex + 1) % slides.length;
+    this.setState({ slideIndex: nextIndex });
+  };
 
   fetchData = async (url, dataVariable, callback = null) => {
     const { token } = this.state;
@@ -169,7 +193,6 @@ class ViewMerchant extends Component {
       `${backendURL}/viewclient?company_name=${company_name}`,
       "overviewData",
       (data) => {
-        // Ensure data exists before accessing properties
         if (data) {
           this.setState({
             overviewData: data,
@@ -200,13 +223,14 @@ class ViewMerchant extends Component {
       if (!response.ok) {
         throw new Error("Network response was not ok.");
       }
+
       this.setState({
         errorMessage: "Status updated successfully",
         messageType: "success",
       });
     } catch (error) {
       this.setState({
-        errorMessage: "Status Not Update",
+        errorMessage: "Status Not Updated",
         messageType: "fail",
       });
     }
@@ -262,20 +286,7 @@ class ViewMerchant extends Component {
 
     const updateRate = {
       id: idforRatedata,
-      MDR: ratesData.MDR,
-      txn_app: ratesData.txn_app,
-      txn_dec: ratesData.txn_dec,
-      refund_fee: ratesData.refund_fee,
-      chargeback_fee: ratesData.chargeback_fee,
-      RR: ratesData.RR,
-      setup_fee: ratesData.setup_fee,
-      settlement_cycle: ratesData.settlement_cycle,
-      settlement_fee: ratesData.settlement_fee,
-      annual_maintenance_fee: ratesData.annual_maintenance_fee,
-      RR_remark: ratesData.RR_remark,
-      setupFee_remark: ratesData.setupFee_remark,
-      settlementFee_remark: ratesData.settlementFee_remark,
-      annualMaintenanceFee_remark: ratesData.annualMaintenanceFee_remark,
+      ...ratesData,
     };
 
     try {
@@ -307,6 +318,10 @@ class ViewMerchant extends Component {
     }
   };
 
+  handleCancelClick = () => {
+    this.setState({ isEditing: false });
+  };
+
   formatValue = (val) => {
     return `${(val / 1000).toFixed(1)}k`;
   };
@@ -321,9 +336,7 @@ class ViewMerchant extends Component {
         statusText: newStatusText,
         buttonLabel: newStatusText === "Active" ? "Suspend" : "Activate",
       },
-      () => {
-        this.updateMerchantStatus(newStatusText, idforEdit);
-      }
+      () => this.updateMerchantStatus(newStatusText, idforEdit)
     );
   };
 
@@ -362,11 +375,15 @@ class ViewMerchant extends Component {
     const { states } = this.state;
     const currentIndex = states.indexOf(current);
     const newIndex = (currentIndex - 1 + states.length) % states.length;
+     const { slideIndex, slides } = this.state;
+    // Calculate the previous slide index in a circular manner
+    const prevIndex = (slideIndex - 1 + slides.length) % slides.length;
     this.setState({
       showApprovalRatio: newIndex === 0,
       showTotalVolume: newIndex === 1,
       showSettledVolume: newIndex === 2,
     });
+    this.setState({ slideIndex: prevIndex });
   };
 
   handleNextArrowclick = (current) => {
@@ -378,6 +395,7 @@ class ViewMerchant extends Component {
       showTotalVolume: newIndex === 1,
       showSettledVolume: newIndex === 2,
     });
+    this.nextSlide();
   };
 
   handleButtonClick = (buttonName) => {
@@ -511,7 +529,12 @@ class ViewMerchant extends Component {
       showSecretKey,
       copied,
       rootAccountKey,
+      slideIndex,
+      slides,
+      approvalData,
+      volumeData,
     } = this.state;
+    const currentSlide = slides[slideIndex];
 
     if (userRole === "admin") {
       return (
@@ -554,111 +577,95 @@ class ViewMerchant extends Component {
                   >
                     <p>{statusText}</p>
                   </div>
-                  {this.state.showApprovalRatio && (
-                    <div className="approve-volume-container">
-                      <LeftSign
-                        className="icon2"
-                        onClick={() =>
-                          this.handleBackArrowclick("showApprovalRatio")
-                        }
-                      ></LeftSign>
+                  <div className="slideshow-container">
+                    {currentSlide.type === "approvalRatio" && (
+                      <div className="approve-volume-container">
+                        <LeftSign
+                          className="icon2"
+                          onClick={this.handleBackArrowclick}
+                        />
 
-                      <div className="approval-div-section">
-                        <div>
-                          <div className="creditcard-div">
-                            <ApprovalRatio className="creditcard-img primary-color-icon" />
+                        <div className="approval-div-section">
+                          <div>
+                            <div className="creditcard-div">
+                              <ApprovalRatio className="creditcard-img primary-color-icon" />
+                            </div>
                           </div>
-                        </div>
-                        <div>
-                          <h5>
-                            {this.state.approvalData &&
-                            this.state.approvalData.approvalRatio !== undefined
-                              ? parseFloat(
-                                  this.state.approvalData.approvalRatio.toFixed(
-                                    2
+                          <div>
+                            <h5>
+                              {approvalData &&
+                              approvalData.approvalRatio !== undefined
+                                ? parseFloat(
+                                    approvalData.approvalRatio.toFixed(2)
                                   )
-                                )
-                              : "N/A"}
-                            %
-                          </h5>
-
-                          <p className="p2">Approval Ratio</p>
-                        </div>
-                      </div>
-                      <RightSign
-                        className="icon2"
-                        onClick={() =>
-                          this.handleNextArrowclick("showApprovalRatio")
-                        }
-                      />
-                    </div>
-                  )}
-                  {this.state.showTotalVolume && (
-                    <div className="approve-volume-container">
-                      <LeftSign
-                        className="icon2"
-                        onClick={() =>
-                          this.handleBackArrowclick("showTotalVolume")
-                        }
-                      />
-
-                      <div className="approval-div-section">
-                        <div>
-                          <div className="creditcard-div">
-                            <CreaditCard className="creditcard-img primary-color-icon" />
+                                : "N/A"}
+                              %
+                            </h5>
+                            <p className="p2">Approval Ratio</p>
                           </div>
                         </div>
-                        <div>
-                          <h5>
-                            $
-                            {this.formatValue(
-                              this.state.volumeData["totalVolume"]
-                            )}
-                          </h5>
-                          <p className="p2">Total Volume</p>
-                        </div>
-                      </div>
-                      <RightSign
-                        className="icon2"
-                        onClick={() =>
-                          this.handleNextArrowclick("showTotalVolume")
-                        }
-                      />
-                    </div>
-                  )}
-                  {this.state.showSettledVolume && (
-                    <div className="approve-volume-container">
-                      <LeftSign
-                        className="icon2"
-                        onClick={() =>
-                          this.handleBackArrowclick("showSettledVolume")
-                        }
-                      />
 
-                      <div className="approval-div-section">
-                        <div>
-                          <div className="creditcard-div">
-                            <DollarCircle className="creditcard-img primary-color-icon" />
+                        <RightSign
+                          className="icon2"
+                          onClick={this.handleNextArrowclick}
+                        />
+                      </div>
+                    )}
+
+                    {currentSlide.type === "totalVolume" && (
+                      <div className="approve-volume-container">
+                        <LeftSign
+                          className="icon2"
+                          onClick={this.handleBackArrowclick}
+                        />
+
+                        <div className="approval-div-section">
+                          <div>
+                            <div className="creditcard-div">
+                              <CreaditCard className="creditcard-img primary-color-icon" />
+                            </div>
+                          </div>
+                          <div>
+                            <h5>${this.formatValue(volumeData.totalVolume)}</h5>
+                            <p className="p2">Total Volume</p>
                           </div>
                         </div>
-                        <div>
-                          <h5>
-                            $
-                            {this.formatValue(
-                              this.state.volumeData["settledVolume"]
-                            )}
-                          </h5>
-                          <p className="p2">Settled Volume</p>
-                        </div>
+
+                        <RightSign
+                          className="icon2"
+                          onClick={this.handleNextArrowclick}
+                        />
                       </div>
-                      <RightSign
-                        className="icon2"
-                        onClick={() =>
-                          this.handleNextArrowclick("showSettledVolume")
-                        }
-                      />
-                    </div>
-                  )}
+                    )}
+
+                    {currentSlide.type === "settledVolume" && (
+                      <div className="approve-volume-container">
+                        <LeftSign
+                          className="icon2"
+                          onClick={this.handleBackArrowclick}
+                        />
+
+                        <div className="approval-div-section">
+                          <div>
+                            <div className="creditcard-div">
+                              <DollarCircle className="creditcard-img primary-color-icon" />
+                            </div>
+                          </div>
+                          <div>
+                            <h5>
+                              ${this.formatValue(volumeData.settledVolume)}
+                            </h5>
+                            <p className="p2">Settled Volume</p>
+                          </div>
+                        </div>
+
+                        <RightSign
+                          className="icon2"
+                          onClick={this.handleNextArrowclick}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="left-section-middle">
                   <p>Details</p>
@@ -1201,6 +1208,14 @@ class ViewMerchant extends Component {
                         >
                           {isEditing ? "Update" : "Edit"}
                         </button>
+                        {isEditing && (
+                          <button
+                            className="btn-secondary"
+                            onClick={this.handleCancelClick}
+                          >
+                            Cancel
+                          </button>
+                        )}
                       </div>
                     </div>
                   )}
@@ -1403,10 +1418,6 @@ class ViewMerchant extends Component {
           >
             <div className="view-merchant-container">
               <div className="row-cards left-section">
-                <LeftArrow
-                  className="icon2"
-                  onClick={this.handleBackButtonClick}
-                />
                 <div className="left-section-top">
                   <div className="profile-image">
                     <img src={profile} alt="user profile"></img>
@@ -1421,19 +1432,19 @@ class ViewMerchant extends Component {
                   >
                     <p>{statusText}</p>
                   </div>
-                  {this.state.showApprovalRatio && (
-                    <div className="approve-volume-container">
-                      <LeftSign
-                        className="icon2"
-                        onClick={() =>
-                          this.handleBackArrowclick("showApprovalRatio")
-                        }
-                      ></LeftSign>
+                  <div className="slideshow-container">
+                    {currentSlide.type === "approvalRatio" && (
+                      <div className="approve-volume-container">
+                        <LeftSign
+                          className="icon2"
+                          onClick={this.handleBackArrowclick}
+                        />
 
-                      <div className="approval-div-section">
-                        <div>
-                          <div className="creditcard-div">
-                            <ApprovalRatio className="creditcard-img primary-color-icon" />
+                        <div className="approval-div-section">
+                          <div>
+                            <div className="creditcard-div">
+                              <ApprovalRatio className="creditcard-img primary-color-icon" />
+                            </div>
                           </div>
                         </div>
                         <div>
@@ -1450,81 +1461,68 @@ class ViewMerchant extends Component {
                           </h5>
                           <p className="p2">Approval Ratio</p>
                         </div>
-                      </div>
-                      <RightSign
-                        className="icon2"
-                        onClick={() =>
-                          this.handleNextArrowclick("showApprovalRatio")
-                        }
-                      />
-                    </div>
-                  )}
-                  {this.state.showTotalVolume && (
-                    <div className="approve-volume-container">
-                      <LeftSign
-                        className="icon2"
-                        onClick={() =>
-                          this.handleBackArrowclick("showTotalVolume")
-                        }
-                      />
 
-                      <div className="approval-div-section">
-                        <div>
-                          <div className="creditcard-div">
-                            <CreaditCard className="creditcard-img primary-color-icon" />
+                        <RightSign
+                          className="icon2"
+                          onClick={this.handleNextArrowclick}
+                        />
+                      </div>
+                    )}
+
+                    {currentSlide.type === "totalVolume" && (
+                      <div className="approve-volume-container">
+                        <LeftSign
+                          className="icon2"
+                          onClick={this.handleBackArrowclick}
+                        />
+
+                        <div className="approval-div-section">
+                          <div>
+                            <div className="creditcard-div">
+                              <CreaditCard className="creditcard-img primary-color-icon" />
+                            </div>
+                          </div>
+                          <div>
+                            <h5>${this.formatValue(volumeData.totalVolume)}</h5>
+                            <p className="p2">Total Volume</p>
                           </div>
                         </div>
-                        <div>
-                          <h5>
-                            $
-                            {this.formatValue(
-                              this.state.volumeData["totalVolume"]
-                            )}
-                          </h5>
-                          <p className="p2">Total Volume</p>
-                        </div>
-                      </div>
-                      <RightSign
-                        className="icon2"
-                        onClick={() =>
-                          this.handleNextArrowclick("showTotalVolume")
-                        }
-                      />
-                    </div>
-                  )}
-                  {this.state.showSettledVolume && (
-                    <div className="approve-volume-container">
-                      <LeftSign
-                        className="icon2"
-                        onClick={() =>
-                          this.handleBackArrowclick("showSettledVolume")
-                        }
-                      />
 
-                      <div className="approval-div-section">
-                        <div>
-                          <div className="creditcard-div">
-                            <DollarCircle className="creditcard-img primary-color-icon" />
+                        <RightSign
+                          className="icon2"
+                          onClick={this.handleNextArrowclick}
+                        />
+                      </div>
+                    )}
+
+                    {currentSlide.type === "settledVolume" && (
+                      <div className="approve-volume-container">
+                        <LeftSign
+                          className="icon2"
+                          onClick={this.handleBackArrowclick}
+                        />
+
+                        <div className="approval-div-section">
+                          <div>
+                            <div className="creditcard-div">
+                              <DollarCircle className="creditcard-img primary-color-icon" />
+                            </div>
+                          </div>
+                          <div>
+                            <h5>
+                              ${this.formatValue(volumeData.settledVolume)}
+                            </h5>
+                            <p className="p2">Settled Volume</p>
                           </div>
                         </div>
-                        <div>
-                          <h5>
-                            $
-                            {this.formatValue(
-                              this.state.volumeData["settledVolume"]
-                            )}
-                          </h5>
-                          <p className="p2">Settled Volume</p>
-                        </div>
+
+                        <RightSign
+                          className="icon2"
+                          onClick={this.handleNextArrowclick}
+                        />
                       </div>
-                      <RightSign
-                        className="icon2"
-                        onClick={() =>
-                          this.handleNextArrowclick("showSettledVolume")
-                        }
-                      />
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
                 <div className="left-section-middle">
                   <p>Details</p>
@@ -1588,14 +1586,14 @@ class ViewMerchant extends Component {
                     </ul>
                   </div>
                 </div>
-                <div className="left-section-bottom">
-                  {/* <button
+                <div className="left-section-bottom root-update-btn">
+                  <button
                     className="btn-primary"
                     onClick={() => this.handleAddMerchant()}
                     disabled={isSuspended}
                   >
                     Edit
-                  </button> */}
+                  </button>
                   {/* <button
                     className={`btn-secondary ${
                       statusText === "Active" ? "btn-suspend" : "btn-activate"
