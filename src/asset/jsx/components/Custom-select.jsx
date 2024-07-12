@@ -1,18 +1,15 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 
 class CustomSelect extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      selectedOptions: props.multiSelect ? [] : props.selectedValue || null, 
-      isOpen: false,
-      searchValue: ''
-    };
-  }
+  state = {
+    selectedOptions: this.props.multiSelect ? [] : this.props.selectedValue || null,
+    isOpen: false,
+    searchValue: ''
+  };
 
   componentDidMount() {
     document.addEventListener('click', this.handleClickOutside);
+    this.setDefaultOption();
   }
 
   componentWillUnmount() {
@@ -30,46 +27,54 @@ class CustomSelect extends Component {
   };
 
   handleOptionSelect = (option) => {
-    const { selectedOptions } = this.state;
-
-    if (this.props.multiSelect) {
-      const index = selectedOptions.indexOf(option);
-      const updatedOptions = [...selectedOptions];
-      if (index === -1) {
-        updatedOptions.push(option);
+    this.setState((prevState) => {
+      if (this.props.multiSelect) {
+        const updatedOptions = prevState.selectedOptions.includes(option)
+          ? prevState.selectedOptions.filter(opt => opt !== option)
+          : [...prevState.selectedOptions, option];
+        this.props.onChange(updatedOptions);
+        return { selectedOptions: updatedOptions };
       } else {
-        updatedOptions.splice(index, 1);
+        this.props.onChange(option);
+        return { selectedOptions: option, isOpen: false };
       }
-      this.setState({ selectedOptions: updatedOptions });
-    } else {
-      this.setState({ selectedOptions: option, isOpen: false });
-    }
-    this.props.onChange(option);
+    });
   };
 
   handleSearchChange = (e) => {
     this.setState({ searchValue: e.target.value });
   };
 
+  setDefaultOption = () => {
+    const { options, defaultLabel } = this.props;
+    if (defaultLabel && options && options.length === 1) {
+      this.setState({ selectedOptions: options[0] });
+      this.props.onChange(options[0]);
+    }
+  };
+
   render() {
-    const { options, width, height, showDropdownIcon, defaultLabel } = this.props; 
+    const { options = [], width = '170px', height = 'auto', showDropdownIcon = false, defaultLabel } = this.props;
     const { selectedOptions, isOpen, searchValue } = this.state;
 
     const filteredOptions = options.filter(option =>
-      typeof option === 'string' && option.toLowerCase().startsWith(searchValue.toLowerCase())
+      option.toLowerCase().startsWith(searchValue.toLowerCase())
     );
 
-    let dropdownIcon;
-    if (showDropdownIcon) {
-      dropdownIcon = isOpen ?  '⮝': '⮟'; 
-    } else {
-      dropdownIcon = isOpen ?  '👆': '👇'; 
+    if (defaultLabel && !filteredOptions.includes(defaultLabel)) {
+      filteredOptions.unshift(defaultLabel);
     }
-    
+
+    const dropdownIcon = showDropdownIcon ? (isOpen ? '⮝' : '⮟') : (isOpen ? '👆' : '👇');
+
     return (
-      <div className="custom-select-wrapper" ref={this.setWrapperRef} >
-        <div className="custom-select-selected" onClick={() => this.setState({ isOpen: !isOpen })} style={{ width: width || '170px', height: height || 'auto'}}>
-          {!this.props.multiSelect && selectedOptions ? selectedOptions : this.props.selectedOptionRenderer || defaultLabel || 'Select your option'}
+      <div className="custom-select-wrapper" ref={this.setWrapperRef}>
+        <div
+          className="custom-select-selected"
+          onClick={() => this.setState({ isOpen: !isOpen })}
+          style={{ width, height }}
+        >
+          {selectedOptions || defaultLabel || (options.length > 0 ? options[0] : 'No options available')}
           <div className="select-icon">
             {dropdownIcon}
           </div>
@@ -83,25 +88,16 @@ class CustomSelect extends Component {
               value={searchValue}
               onChange={this.handleSearchChange}
             />
-            {/* {defaultLabel && (
+            {filteredOptions.map((option, index) => (
               <div
-                key={defaultLabel}
-                onClick={() => this.handleOptionSelect(defaultLabel)}
-                className={selectedOptions === defaultLabel ? 'custom-select-option selected' : 'custom-select-option'}
-              >
-                {defaultLabel}
-              </div>
-            )} */}
-            {filteredOptions.map((option) => (
-              <div
-                key={option}
+                key={index}
                 onClick={() => this.handleOptionSelect(option)}
-                className={this.props.multiSelect ?
-                  (selectedOptions && selectedOptions.includes(option) ? 'custom-select-option selected' : 'custom-select-option')
-                  : (selectedOptions === option ? 'custom-select-option selected' : 'custom-select-option')
-                }
+                className={`custom-select-option ${this.props.multiSelect ?
+                  (selectedOptions.includes(option) ? 'selected' : '')
+                  : (selectedOptions === option ? 'selected' : '')
+                }`}
               >
-                {this.props.multiSelect ?
+                {this.props.multiSelect ? (
                   <label>
                     <input
                       type="checkbox"
@@ -111,8 +107,9 @@ class CustomSelect extends Component {
                     />
                     {option}
                   </label>
-                  : option
-                }
+                ) : (
+                  option
+                )}
               </div>
             ))}
           </div>
@@ -121,22 +118,5 @@ class CustomSelect extends Component {
     );
   }
 }
-
-CustomSelect.propTypes = {
-  options: PropTypes.array.isRequired,
-  multiSelect: PropTypes.bool,
-  selectedOptionRenderer: PropTypes.node,
-  selectedValue: PropTypes.string,
-  onChange: PropTypes.func.isRequired,
-  width: PropTypes.string,
-  height: PropTypes.string,
-  showDropdownIcon: PropTypes.bool,
-  defaultLabel: PropTypes.string // New prop for default label
-};
-
-CustomSelect.defaultProps = {
-  multiSelect: false,
-  showDropdownIcon: false 
-};
 
 export default CustomSelect;

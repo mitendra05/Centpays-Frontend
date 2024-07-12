@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
+import CryptoJS from "crypto-js";
 
 // import component
 // import MessageBox from "../components/Message_box";
@@ -11,118 +12,147 @@ import tree1 from "../../media/image/bg-tree-1.png";
 import tree2 from "../../media/image/bg-tree-2.png";
 
 class Signup extends Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			errorMessage: "",
-			isSignupSuccessful: false,
-			// api states
-			userName: "",
-			userEmail: "",
-			userMobile_no: "",
-			userCompany_name: "",
-			userCountry: "",
-			userPassword: "",
-			userConfirm_password: "",
-		};
-	}
+  constructor(props) {
+    super(props);
+    this.state = {
+      errorMessage: "",
+      isSignupSuccessful: false,
+      // api states
+      userName: "",
+      userEmail: "",
+      userMobile_no: "",
+      userCountry: "",
+      userPassword: "",
+      userConfirm_password: "",
+      userSignupKey: "",
+    };
+  }
 
-	handleInputChange = (event) => {
-		this.setState({ [event.target.id]: event.target.value });
-	};
+  handleInputChange = (event) => {
+    this.setState({ [event.target.id]: event.target.value });
+  };
 
-	getCookie = (name) => {
-		const value = `; ${document.cookie}`;
-		const parts = value.split(`; ${name}=`);
-		if (parts.length === 2) return parts.pop().split(';').shift();
-		return null;
-	}
+  decodeSignedToken = (token) => {
+    try {
+      const bytes = CryptoJS.AES.decrypt(
+        token,
+        process.env.REACT_APP_KEY_SECRET
+      );
+      const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+      return decryptedData;
+    } catch (error) {
+      console.error("Error decoding token:", error.message);
+      return null;
+    }
+  };
 
+  handleSubmit = async (e) => {
+    const backendURL = process.env.REACT_APP_BACKEND_URL;
+    e.preventDefault();
+    const {
+      userName,
+      userEmail,
+      userMobile_no,
+      userCountry,
+      userPassword,
+      userConfirm_password,
+      userSignupKey,
+    } = this.state;
+    console.log("signup key", userSignupKey);
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
 
-	handleSubmit = async (e) => {
-		const backendURL = process.env.REACT_APP_BACKEND_URL;
-		e.preventDefault();
-		const {
-			userName,
-			userEmail,
-			userMobile_no,
-			userCompany_name,
-			userCountry,
-			userPassword,
-			userConfirm_password,
-		} = this.state;
+    if (!passwordRegex.test(userPassword)) {
+      this.setState({
+        errorMessage:
+          "Password must be at least 8 characters long and contain at least one uppercase letter, one digit, and one special character.",
+        messageType: "Failed",
+      });
+      return;
+    }
+    const signupKey = this.decodeSignedToken(
+      userSignupKey,
+      process.env.REACT_APP_KEY_SECRET
+    );
+    console.log("decoded key", signupKey);
+    try {
+      const response = await fetch(`${backendURL}/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: userName,
+          email: userEmail,
+          mobile_no: userMobile_no,
+          country: userCountry,
+          password: userPassword,
+          confirm_password: userConfirm_password,
+          client_id: signupKey.clientId,
+          role: signupKey.role,
+        }),
+      });
+      if (response.ok) {
+        document.cookie = `signupEmail=${userEmail};path=/`;
+        this.setState({
+          userName: "",
+          userEmail: "",
+          userMobile_no: "",
+          userCountry: "",
+          userPassword: "",
+          userConfirm_password: "",
+          userSignupKey: "",
+        });
+        this.handleSignupSuccessModalToggle("open");
+      } else {
+        this.setState({
+          errorMessage: "Error creating user. Please try again later.",
+          messageType: "Failed",
+        });
+      }
+    } catch (error) {
+      this.setState({
+        errorMessage: "An unexpected error occurred. Please try again later.",
+        messageType: "Failed",
+      });
+    }
+  };
 
-		const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
+  handleSignupSuccessModalToggle = (action) => {
+    this.setState({ isSignupSuccessful: action === "open" ? true : false });
+  };
 
-		if (!passwordRegex.test(userPassword)) {
-			this.setState({
-				errorMessage: "Password must be at least 8 characters long and contain at least one uppercase letter, one digit, and one special character.", messageType: "Failed"
-			});
-			return;
-		}
-
-		try {
-			const response = await fetch(`${backendURL}/signup`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					name: userName,
-					email: userEmail,
-					mobile_no: userMobile_no,
-					country: userCountry,
-					password: userPassword,
-					confirm_password: userConfirm_password,
-					company_name: userCompany_name,
-				}),
-			});
-			if (response.ok) {
-
-				document.cookie = `signupEmail=${userEmail};path=/`;
-				this.setState({
-					userName: "",
-					userEmail: "",
-					userMobile_no: "",
-					userCountry: "",
-					userPassword: "",
-					userConfirm_password: "",
-					userCompany_name: "",
-				});
-				this.handleSignupSuccessModalToggle("open");
-			} else {
-				this.setState({ errorMessage: "Error creating user. Please try again later.", messageType: "Failed" });
-			}
-		} catch (error) {
-			this.setState({ errorMessage: "An unexpected error occurred. Please try again later.", messageType: "Failed" });
-		}
-	};
-
-	handleSignupSuccessModalToggle = (action) => {
-		this.setState({ isSignupSuccessful: action === "open" ? true : false });
-	};
-
-	render() {
-		const { isSignupSuccessful } = this.state;
-		return (
-			<>
-				{isSignupSuccessful && <Modal onClose={() => this.setState({ isSignupSuccessful: false })} />}
-				{isSignupSuccessful && (
-					<Modal
-						onClose={() => this.handleSignupSuccessModalToggle("close")}
-						onDecline={() => this.handleSignupSuccessModalToggle("decline")}
-						onAccept={() => this.handleSignupSuccessModalToggle("accept")}
-						showFooter={false}
-						modalHeading={"Congratulations! 🎉"}
-						modalBody={
-							<div className="auth-content loginsuccessful-modal">
-								<h5 className="line-spacing">Your Account has been set-up successfully.</h5>
-								<button className="btn-primary loginbutton-modal" onClick={() => window.location.href = "/"}>Login</button>
-								<p className="p1 content-modal">*Login to access your account</p> 
-							</div>
-						}
-					/>
-				)}
+  render() {
+    const { isSignupSuccessful } = this.state;
+    return (
+      <>
+        {isSignupSuccessful && (
+          <Modal onClose={() => this.setState({ isSignupSuccessful: false })} />
+        )}
+        {isSignupSuccessful && (
+          <Modal
+            onClose={() => this.handleSignupSuccessModalToggle("close")}
+            onDecline={() => this.handleSignupSuccessModalToggle("decline")}
+            onAccept={() => this.handleSignupSuccessModalToggle("accept")}
+            showFooter={false}
+            modalHeading={"Congratulations! 🎉"}
+            modalBody={
+              <div className="auth-content loginsuccessful-modal">
+                <h5 className="line-spacing">
+                  Your Account has been set-up successfully.
+                </h5>
+                <button
+                  className="btn-primary loginbutton-modal"
+                  onClick={() => (window.location.href = "/")}
+                >
+                  Login
+                </button>
+                <p className="p1 content-modal">
+                  *Login to access your account
+                </p>
+              </div>
+            }
+          />
+        )}
 
 				<div id="auth">
 					<div className="auth-bg-top"></div>
@@ -266,20 +296,20 @@ class Signup extends Component {
 										Sign Up
 									</button>
 
-									<p className="bottom-line">
-										Already have an account?
-										<Link to="/" className="highlight-text">
-											Sign in
-										</Link>
-									</p>
-								</form>
-							</div>
-						</div>
-					</div>
-				</div>
-			</>
-		);
-	}
+                  <p className="bottom-line">
+                    Already have an account?
+                    <Link to="/" className="highlight-text">
+                      Sign in
+                    </Link>
+                  </p>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
 }
 
 export default Signup;
