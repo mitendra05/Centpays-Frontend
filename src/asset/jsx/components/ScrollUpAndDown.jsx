@@ -36,42 +36,37 @@ class ScrollUpAndDown extends Component {
 
   checkScrollVisibility = (scrollTop, scrollHeight, clientHeight) => {
     const isAtTop = scrollTop === 0;
-    const isAtBottom = scrollTop + clientHeight >= scrollHeight;
-
-    if (isAtTop) {
-      this.setState({ isTop: true });
-    } else if (isAtBottom) {
-      this.setState({ isTop: false });
-    } else {
-      this.setState({ isTop: false });
-    }
+    
+    // Update the state based on the current scroll position
+    this.setState({ isTop: isAtTop });
   };
-
+  
   scrollToTopOrBottom = () => {
     let tableBody = document.querySelector('.table-Body');
     if (!tableBody) {
       tableBody = document.querySelector('.txn-search-table-Body');
     }
-
+  
     if (tableBody) {
       const { isTop } = this.state;
       const scrollHeight = tableBody.scrollHeight;
-
+  
       if (isTop) {
         tableBody.scrollTo({
           top: scrollHeight,
           behavior: 'smooth'
         });
-        this.setState({ isTop: false });
       } else {
         tableBody.scrollTo({
           top: 0,
           behavior: 'smooth'
         });
-        this.setState({ isTop: true });
       }
+  
+      this.setState({ isTop});
     }
   };
+  
 
   render() {
     const { isTop } = this.state;
@@ -81,7 +76,7 @@ class ScrollUpAndDown extends Component {
         onClick={this.scrollToTopOrBottom}
         className="scroll-top-and-bottom-button"
       >
-        {isTop ? <DownDoubleArrow className='primary-color-icon top-icon'/> : <UpDoubleArrow className='primary-color-icon top-icon'/>}
+        {isTop ? <DownDoubleArrow className='white-icon scrollupdown-icon'/> : <UpDoubleArrow className='white-icon scrollupdown-icon'/>}
       </button>
     );
   }

@@ -60,7 +60,7 @@ class TransactionMonitoring extends Component {
       cardtype: "",
       cardnumber: "",
       activeQuickSearchbtn: "",
-      showTypedData: false,
+      showIds: false,
     };
   }
 
@@ -94,7 +94,7 @@ class TransactionMonitoring extends Component {
       this.iconContainerRef &&
       !this.iconContainerRef.contains(event.target)
     ) {
-      this.setState({ showTypedData: false });
+      this.setState({ showIds: false });
     }
   };
 
@@ -122,9 +122,8 @@ class TransactionMonitoring extends Component {
     const { id, value } = event.target;
     this.setState({
       [id]: value,
-      showTypedData: false,
+      showIds: false,
     });
-    this.handleSearch();
   };
 
   handleKeyDown = (event) => {
@@ -136,7 +135,7 @@ class TransactionMonitoring extends Component {
 
   toggleTypedData = () => {
     this.setState((prevState) => ({
-      showTypedData: !prevState.showTypedData,
+      showIds: !prevState.showIds,
     }));
   };
 
@@ -173,16 +172,17 @@ class TransactionMonitoring extends Component {
       cardnumber: "",
       searchedResult: null,
       activeQuickSearchbtn: "",
+      showIds: null,
     });
   };
 
   handleSearch = async () => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
-    const { token, userRole, merchantName } = this.state;
+    const { token } = this.state;
     const searchedData = {
       searchIds: this.state.searchIds,
       status: this.state.status,
-      merchant: userRole === "merchant" ? merchantName : this.state.merchant,
+      merchant: this.state.merchant,
       fromDate: this.state.fromDate,
       toDate: this.state.toDate,
       mid: this.state.mid,
@@ -192,7 +192,7 @@ class TransactionMonitoring extends Component {
       cardtype: this.state.cardtype,
       cardnumber: this.handleCardNumber(this.state.cardnumber),
     };
-    console.log("searcheddata", searchedData);
+
     try {
       const response = await fetch(`${backendURL}/transactionreport`, {
         method: "POST",
@@ -204,7 +204,10 @@ class TransactionMonitoring extends Component {
       });
       if (response.ok) {
         const data = await response.json();
-        this.setState({ searchedResult: data });
+        // Update searchedResult and then calculate showTotalAmount
+        this.setState({ searchedResult: data }, () => {
+          this.calculateShowTotalAmount();
+        });
       } else {
         this.setState({
           errorMessage: "Error searching. Please try again later.",
@@ -219,11 +222,30 @@ class TransactionMonitoring extends Component {
     }
   };
 
+  calculateShowTotalAmount = () => {
+    const { currentPage, rowsPerPage, searchedResult } = this.state;
+    const totalRows = searchedResult.length;
+    const totalPages = Math.ceil(totalRows / rowsPerPage);
+    const showTotalAmount =
+      totalRows > 0 && (currentPage === totalPages || totalPages === 1);
+
+    if (this.state.showTotalAmount !== showTotalAmount) {
+      this.setState({ showTotalAmount });
+    }
+  };
+
   handleQuickSearch = (buttonName) => {
-    //Today
+    if (this.state.activeQuickSearchbtn === buttonName) {
+      this.setState({
+        activeQuickSearchbtn: null,
+        fromDate: null,
+        toDate: null,
+      });
+      return;
+    }
+
+    // Today
     if (buttonName === "Today") {
-      console.log(buttonName);
-      console.log(this.state.activeQuickSearchbtn);
       const currentDate = new Date();
       const from = `${currentDate.getFullYear()}-${(
         "0" +
@@ -233,24 +255,20 @@ class TransactionMonitoring extends Component {
         "0" +
         (currentDate.getMonth() + 1)
       ).slice(-2)}-${("0" + currentDate.getDate()).slice(-2)} 23:59:59`;
-      console.log("from", from);
-      console.log("to", to);
       this.setState({
         fromDate: from,
         toDate: to,
         activeQuickSearchbtn: buttonName,
       });
+    }
 
-      //Yesterday
-    } else if (buttonName === "Yesterday") {
-      console.log(buttonName);
-      console.log(this.state.activeQuickSearchbtn);
+    // Yesterday
+    else if (buttonName === "Yesterday") {
       const currentDate = new Date();
       const oneDayMilliseconds = 24 * 60 * 60 * 1000;
       const yesterdayDate = new Date(
         currentDate.getTime() - oneDayMilliseconds
       );
-
       const from = `${yesterdayDate.getFullYear()}-${(
         "0" +
         (yesterdayDate.getMonth() + 1)
@@ -259,8 +277,6 @@ class TransactionMonitoring extends Component {
         "0" +
         (yesterdayDate.getMonth() + 1)
       ).slice(-2)}-${("0" + yesterdayDate.getDate()).slice(-2)} 23:59:59`;
-      console.log("from", from);
-      console.log("to", to);
       this.setState({
         fromDate: from,
         toDate: to,
@@ -268,10 +284,8 @@ class TransactionMonitoring extends Component {
       });
     }
 
-    //This week
+    // This Week
     else if (buttonName === "This Week") {
-      console.log(buttonName);
-      console.log(this.state.activeQuickSearchbtn);
       const currentDate = new Date();
       let date = new Date();
       const oneDayMilliseconds = 24 * 60 * 60 * 1000;
@@ -283,19 +297,19 @@ class TransactionMonitoring extends Component {
       const from = `${date.getFullYear()}-${("0" + (date.getMonth() + 1)).slice(
         -2
       )}-${("0" + date.getDate()).slice(-2)} 00:00:00`;
-
       const to = `${currentDate.getFullYear()}-${(
         "0" +
         (currentDate.getMonth() + 1)
       ).slice(-2)}-${("0" + currentDate.getDate()).slice(-2)} 23:59:59`;
-      console.log("from", from);
-      console.log("to", to);
       this.setState({
         fromDate: from,
         toDate: to,
         activeQuickSearchbtn: buttonName,
       });
-    } else if (buttonName === "Last Week") {
+    }
+
+    // Last Week
+    else if (buttonName === "Last Week") {
       const today = new Date();
       const dayOfWeek = today.getDay();
       const daysSinceLastMonday = ((dayOfWeek + 6) % 7) + 7;
@@ -309,46 +323,43 @@ class TransactionMonitoring extends Component {
         "0" +
         (mondayDate.getMonth() + 1)
       ).slice(-2)}-${("0" + mondayDate.getDate()).slice(-2)} 00:00:00`;
-
       const to = `${sundayDate.getFullYear()}-${(
         "0" +
         (sundayDate.getMonth() + 1)
       ).slice(-2)}-${("0" + sundayDate.getDate()).slice(-2)} 23:59:59`;
-
-      console.log("from", from);
-      console.log("to", to);
       this.setState({
         fromDate: from,
         toDate: to,
         activeQuickSearchbtn: buttonName,
       });
-    } else if (buttonName === "This Month") {
-      const currentDate = new Date();
+    }
 
+    // This Month
+    else if (buttonName === "This Month") {
+      const currentDate = new Date();
       const from = `${currentDate.getFullYear()}-${(
         "0" +
         (currentDate.getMonth() + 1)
       ).slice(-2)}-01 00:00:00`;
-
       const to = `${currentDate.getFullYear()}-${(
         "0" +
         (currentDate.getMonth() + 1)
       ).slice(-2)}-${("0" + currentDate.getDate()).slice(-2)} 23:59:59`;
-      console.log("from", from);
-      console.log("to", to);
       this.setState({
         fromDate: from,
         toDate: to,
         activeQuickSearchbtn: buttonName,
       });
-    } else if (buttonName === "Last Month") {
+    }
+
+    // Last Month
+    else if (buttonName === "Last Month") {
       const currentDate = new Date();
       const endDate = new Date(
         currentDate.getFullYear(),
         currentDate.getMonth(),
         0
       );
-
       const from = `${currentDate.getFullYear()}-${(
         "0" + currentDate.getMonth()
       ).slice(-2)}-01 00:00:00`;
@@ -356,18 +367,17 @@ class TransactionMonitoring extends Component {
         "0" +
         (endDate.getMonth() + 1)
       ).slice(-2)}-${("0" + endDate.getDate()).slice(-2)} 23:59:59`;
-      console.log("from", from);
-      console.log("to", to);
       this.setState({
         fromDate: from,
         toDate: to,
         activeQuickSearchbtn: buttonName,
       });
-    } else if (buttonName === "This Year") {
+    }
+
+    // This Year
+    else if (buttonName === "This Year") {
       const currentDate = new Date();
-
       const yearStartDate = new Date(currentDate.getFullYear(), 0, 1);
-
       const from = `${yearStartDate.getFullYear()}-${(
         "0" +
         (yearStartDate.getMonth() + 1)
@@ -376,8 +386,6 @@ class TransactionMonitoring extends Component {
         "0" +
         (currentDate.getMonth() + 1)
       ).slice(-2)}-${("0" + currentDate.getDate()).slice(-2)} 23:59:59`;
-      console.log("from", from);
-      console.log("to", to);
       this.setState({
         fromDate: from,
         toDate: to,
@@ -393,7 +401,7 @@ class TransactionMonitoring extends Component {
       activeQuickSearchbtn,
       selectedRowToView,
       userRole,
-      showTypedData,
+      showIds,
       searchIds,
     } = this.state;
     const searchIdsArray = searchIds.split(/[\s,]+/);
@@ -426,10 +434,10 @@ class TransactionMonitoring extends Component {
                           </label>
                           {searchIdsArray.length > 1 && (
                             <div
-                              className="icon-container"
+                             
                               ref={(ref) => (this.iconContainerRef = ref)}
                             >
-                              <Eye onClick={this.toggleTypedData} />
+                              <Eye onClick={this.toggleTypedData}  className="icon-container"/>
                             </div>
                           )}
                         </div>
@@ -445,13 +453,24 @@ class TransactionMonitoring extends Component {
                           />
                         </div>
 
-                        {showTypedData && (
-                          <div className="Transaction-monitoring-modal">
-                            <div className="Transaction-monitoring-search-modal">
-                              {searchIdsArray.map((line, index) => (
-                                <p key={index}>{line}</p>
-                              ))}
-                            </div>
+                        {showIds && (
+                          <div className="Transaction-monitoring-dropdown">
+                            {searchIdsArray.length > 0 && (
+                              <select
+                                className="transaction-id-dropdown"
+                                size={
+                                  searchIdsArray.length > 10
+                                    ? 10
+                                    : searchIdsArray.length
+                                }
+                              >
+                                {searchIdsArray.map((line, index) => (
+                                  <option key={index} value={line}>
+                                    {line}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
                           </div>
                         )}
                       </div>
@@ -534,7 +553,6 @@ class TransactionMonitoring extends Component {
                           id="fromDate"
                           value={this.state.fromDate || ""}
                           onChange={this.handleInputChange}
-                          onKeyDown={this.handleKeyDown}
                         ></input>
                       </div>
                       <div className="date-input-div">
@@ -552,154 +570,88 @@ class TransactionMonitoring extends Component {
                           id="toDate"
                           value={this.state.toDate || ""}
                           onChange={this.handleInputChange}
-                          onKeyDown={this.handleKeyDown}
                         ></input>
                       </div>
                     </div>
 
                     <div className="quick-search-div">
                       <div>
-                        <p className="p2 date-label">Quick Search:</p>
-                        <div>
-                          {activeQuickSearchbtn === "Today" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() => this.handleQuickSearch("Today")}
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              Today
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() => this.handleQuickSearch("Today")}
-                            >
-                              Today
-                            </button>
-                          )}
+                        <button
+                          className={
+                            activeQuickSearchbtn === "Today"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("Today")}
+                        >
+                          Today
+                        </button>
 
-                          {activeQuickSearchbtn === "Yesterday" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Yesterday")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              Yesterday
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Yesterday")
-                              }
-                            >
-                              Yesterday
-                            </button>
-                          )}
+                        <button
+                          className={
+                            activeQuickSearchbtn === "Yesterday"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("Yesterday")}
+                        >
+                          Yesterday
+                        </button>
 
-                          {activeQuickSearchbtn === "This Week" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Week")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              This Week
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Week")
-                              }
-                            >
-                              This Week
-                            </button>
-                          )}
-                          {activeQuickSearchbtn === "Last Week" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Last Week")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              Last Week
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Last Week")
-                              }
-                            >
-                              Last Week
-                            </button>
-                          )}
-                          {activeQuickSearchbtn === "This Month" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Month")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              This Month
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Month")
-                              }
-                            >
-                              This Month
-                            </button>
-                          )}
-                          {activeQuickSearchbtn === "Last Month" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Last Month")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              Last Month
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Last Month")
-                              }
-                            >
-                              Last Month
-                            </button>
-                          )}
-                          {activeQuickSearchbtn === "This Year" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Year")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              This Year
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Year")
-                              }
-                            >
-                              This Year
-                            </button>
-                          )}
-                        </div>
+                        <button
+                          className={
+                            activeQuickSearchbtn === "This Week"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("This Week")}
+                        >
+                          This Week
+                        </button>
+
+                        <button
+                          className={
+                            activeQuickSearchbtn === "Last Week"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("Last Week")}
+                        >
+                          Last Week
+                        </button>
+
+                        <button
+                          className={
+                            activeQuickSearchbtn === "This Month"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("This Month")}
+                        >
+                          This Month
+                        </button>
+
+                        <button
+                          className={
+                            activeQuickSearchbtn === "Last Month"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("Last Month")}
+                        >
+                          Last Month
+                        </button>
+
+                        <button
+                          className={
+                            activeQuickSearchbtn === "This Year"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("This Year")}
+                        >
+                          This Year
+                        </button>
                       </div>
                     </div>
                     <div className="more-options-div">
@@ -855,10 +807,10 @@ class TransactionMonitoring extends Component {
                           </label>
                           {searchIdsArray.length > 1 && (
                             <div
-                              className="icon-container"
+                             
                               ref={(ref) => (this.iconContainerRef = ref)}
                             >
-                              <Eye onClick={this.toggleTypedData} />
+                              <Eye onClick={this.toggleTypedData}  className="icon-container"/>
                             </div>
                           )}
                         </div>
@@ -873,13 +825,24 @@ class TransactionMonitoring extends Component {
                             onKeyDown={this.handleKeyDown}
                           />
                         </div>
-                        {showTypedData && (
-                          <div className="Transaction-monitoring-modal">
-                            <div className="Transaction-monitoring-search-modal">
-                              {searchIdsArray.map((line, index) => (
-                                <p key={index}>{line}</p>
-                              ))}
-                            </div>
+                        {showIds && (
+                          <div className="Transaction-monitoring-dropdown">
+                            {searchIdsArray.length > 0 && (
+                              <select
+                                className="transaction-id-dropdown"
+                                size={
+                                  searchIdsArray.length > 10
+                                    ? 10
+                                    : searchIdsArray.length
+                                }
+                              >
+                                {searchIdsArray.map((line, index) => (
+                                  <option key={index} value={line}>
+                                    {line}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
                           </div>
                         )}
                       </div>
@@ -950,7 +913,7 @@ class TransactionMonitoring extends Component {
                         <label
                           className={`date-label ${
                             this.state.fromDate ? "filled-id-label" : ""
-                          } `}
+                          }`}
                           htmlFor="fromDate"
                         >
                           From:
@@ -959,7 +922,7 @@ class TransactionMonitoring extends Component {
                           className="date-input"
                           type="datetime-local"
                           id="fromDate"
-                          value={this.state.fromDate}
+                          value={this.state.fromDate || ""}
                           onChange={this.handleInputChange}
                         ></input>
                       </div>
@@ -967,7 +930,7 @@ class TransactionMonitoring extends Component {
                         <label
                           className={`date-label ${
                             this.state.toDate ? "filled-id-label" : ""
-                          } `}
+                          }`}
                           htmlFor="toDate"
                         >
                           To:
@@ -976,154 +939,90 @@ class TransactionMonitoring extends Component {
                           className="date-input"
                           type="datetime-local"
                           id="toDate"
-                          value={this.state.toDate}
+                          value={this.state.toDate || ""}
                           onChange={this.handleInputChange}
                         ></input>
                       </div>
                     </div>
+
                     <div className="quick-search-div">
                       <div>
-                        <p className="p2 date-label">Quick Search:</p>
-                        <div>
-                          {activeQuickSearchbtn === "Today" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() => this.handleQuickSearch("Today")}
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              Today
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() => this.handleQuickSearch("Today")}
-                            >
-                              Today
-                            </button>
-                          )}
+                        <button
+                          className={
+                            activeQuickSearchbtn === "Today"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("Today")}
+                        >
+                          Today
+                        </button>
 
-                          {activeQuickSearchbtn === "Yesterday" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Yesterday")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              Yesterday
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Yesterday")
-                              }
-                            >
-                              Yesterday
-                            </button>
-                          )}
+                        <button
+                          className={
+                            activeQuickSearchbtn === "Yesterday"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("Yesterday")}
+                        >
+                          Yesterday
+                        </button>
 
-                          {activeQuickSearchbtn === "This Week" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Week")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              This Week
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Week")
-                              }
-                            >
-                              This Week
-                            </button>
-                          )}
-                          {activeQuickSearchbtn === "Last Week" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Last Week")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              Last Week
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Last Week")
-                              }
-                            >
-                              Last Week
-                            </button>
-                          )}
-                          {activeQuickSearchbtn === "This Month" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Month")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              This Month
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Month")
-                              }
-                            >
-                              This Month
-                            </button>
-                          )}
-                          {activeQuickSearchbtn === "Last Month" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Last Month")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              Last Month
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Last Month")
-                              }
-                            >
-                              Last Month
-                            </button>
-                          )}
-                          {activeQuickSearchbtn === "This Year" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Year")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              This Year
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Year")
-                              }
-                            >
-                              This Year
-                            </button>
-                          )}
-                        </div>
+                        <button
+                          className={
+                            activeQuickSearchbtn === "This Week"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("This Week")}
+                        >
+                          This Week
+                        </button>
+
+                        <button
+                          className={
+                            activeQuickSearchbtn === "Last Week"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("Last Week")}
+                        >
+                          Last Week
+                        </button>
+
+                        <button
+                          className={
+                            activeQuickSearchbtn === "This Month"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("This Month")}
+                        >
+                          This Month
+                        </button>
+
+                        <button
+                          className={
+                            activeQuickSearchbtn === "Last Month"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("Last Month")}
+                        >
+                          Last Month
+                        </button>
+
+                        <button
+                          className={
+                            activeQuickSearchbtn === "This Year"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("This Year")}
+                        >
+                          This Year
+                        </button>
                       </div>
                       <div
                         className="show-more"
@@ -1216,10 +1115,10 @@ class TransactionMonitoring extends Component {
                           </label>
                           {searchIdsArray.length > 1 && (
                             <div
-                              className="icon-container"
+                             
                               ref={(ref) => (this.iconContainerRef = ref)}
                             >
-                              <Eye onClick={this.toggleTypedData} />
+                              <Eye onClick={this.toggleTypedData}  className="icon-container" />
                             </div>
                           )}
                         </div>
@@ -1234,13 +1133,24 @@ class TransactionMonitoring extends Component {
                             onKeyDown={this.handleKeyDown}
                           />
                         </div>
-                        {showTypedData && (
-                          <div className="Transaction-monitoring-modal">
-                            <div className="Transaction-monitoring-search-modal">
-                              {searchIdsArray.map((line, index) => (
-                                <p key={index}>{line}</p>
-                              ))}
-                            </div>
+                        {showIds && (
+                          <div className="Transaction-monitoring-dropdown">
+                            {searchIdsArray.length > 0 && (
+                              <select
+                                className="transaction-id-dropdown"
+                                size={
+                                  searchIdsArray.length > 10
+                                    ? 10
+                                    : searchIdsArray.length
+                                }
+                              >
+                                {searchIdsArray.map((line, index) => (
+                                  <option key={index} value={line}>
+                                    {line}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
                           </div>
                         )}
                       </div>
@@ -1300,7 +1210,7 @@ class TransactionMonitoring extends Component {
                           className="date-input id-input-mrchnt-div"
                           type="datetime-local"
                           id="fromDate"
-                          value={this.state.fromDate}
+                          value={this.state.fromDate || ""}
                           onChange={this.handleInputChange}
                           onKeyDown={this.handleKeyDown}
                         ></input>
@@ -1318,11 +1228,12 @@ class TransactionMonitoring extends Component {
                           className="date-input date-input-mrchnt-div"
                           type="datetime-local"
                           id="toDate"
-                          value={this.state.toDate}
+                          value={this.state.toDate || ""}
                           onChange={this.handleInputChange}
                           onKeyDown={this.handleKeyDown}
                         ></input>
                       </div>
+
                       <div className="txn-monitoring-btn-div txn-monitoring-mrcnt-btn-div">
                         <button
                           className="btn-primary"
@@ -1340,147 +1251,82 @@ class TransactionMonitoring extends Component {
                     </div>
                     <div className="quick-search-div">
                       <div>
-                        <p className="p2 date-label">Quick Search:</p>
-                        <div>
-                          {activeQuickSearchbtn === "Today" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() => this.handleQuickSearch("Today")}
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              Today
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() => this.handleQuickSearch("Today")}
-                            >
-                              Today
-                            </button>
-                          )}
+                        <button
+                          className={
+                            activeQuickSearchbtn === "Today"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("Today")}
+                        >
+                          Today
+                        </button>
 
-                          {activeQuickSearchbtn === "Yesterday" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Yesterday")
-                              }
-                            >
-                              Yesterday
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Yesterday")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              Yesterday
-                            </button>
-                          )}
+                        <button
+                          className={
+                            activeQuickSearchbtn === "Yesterday"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("Yesterday")}
+                        >
+                          Yesterday
+                        </button>
 
-                          {activeQuickSearchbtn === "This Week" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Week")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              This Week
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Week")
-                              }
-                            >
-                              This Week
-                            </button>
-                          )}
-                          {activeQuickSearchbtn === "Last Week" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Last Week")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              Last Week
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Last Week")
-                              }
-                            >
-                              Last Week
-                            </button>
-                          )}
-                          {activeQuickSearchbtn === "This Month" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Month")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              This Month
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Month")
-                              }
-                            >
-                              This Month
-                            </button>
-                          )}
-                          {activeQuickSearchbtn === "Last Month" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Last Month")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              Last Month
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Last Month")
-                              }
-                            >
-                              Last Month
-                            </button>
-                          )}
-                          {activeQuickSearchbtn === "This Year" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Year")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              This Year
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Year")
-                              }
-                            >
-                              This Year
-                            </button>
-                          )}
-                        </div>
+                        <button
+                          className={
+                            activeQuickSearchbtn === "This Week"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("This Week")}
+                        >
+                          This Week
+                        </button>
+
+                        <button
+                          className={
+                            activeQuickSearchbtn === "Last Week"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("Last Week")}
+                        >
+                          Last Week
+                        </button>
+
+                        <button
+                          className={
+                            activeQuickSearchbtn === "This Month"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("This Month")}
+                        >
+                          This Month
+                        </button>
+
+                        <button
+                          className={
+                            activeQuickSearchbtn === "Last Month"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("Last Month")}
+                        >
+                          Last Month
+                        </button>
+
+                        <button
+                          className={
+                            activeQuickSearchbtn === "This Year"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("This Year")}
+                        >
+                          This Year
+                        </button>
                       </div>
                     </div>
                     <div className="more-options-div">
@@ -1630,10 +1476,9 @@ class TransactionMonitoring extends Component {
                           </label>
                           {searchIdsArray.length > 1 && (
                             <div
-                              className="icon-container"
                               ref={(ref) => (this.iconContainerRef = ref)}
                             >
-                              <Eye onClick={this.toggleTypedData} />
+                              <Eye onClick={this.toggleTypedData}  className="icon-container"/>
                             </div>
                           )}
                         </div>
@@ -1648,13 +1493,24 @@ class TransactionMonitoring extends Component {
                             onKeyDown={this.handleKeyDown}
                           />
                         </div>
-                        {showTypedData && (
-                          <div className="Transaction-monitoring-modal">
-                            <div className="Transaction-monitoring-search-modal">
-                              {searchIdsArray.map((line, index) => (
-                                <p key={index}>{line}</p>
-                              ))}
-                            </div>
+                        {showIds && (
+                          <div className="Transaction-monitoring-dropdown">
+                            {searchIdsArray.length > 0 && (
+                              <select
+                                className="transaction-id-dropdown"
+                                size={
+                                  searchIdsArray.length > 10
+                                    ? 10
+                                    : searchIdsArray.length
+                                }
+                              >
+                                {searchIdsArray.map((line, index) => (
+                                  <option key={index} value={line}>
+                                    {line}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
                           </div>
                         )}
                       </div>
@@ -1696,7 +1552,7 @@ class TransactionMonitoring extends Component {
                           className="date-input id-input-mrchnt-div"
                           type="datetime-local"
                           id="fromDate"
-                          value={this.state.fromDate}
+                          value={this.state.fromDate || ""}
                           onChange={this.handleInputChange}
                           onKeyDown={this.handleKeyDown}
                         ></input>
@@ -1714,7 +1570,7 @@ class TransactionMonitoring extends Component {
                           className="date-input date-input-mrchnt-div"
                           type="datetime-local"
                           id="toDate"
-                          value={this.state.toDate}
+                          value={this.state.toDate || ""}
                           onChange={this.handleInputChange}
                           onKeyDown={this.handleKeyDown}
                         ></input>
@@ -1736,147 +1592,82 @@ class TransactionMonitoring extends Component {
                     </div>
                     <div className="quick-search-div">
                       <div>
-                        <p className="p2 date-label">Quick Search:</p>
-                        <div>
-                          {activeQuickSearchbtn === "Today" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() => this.handleQuickSearch("Today")}
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              Today
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() => this.handleQuickSearch("Today")}
-                            >
-                              Today
-                            </button>
-                          )}
+                        <button
+                          className={
+                            activeQuickSearchbtn === "Today"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("Today")}
+                        >
+                          Today
+                        </button>
 
-                          {activeQuickSearchbtn === "Yesterday" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Yesterday")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              Yesterday
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Yesterday")
-                              }
-                            >
-                              Yesterday
-                            </button>
-                          )}
+                        <button
+                          className={
+                            activeQuickSearchbtn === "Yesterday"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("Yesterday")}
+                        >
+                          Yesterday
+                        </button>
 
-                          {activeQuickSearchbtn === "This Week" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Week")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              This Week
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Week")
-                              }
-                            >
-                              This Week
-                            </button>
-                          )}
-                          {activeQuickSearchbtn === "Last Week" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Last Week")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              Last Week
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Last Week")
-                              }
-                            >
-                              Last Week
-                            </button>
-                          )}
-                          {activeQuickSearchbtn === "This Month" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Month")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              This Month
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Month")
-                              }
-                            >
-                              This Month
-                            </button>
-                          )}
-                          {activeQuickSearchbtn === "Last Month" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Last Month")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              Last Month
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("Last Month")
-                              }
-                            >
-                              Last Month
-                            </button>
-                          )}
-                          {activeQuickSearchbtn === "This Year" ? (
-                            <button
-                              className="active-quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Year")
-                              }
-                              onKeyDown={this.handleKeyDown}
-                            >
-                              This Year
-                            </button>
-                          ) : (
-                            <button
-                              className="quick-search-btn"
-                              onClick={() =>
-                                this.handleQuickSearch("This Year")
-                              }
-                            >
-                              This Year
-                            </button>
-                          )}
-                        </div>
+                        <button
+                          className={
+                            activeQuickSearchbtn === "This Week"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("This Week")}
+                        >
+                          This Week
+                        </button>
+
+                        <button
+                          className={
+                            activeQuickSearchbtn === "Last Week"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("Last Week")}
+                        >
+                          Last Week
+                        </button>
+
+                        <button
+                          className={
+                            activeQuickSearchbtn === "This Month"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("This Month")}
+                        >
+                          This Month
+                        </button>
+
+                        <button
+                          className={
+                            activeQuickSearchbtn === "Last Month"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("Last Month")}
+                        >
+                          Last Month
+                        </button>
+
+                        <button
+                          className={
+                            activeQuickSearchbtn === "This Year"
+                              ? "active-quick-search-btn"
+                              : "quick-search-btn"
+                          }
+                          onClick={() => this.handleQuickSearch("This Year")}
+                        >
+                          This Year
+                        </button>
                       </div>
                       <div
                         className="show-more"

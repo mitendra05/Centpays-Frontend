@@ -6,7 +6,7 @@ import MessageBox from "./Message_box";
 import Modal from "./Modal";
 
 //SVG icons
-import { LeftArrow, RightArrow, Reset, Close,Copy } from "../../media/icon/SVGicons";
+import { LeftArrow, RightArrow, Reset, Close} from "../../media/icon/SVGicons";
 import CustomTooltip from "./Custom-tooltip";
 
 class MerchantForm extends Component {
@@ -23,7 +23,7 @@ class MerchantForm extends Component {
       ...props.merchantData,
       isUpdate: false,
       showSeceretKeyModal: false,
-      generatedKey: "",
+       rootAccountKey: ""
     };
   }
 
@@ -188,10 +188,11 @@ decodeSignedToken = (token) => {
           rootAccountKey = this.generateSignedToken(client_data.client.client_id, 'root');
           decodedKey = this.decodeSignedToken(rootAccountKey, process.env.REACT_APP_KEY_SECRET);
           console.log("decoded key", decodedKey);
-          this.setState({isAddMerchantPanelOpen:false,showSeceretKeyModal:true})
+          this.setState({showSeceretKeyModal:true})
         }
 
         this.setState({
+          isAddMerchantPanelOpen:false,
           generatedKey: rootAccountKey || '',
           showSeceretKeyModal: !isUpdate,
           errorMessage: isUpdate
@@ -259,6 +260,7 @@ SecerectKeyModalClose = () => {
       .catch(err => {
         this.setState({errorMessage:"Fail to copied!"})
       });
+      this.setState({ showSeceretKeyModal: false });
   };
 
   SeceretKeyMask = (number) => {

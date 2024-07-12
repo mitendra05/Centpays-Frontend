@@ -87,8 +87,6 @@ class PreviewReport extends Component {
 		  });
 		}
 	  };
-	
-	
 
 	generatePDF = () => {
 		const originalContents = document.body.innerHTML;
@@ -125,10 +123,14 @@ class PreviewReport extends Component {
 	};
 
 	handleBack = () => {
-		window.history.back();
-	};
-
-
+		const { id,company_name} = this.state;
+		const currentPath = window.location.pathname;
+		if (currentPath === `/previewreport/${id}`) {
+		  window.location.href = `/previewsettlement/${company_name}`;
+		} else {
+		  window.history.back();
+		}
+	  };
 
 	render() {
 		const { reportData, errorMessage,rateData} = this.state;

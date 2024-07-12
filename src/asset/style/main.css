@@ -840,8 +840,8 @@ input[type="checkbox"] {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	margin-top: -20px;
-	padding: 0 10px;
+	margin-top: -10px;
+	padding: 10px 1px;
 }
 
 .checkbox-container p {
@@ -864,10 +864,10 @@ input[type="checkbox"] {
 	margin: 40px 0 30px 0;
 }
 
-.auth-btn-signup {
+/* .auth-btn-signup {
 	width: 100%;
 	margin: 20px 0 15px 0;
-}
+} */
 
 .bottom-line{
 	position: absolute;
@@ -2705,31 +2705,43 @@ border-bottom: none !important;
 	margin-left: 20px;
 }
 
-.Transaction-monitoring-modal {
+/* .Transaction-monitoring-modal {
 	background-color: var(--white);
 	padding: 20px;
 	border-radius: 3px;
 	width: 100%;
-	max-width: 90%; 
+	max-width: 90%;
+	max-height: 300px;
 	overflow-y: auto;
 	border: 1px solid var(--border-gray);
 	z-index: 999;
 	justify-content: left;
 	margin-left: 15px;
-	max-height: 600px;
+  } */
+  
+  .transaction-id-dropdown {
+	width: 100%;
+	height: 100%;
+	border: none;
+	padding: 8px;
+	font-size: 14px;
+	line-height: 1.6;
+	cursor: pointer;
+	background-color: var(--white);
+	border: 1px solid var(--border-gray);
+	z-index: 999;
   }
   
-  .Transaction-monitoring-search-modal p {
-	white-space: pre-wrap; 
-	font-size: 14px;
-	line-height: 3;
-	margin-top: -20px;
+  .transaction-id-dropdown option {
+	padding: 8px;
+	font-size: 13px;
+	color: var(--light-text);
+	line-height: 1.6;
+	cursor: pointer;
   }
 
-  .Transaction-monitoring-search-modal{
-	overflow-y: auto;
-	position: relative;
-	
+  .icon-container{
+	cursor: pointer;
   }
   
   
@@ -3992,14 +4004,28 @@ hr {
 	transition: transform 0.5s ease;
 }
 
-
+.scroll-animation{
+	width: 30vw;
+	overflow: hidden;
+}
 .approval-div-section {
 	display: flex;
 	align-items: center;
 	width: 45%;
 	height: 100%;
 	margin-left: 50px;
+	animation: scrollAnimation 5s linear ;
+	overflow: hidden;
 }
+
+@keyframes scrollAnimation {
+	0% {
+	  transform: translateX(120%);
+	}
+	100% {
+	  transform: translateX(-100%);
+	}
+  }
 
 .approval-div-section div {
 	margin-right: 5px;
@@ -4447,8 +4473,8 @@ hr {
 	position: fixed;
 	bottom: 1%;
 	right: 2%;
-	width: 35px;
-	height: 35px;
+	width: 40px;
+	height: 40px;
 	padding: 5px;
 	font-size: 16px;
 	background-color: var(--primary);
@@ -4459,6 +4485,8 @@ hr {
 	opacity: 0;
 	transition: opacity 0.3s;
 	z-index: 30;
+	text-align: center;
+	
 }
 
 .scroll-to-top-button:hover {
@@ -4474,13 +4502,12 @@ hr {
 	top: 50%;
 	right: -18px;
 	transform: translateY(-50%);
-	background-color: var(--secondary-dark);
+	background-color: var(--primary);
 	border: none;
 	width: 40px;
 	height: 40px;
 	cursor: pointer;
 	z-index: 99;
-	opacity: 0.7;
 	border-radius: 50%;
 	text-align: center;
 }
@@ -4531,6 +4558,15 @@ hr {
 	height: 27px;
 	transition: all 0.2s ease-in-out;
 	z-index: 999;
+	margin-top: 1px;
+}
+
+.scrollupdown-icon{
+	width: 27px;
+	height: 27px;
+	transition: all 0.2s ease-in-out;
+	z-index: 999;
+	margin-top: 3px;
 }
 
 .scrollTable-to-top-button:hover {

@@ -184,7 +184,7 @@ class ViewMerchant extends Component {
   startSlideshow = () => {
     this.interval = setInterval(() => {
       this.nextSlide();
-    }, 2000);
+    }, 5000);
   };
 
   nextSlide = () => {
@@ -375,7 +375,13 @@ class ViewMerchant extends Component {
   };
 
   handleBackButtonClick = () => {
-    window.history.back();
+    const { company_name } = this.state;
+    const currentPath = window.location.pathname;
+    if (currentPath === `/viewmerchant/${company_name}`) {
+      window.location.href = "/allmerchant";
+    } else {
+      window.history.back();
+    }
   };
 
   handleEditClick = () => {
@@ -670,24 +676,25 @@ class ViewMerchant extends Component {
                           className="icon2"
                           onClick={this.handleBackArrowclick}
                         />
-
-                        <div className="approval-div-section">
-                          <div>
-                            <div className="creditcard-div">
-                              <ApprovalRatio className="creditcard-img primary-color-icon" />
+                        <div className="scroll-animation">
+                          <div className="approval-div-section">
+                            <div>
+                              <div className="creditcard-div">
+                                <ApprovalRatio className="creditcard-img primary-color-icon" />
+                              </div>
                             </div>
-                          </div>
-                          <div>
-                            <h5>
-                              {approvalData &&
-                              approvalData.approvalRatio !== undefined
-                                ? parseFloat(
-                                    approvalData.approvalRatio.toFixed(2)
-                                  )
-                                : "N/A"}
-                              %
-                            </h5>
-                            <p className="p2">Approval Ratio</p>
+                            <div>
+                              <h5>
+                                {approvalData &&
+                                approvalData.approvalRatio !== undefined
+                                  ? parseFloat(
+                                      approvalData.approvalRatio.toFixed(2)
+                                    )
+                                  : "N/A"}
+                                %
+                              </h5>
+                              <p className="p2">Approval Ratio</p>
+                            </div>
                           </div>
                         </div>
 
@@ -704,16 +711,19 @@ class ViewMerchant extends Component {
                           className="icon2"
                           onClick={this.handleBackArrowclick}
                         />
-
-                        <div className="approval-div-section">
-                          <div>
-                            <div className="creditcard-div">
-                              <CreaditCard className="creditcard-img primary-color-icon" />
+                        <div className="scroll-animation">
+                          <div className="approval-div-section">
+                            <div>
+                              <div className="creditcard-div">
+                                <CreaditCard className="creditcard-img primary-color-icon" />
+                              </div>
                             </div>
-                          </div>
-                          <div>
-                            <h5>${this.formatValue(volumeData.totalVolume)}</h5>
-                            <p className="p2">Total Volume</p>
+                            <div>
+                              <h5>
+                                ${this.formatValue(volumeData.totalVolume)}
+                              </h5>
+                              <p className="p2">Total Volume</p>
+                            </div>
                           </div>
                         </div>
 
@@ -730,18 +740,19 @@ class ViewMerchant extends Component {
                           className="icon2"
                           onClick={this.handleBackArrowclick}
                         />
-
-                        <div className="approval-div-section">
-                          <div>
-                            <div className="creditcard-div">
-                              <DollarCircle className="creditcard-img primary-color-icon" />
+                        <div className="scroll-animation">
+                          <div className="approval-div-section">
+                            <div>
+                              <div className="creditcard-div">
+                                <DollarCircle className="creditcard-img primary-color-icon" />
+                              </div>
                             </div>
-                          </div>
-                          <div>
-                            <h5>
-                              ${this.formatValue(volumeData.settledVolume)}
-                            </h5>
-                            <p className="p2">Settled Volume</p>
+                            <div>
+                              <h5>
+                                ${this.formatValue(volumeData.settledVolume)}
+                              </h5>
+                              <p className="p2">Settled Volume</p>
+                            </div>
                           </div>
                         </div>
 
@@ -1524,24 +1535,25 @@ class ViewMerchant extends Component {
                           className="icon2"
                           onClick={this.handleBackArrowclick}
                         />
-
-                        <div className="approval-div-section">
-                          <div>
-                            <div className="creditcard-div">
-                              <ApprovalRatio className="creditcard-img primary-color-icon" />
+                        <div className="scroll-animation">
+                          <div className="approval-div-section">
+                            <div>
+                              <div className="creditcard-div">
+                                <ApprovalRatio className="creditcard-img primary-color-icon" />
+                              </div>
                             </div>
-                          </div>
-                          <div>
-                            <h5>
-                              {approvalData &&
-                              approvalData.approvalRatio !== undefined
-                                ? parseFloat(
-                                    approvalData.approvalRatio.toFixed(2)
-                                  )
-                                : "N/A"}
-                              %
-                            </h5>
-                            <p className="p2">Approval Ratio</p>
+                            <div>
+                              <h5>
+                                {approvalData &&
+                                approvalData.approvalRatio !== undefined
+                                  ? parseFloat(
+                                      approvalData.approvalRatio.toFixed(2)
+                                    )
+                                  : "N/A"}
+                                %
+                              </h5>
+                              <p className="p2">Approval Ratio</p>
+                            </div>
                           </div>
                         </div>
 
@@ -1558,16 +1570,19 @@ class ViewMerchant extends Component {
                           className="icon2"
                           onClick={this.handleBackArrowclick}
                         />
-
-                        <div className="approval-div-section">
-                          <div>
-                            <div className="creditcard-div">
-                              <CreaditCard className="creditcard-img primary-color-icon" />
+                        <div className="scroll-animation">
+                          <div className="approval-div-section">
+                            <div>
+                              <div className="creditcard-div">
+                                <CreaditCard className="creditcard-img primary-color-icon" />
+                              </div>
                             </div>
-                          </div>
-                          <div>
-                            <h5>${this.formatValue(volumeData.totalVolume)}</h5>
-                            <p className="p2">Total Volume</p>
+                            <div>
+                              <h5>
+                                ${this.formatValue(volumeData.totalVolume)}
+                              </h5>
+                              <p className="p2">Total Volume</p>
+                            </div>
                           </div>
                         </div>
 
@@ -1584,21 +1599,21 @@ class ViewMerchant extends Component {
                           className="icon2"
                           onClick={this.handleBackArrowclick}
                         />
-
-                        <div className="approval-div-section">
-                          <div>
-                            <div className="creditcard-div">
-                              <DollarCircle className="creditcard-img primary-color-icon" />
+                        <div className="scroll-animation">
+                          <div className="approval-div-section">
+                            <div>
+                              <div className="creditcard-div">
+                                <DollarCircle className="creditcard-img primary-color-icon" />
+                              </div>
+                            </div>
+                            <div>
+                              <h5>
+                                ${this.formatValue(volumeData.settledVolume)}
+                              </h5>
+                              <p className="p2">Settled Volume</p>
                             </div>
                           </div>
-                          <div>
-                            <h5>
-                              ${this.formatValue(volumeData.settledVolume)}
-                            </h5>
-                            <p className="p2">Settled Volume</p>
-                          </div>
                         </div>
-
                         <RightSign
                           className="icon2"
                           onClick={this.handleNextArrowclick}
