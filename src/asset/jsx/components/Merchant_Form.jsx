@@ -112,22 +112,23 @@ class MerchantForm extends Component {
 
   generateSignedToken = (clientId, role) => {
     const payload = { clientId, role };
+    console.log(payload)
     const payloadString = JSON.stringify(payload);
-    const token = CryptoJS.AES.encrypt(payloadString, 'dummy_key_secret').toString();
+    console.log(payloadString)
+    const token = CryptoJS.AES.encrypt(payloadString, process.env.REACT_APP_KEY_SECRET).toString();
     return token;
-  };
+};
 
 decodeSignedToken = (token) => {
   try {
-    const bytes = CryptoJS.AES.decrypt(token, 'dummy_key_secret');
-    const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-    return decryptedData;
+      const bytes = CryptoJS.AES.decrypt(token, process.env.REACT_APP_KEY_SECRET);
+      const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+      return decryptedData;
   } catch (error) {
-    console.error("Error decoding token:", error.message);
-    return null;
+      console.error("Error decoding token:", error.message);
+      return null;
   }
 };
-
 
  handleSubmit = async (event) => {
   event.preventDefault();
@@ -183,16 +184,16 @@ decodeSignedToken = (token) => {
 
       if (response.ok) {
         const client_data = await response.json();
-        let rootAccountKey, decodedKey;
+        let rootAccountKey;
         if (!isUpdate) {
+          console.log("id",client_data.client.client_id)
           rootAccountKey = this.generateSignedToken(client_data.client.client_id, 'root');
           decodedKey = this.decodeSignedToken(rootAccountKey, process.env.REACT_APP_KEY_SECRET);
           console.log("decoded key", decodedKey);
-          this.setState({showSeceretKeyModal:true})
+          this.setState({isAddMerchantPanelOpen:false,showSeceretKeyModal:true})
         }
 
         this.setState({
-          isAddMerchantPanelOpen:false,
           generatedKey: rootAccountKey || '',
           showSeceretKeyModal: !isUpdate,
           errorMessage: isUpdate
@@ -227,7 +228,7 @@ decodeSignedToken = (token) => {
           director_last_name: "",
           skype_id: "",
         });
-
+        
         if (isUpdate) {
           this.props.refreshMerchantData();
         }
@@ -248,12 +249,12 @@ decodeSignedToken = (token) => {
   }
 };
 
-SecerectKeyModalClose = () => {
-    this.setState({ showSeceretKeyModal: false });
+  secretKeyModalClose = () => {
+    this.setState({ showSecretKeyModal: false });
   };
 
   copyKeyToClipboard = () => {
-    navigator.clipboard.writeText(this.state.generatedKey)
+    navigator.clipboard.writeText(this.state.rootAccountKey)
       .then(() => {
         this.setState({errorMessage:"copied!"});
       })
@@ -263,7 +264,7 @@ SecerectKeyModalClose = () => {
       this.setState({ showSeceretKeyModal: false });
   };
 
-  SeceretKeyMask = (number) => {
+  maskString = (number) => {
     const numStr = String(number);
     if (numStr.length > 12) {
       const stars = "*".repeat(numStr.length - 12);
@@ -274,7 +275,8 @@ SecerectKeyModalClose = () => {
   
   render() {
     const { handleAddMerchant, submitButtonText, heading,isDisable} = this.props;
-    const { errorMessage, messageType,showSeceretKeyModal, generatedKey,isAddMerchantPanelOpen} = this.state;
+    const { errorMessage, messageType, showSecretKeyModal, rootAccountKey } = this.state;
+
     return (
       <>
         {errorMessage && (
@@ -284,10 +286,11 @@ SecerectKeyModalClose = () => {
             onClose={() => this.setState({ errorMessage: "" })}
           />
         )}
-        {showSeceretKeyModal && (
+
+        {showSecretKeyModal && (
            <Modal
-           onClose={() => this.SecerectKeyModalClose()}
-           onDecline={() => this.SecerectKeyModalClose()}
+           onClose={() => this.secretKeyModalClose()}
+           onDecline={() => this.secretKeyModalClose()}
            showDeclinebtn={false}
            showFotter={true}
            onAccept={() => this.copyKeyToClipboard()}
@@ -296,14 +299,13 @@ SecerectKeyModalClose = () => {
            modalBody={
              <div>
               <h5 className="secretkey-head">Merchant Root Account Signup Key</h5>
-               <p className="p2 secret-key">{this.SeceretKeyMask(generatedKey)}</p>
+               <p className="p2 secret-key">{this.maskString(rootAccountKey)}</p>
              </div>
            }
          />
        )}
-       {isAddMerchantPanelOpen &&(
-        <div>
-        <div className="overlay"></div>
+
+       {this.state.isAddMerchantPanelOpen && (<><div className="overlay"></div>
         <div className="sendPanel">
           <div className="sendPanel-header">
             {" "}
@@ -715,8 +717,8 @@ SecerectKeyModalClose = () => {
               </div>
             )}
           </div>
-        </div>
-        </div> )}   
+        </div></>)}
+
       </>
     );
   }

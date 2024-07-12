@@ -23,14 +23,12 @@ export class AQTest extends Component {
             amount: "",
             selectedCurrency: "USD",
             proceedClicked: false,
-            
             selectedCard: 'Visa',
             cardHolderName: "",
             cardNumder: "",
             expiryDate: "",
             cvvno: "",
-
-            status: " ",
+            status: "",
             isLoader: false,   
             orderNo: "", 
         };
@@ -42,7 +40,6 @@ export class AQTest extends Component {
         if (parts.length === 2) return parts.pop().split(';').shift();
         return null;
     }
-  
 
     fetchData = async () => {
         this.setState({ isLoading: true, error: null });
@@ -160,12 +157,10 @@ export class AQTest extends Component {
         });
     };
 
-
-
     render() {
         const { billingName, billingEmail, billingPhoneNumber, amount, selectedCurrency,
 
-            proceedClicked, cardHolderName, cardNumder, expiryDate, cvvno, selectedCard, userName, userRole, status, isLoader } = this.state;
+            proceedClicked, cardHolderName, cardNumder, expiryDate, cvvno, selectedCard, userName, userRole, isLoader } = this.state;
             return (
                 <>
                     <Header />

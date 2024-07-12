@@ -154,138 +154,147 @@ class Signup extends Component {
           />
         )}
 
-        <div id="auth">
-          <div className="auth-bg-top"></div>
-          <div className="auth-bg-bottom"></div>
-          <img className="tree1" src={tree1} alt="tree"></img>
-          <img className="tree2" src={tree2} alt="tree"></img>
-          <div className="auth-container forsignup">
-            <div className="auth-main-container ">
-              <div className="auth-content">
-                <div className="logo-container">
-                  <img className="logo" src={fullLogo} alt="Centpays"></img>
-                </div>
-                <h4>Adventure starts here🚀</h4>
-                <p className="p2">Make your payment management easy and fun!</p>
-                <form onSubmit={this.handleSubmit}>
-                  <div className="input-group-div">
-                    <div className="input-group">
-                      <input
-                        type="text"
-                        id="userName"
-                        className="inputFeild auth-input"
-                        required
-                        value={this.state.userName}
-                        onChange={this.handleInputChange}
-                      />
-                      <label htmlFor="name" className="inputLabel">
-                        Name
-                      </label>
-                    </div>
-                    <div className="input-group">
-                      <input
-                        type="email"
-                        id="userEmail"
-                        className="inputFeild auth-input"
-                        required
-                        value={this.state.userEmail}
-                        onChange={this.handleInputChange}
-                      />
-                      <label htmlFor="password" className="inputLabel">
-                        Email
-                      </label>
-                    </div>
-                  </div>
-                  <div className="input-group-div">
-                    <div className="input-group">
-                      <input
-                        type="text"
-                        id="userMobile_no"
-                        className="inputFeild auth-input"
-                        required
-                        value={this.state.userMobile_no}
-                        onChange={this.handleInputChange}
-                      />
-                      <label htmlFor="mobile_no" className="inputLabel">
-                        Mobile No
-                      </label>
-                    </div>
-					         <div className="input-group">
-                    <input
-                      type="text"
-                      id="userCountry"
-                      className="inputFeild auth-input"
-                      required
-                      value={this.state.userCountry}
-                      onChange={this.handleInputChange}
-                    />
-                    <label htmlFor="country" className="inputLabel">
-                      Country
-                    </label>
-                  </div>
-                  </div>
-                 
-                  <div className="input-group-div">
-                    <div className="input-group">
-                      <input
-                        type="password"
-                        id="userPassword"
-                        className="inputFeild "
-                        required
-                        value={this.state.userPassword}
-                        onChange={this.handleInputChange}
-                      />
-                      <label htmlFor="password" className="inputLabel">
-                        Password
-                      </label>
-                    </div>
-                    <div className="input-group">
-                      <input
-                        type="password"
-                        id="userConfirm_password"
-                        className="inputFeild "
-                        require
-                        value={this.state.userConfirm_password}
-                        onChange={this.handleInputChange}
-                      />
-                      <label htmlFor="confirm password" className="inputLabel">
-                        Confirm Password
-                      </label>
-                    </div>
-                  </div>
+				<div id="auth">
+					<div className="auth-bg-top"></div>
+					<div className="auth-bg-bottom"></div>
+					<img className="tree1" src={tree1} alt="tree"></img>
+					<img className="tree2" src={tree2} alt="tree"></img>
+					<div className="auth-container forsignup">
+						<div className="auth-main-container ">
+							<div className="auth-content">
+								<div className="logo-container">
+									<img className="logo" src={fullLogo} alt="Centpays"></img>
+								</div>
+								<h4>Adventure starts here🚀</h4>
+								<p className="p2">Make your payment management easy and fun!</p>
+								<form onSubmit={this.handleSubmit}>
+									<div className="input-group-div">
+										<div className="input-group">
+											<input
+												type="text"
+												id="userName"
+												className="inputFeild auth-input"
+												required
+												value={this.state.userName}
+												onChange={this.handleInputChange}
+											/>
+											<label htmlFor="name" className="inputLabel">
+												Name
+											</label>
+										</div>
+										<div className="input-group">
+											<input
+												type="email"
+												id="userEmail"
+												className="inputFeild auth-input"
+												required
+												value={this.state.userEmail}
+												onChange={this.handleInputChange}
+											/>
+											<label htmlFor="password" className="inputLabel">
+												Email
+											</label>
+										</div>
+									</div>
+									<div className="input-group-div">
+										<div className="input-group">
+											<input
+												type="text"
+												id="userMobile_no"
+												className="inputFeild auth-input"
+												required
+												value={this.state.userMobile_no}
+												onChange={this.handleInputChange}
+											/>
+											<label htmlFor="mobile_no" className="inputLabel">
+												Mobile No
+											</label>
+										</div>
+										<div className="input-group">
+											<input
+												type="text"
+												id="userCompany_name"
+												className="inputFeild auth-input"
+												required
+												value={this.state.userCompany_name}
+												onChange={this.handleInputChange}
+											/>
+											<label htmlFor="company_name" className="inputLabel">
+												Company Name
+											</label>
+										</div>
+									</div>
+									<div className="input-group">
+										<input
+											type="text"
+											id="userCountry"
+											className="inputFeild auth-input"
+											required
+											value={this.state.userCountry}
+											onChange={this.handleInputChange}
+										/>
+										<label htmlFor="country" className="inputLabel">
+											Country
+										</label>
+									</div>
 
-				  <div className="input-group">
-                    <input
-                      type="password"
-                      id="userSignupKey"
-                      className="inputFeild auth-input"
-                      required
-                      value={this.state.userSignupKey}
-                      onChange={this.handleInputChange}
-                    />
-                    <label htmlFor="country" className="inputLabel">
-                      Sign-Up Key
-                    </label>
-                  </div>
+									<div className="input-group-div">
+										<div className="input-group">
+											<input
+												type="password"
+												id="userPassword"
+												className="inputFeild "
+												required
+												value={this.state.userPassword}
+												onChange={this.handleInputChange}
+											/>
+											<label htmlFor="password" className="inputLabel">
+												Password
+											</label>
+										</div>
+										<div className="input-group">
+											<input
+												type="password"
+												id="userConfirm_password"
+												className="inputFeild "
+												require
+												value={this.state.userConfirm_password}
+												onChange={this.handleInputChange}
+											/>
+											<label htmlFor="confirm password" className="inputLabel">
+												Confirm Password
+											</label>
+										</div>
+									</div>
 
+									<div className="input-group">
+										<input
+											type="text"
+											id="userSignUpKey"
+											className="inputFeild auth-input"
+											required
+											value={this.state.userSignUpKey}
+											onChange={this.handleInputChange}
+										/>
+										<label htmlFor="country" className="inputLabel">
+											Sign-Up Key
+										</label>
+									</div>
 
-                  <div className="checkbox-container">
-                    <div>
-                      <input type="checkbox" required></input>
-                      <label className="p2">
-                        I agree to
-                        <Link
-                          to="/termsandcondition"
-                          className="highlight-text"
-                        >
-                          privacy policy and terms
-                        </Link>
-                      </label>
-                    </div>
-                  </div>
-                  <button type="submit" className="btn-primary auth-btn">
-                    Sign Up
-                  </button>
+									<div className="checkbox-container">
+										<div>
+											<input type="checkbox" required></input>
+											<label className="p2">
+												I agree to
+												<Link to="/termsandcondition" className="highlight-text">
+													privacy policy and terms
+												</Link>
+											</label>
+										</div>
+									</div>
+									<button type="submit" className="btn-primary auth-btn-signup">
+										Sign Up
+									</button>
 
                   <p className="bottom-line">
                     Already have an account?
