@@ -4,8 +4,9 @@ import * as XLSX from "xlsx";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import MessageBox from "../components/Message_box";
+import Modal from "../components/Modal";
 
-import { Folder, Excel, Import, Export } from "../../media/icon/SVGicons";
+import { Folder, Excel, Import, Export, Bin } from "../../media/icon/SVGicons";
 
 class Compare extends Component {
   constructor(props) {
@@ -27,6 +28,8 @@ class Compare extends Component {
       mismatchModal: false,
       errorMessage: "",
       messageType: "",
+      nodataFound: false,
+	  hasSettled: false,
     };
   }
 
@@ -73,6 +76,17 @@ class Compare extends Component {
     }
   };
 
+  handleRemoveFile = () => {
+    this.setState({
+      fileName: "No File Chosen",
+      attachment: null,
+      excelData: [],
+    });
+
+    // Manually reset the file input value
+    document.getElementById("attachment").value = "";
+  };
+
   handleSearch = async () => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
     const { token, fromDate, toDate, paymentgateway } = this.state;
@@ -111,18 +125,13 @@ class Compare extends Component {
       const countOfAmounts = data.length;
 
       console.log(countOfAmounts);
-      this.setState(
-        {
-          searchedResult: data,
-          countOfAmounts,
-          totalAmount: totalAmount.toFixed(2),
-          errorMessage: null,
-          messageType: null,
-        },
-        () => {
-          this.findMismatches();
-        }
-      );
+      this.setState({
+        searchedResult: data,
+        countOfAmounts,
+        totalAmount: totalAmount.toFixed(2),
+        errorMessage: null,
+        messageType: null,
+      });
     } catch (error) {
       console.error("Error fetching or processing data:", error);
       this.setState({
@@ -133,17 +142,20 @@ class Compare extends Component {
   };
 
   handleSettleData = async () => {
+	if (this.state.hasSettled) {
+		return; // Prevent further executions
+	  }
     const backendURL = process.env.REACT_APP_BACKEND_URL;
-    const { token, unmatchedExcelData, unmatchedSelectedData } = this.state;
-  
+    const { token, matchedData } = this.state;
+
     try {
-      const settleDataExcel = unmatchedExcelData.map((data) => data.reference_id).join("");
-      const settleDataSelected = unmatchedSelectedData.map((data) => data.reference_id).join("");
-  
+      const settleData = matchedData.map((data) => data.reference_id).join(" ");
+      console.log("Settle Data (transaction IDs):", settleData);
+
       const payload = {
-        txnids: settleDataExcel + settleDataSelected,
+        txnids: settleData,
       };
-  
+
       const response = await fetch(`${backendURL}/settledbybank`, {
         method: "PATCH",
         headers: {
@@ -152,19 +164,20 @@ class Compare extends Component {
         },
         body: JSON.stringify(payload),
       });
-  
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error("Error response from backend:", errorText);
         throw new Error("Error settling data. Please try again later.");
       }
-  
+
       const responseData = await response.json();
       console.log("Settled data response:", responseData);
-  
+
       this.setState({
         errorMessage: "Data sent successfully!",
         messageType: "success",
+		hasSettled: true,
       });
     } catch (error) {
       console.error("Error fetching or processing data:", error);
@@ -174,14 +187,14 @@ class Compare extends Component {
       });
     }
   };
-  
-  
+
   handleClear = () => {
     this.setState({
       fromDate: "",
       toDate: "",
       paymentgateway: "",
       searchedResult: [],
+      excelData: [],
     });
   };
 
@@ -201,10 +214,10 @@ class Compare extends Component {
       const filteredData = json.map((row) =>
         indices.map((index, colIndex) => {
           let cell = row[index];
-          // if (colIndex === 2) {
-          //   if (cell === "process_failed") cell = "Failed";
-          //   else if (cell === "processed") cell = "Success";
-          // }
+          if (colIndex === 2) {
+            if (cell === "process_failed") cell = "Failed";
+            else if (cell === "processed") cell = "Success";
+          }
           return cell;
         })
       );
@@ -256,18 +269,18 @@ class Compare extends Component {
 
   findMismatches = () => {
     const { excelData, searchedResult } = this.state;
-  
+
     if (excelData.length === 0 || searchedResult.length === 0) {
       return;
     }
-  
+
     let totalSearchDataCount = searchedResult.length;
     let matchDataCount = 0;
-  
+
     const matchedData = [];
     const unmatchedExcelData = [];
     const unmatchedSelectedData = [];
-  
+
     const searchedMap = {};
     searchedResult.forEach((transaction) => {
       searchedMap[transaction.txnid] = {
@@ -275,17 +288,17 @@ class Compare extends Component {
         status: transaction.Status === "Success" ? "Success" : "Failed",
       };
     });
-  
+
     excelData.slice(1).forEach((excelTransaction) => {
       const [reference_id, excelAmountStr, excelStatusRaw] = excelTransaction;
       const excelAmount = parseFloat(excelAmountStr);
       const excelStatus = excelStatusRaw === "Success" ? "Success" : "Failed";
-  
+
       if (searchedMap[reference_id]) {
         const searchedTransaction = searchedMap[reference_id];
         const searchedAmount = searchedTransaction.amount;
         const searchedStatus = searchedTransaction.status;
-  
+
         if (excelAmount === searchedAmount && excelStatus === searchedStatus) {
           matchedData.push({
             reference_id,
@@ -314,8 +327,7 @@ class Compare extends Component {
         });
       }
     });
-  
-    
+
     Object.keys(searchedMap).forEach((reference_id) => {
       const searchedTransaction = searchedMap[reference_id];
       unmatchedSelectedData.push({
@@ -324,11 +336,10 @@ class Compare extends Component {
         status: searchedTransaction.status,
       });
     });
-  
-   
+
     let matchPercentage = (matchDataCount / totalSearchDataCount) * 100;
     matchPercentage = matchPercentage.toFixed(2);
-  
+
     let color;
     let message;
     if (matchPercentage >= 0 && matchPercentage <= 40) {
@@ -341,13 +352,13 @@ class Compare extends Component {
       color = "var(--blue-color)";
       message = "Good match";
     } else if (matchPercentage >= 81 && matchPercentage <= 99) {
-      color = "var(--purple-color)";
+      color = "var(--primary-dark)";
       message = "High match ";
     } else if (matchPercentage === "100.00") {
       color = "var(--green-color)";
       message = "Perfect match";
     }
-  
+
     this.setState({
       matchedData,
       unmatchedExcelData,
@@ -360,18 +371,22 @@ class Compare extends Component {
       mismatchModal: true,
     });
   };
-  
+
   closeModal = () => {
     this.setState({ mismatchModal: false });
   };
 
   handleCopyReferenceIds = () => {
     const { unmatchedExcelData, unmatchedSelectedData } = this.state;
-  
-    const excelReferenceIds = unmatchedExcelData.map((data) => data.reference_id).join("\n");
-    const selectedReferenceIds = unmatchedSelectedData.map((data) => data.reference_id).join("\n");
+
+    const excelReferenceIds = unmatchedExcelData
+      .map((data) => data.reference_id)
+      .join("\n");
+    const selectedReferenceIds = unmatchedSelectedData
+      .map((data) => data.reference_id)
+      .join("\n");
     const allReferenceIds = `${excelReferenceIds}\n${selectedReferenceIds}`;
-  
+
     navigator.clipboard
       .writeText(allReferenceIds)
       .then(() => {
@@ -388,7 +403,7 @@ class Compare extends Component {
         });
       });
   };
-  
+
   handleExcelReferenceIds = () => {
     const { unmatchedExcelData, unmatchedSelectedData } = this.state;
 
@@ -406,15 +421,20 @@ class Compare extends Component {
         Status: data.status,
       })),
     ];
-  
+
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.json_to_sheet(exportData);
 
     XLSX.utils.book_append_sheet(workbook, worksheet, "Mismatch Data");
- 
+
     XLSX.writeFile(workbook, "Mismatch_Data.xlsx");
   };
-  
+
+  formatDate(dateTimeString) {
+    if (!dateTimeString) return "";
+    const [datePart, timePart] = dateTimeString.split("T");
+    return `${datePart} ${timePart}`;
+  }
 
   render() {
     const {
@@ -543,7 +563,16 @@ class Compare extends Component {
                     >
                       <Folder className="icon2 yellow-icon" />
                     </label>
+
                     <span className="p2 file-name">{this.state.fileName}</span>
+                    {this.state.fileName !== "No File Chosen" && (
+                      <span
+                        className="remove-file"
+                        onClick={this.handleRemoveFile}
+                      >
+                        <Bin className="grey-icon"></Bin>
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div
@@ -560,6 +589,9 @@ class Compare extends Component {
           <div className="main-screen-rows compare-report-second-row">
             {searchedResult.length > 1 && (
               <div className="row-cards report-preview">
+                <div className="head">
+                  <h4>Preview Data</h4>
+                </div>
                 <div className="preview-table">
                   <table>
                     <thead>
@@ -584,18 +616,21 @@ class Compare extends Component {
                 </div>
                 <div className="preview-totals">
                   <div>
-                    <p>Count</p>
-                    <p>{this.state.searchedTotals.totalTransactions}</p>
+                    <p>Count:</p>
+                    <p className="p2">{this.state.countOfAmounts}</p>
                   </div>
                   <div>
-                    <p>Sum</p>
-                    <p>{this.state.searchedTotals.totalAmount}</p>
+                    <p>Sum:</p>
+                    <p className="p2">{this.state.totalAmount}</p>
                   </div>
                 </div>
               </div>
             )}
             {excelData.length > 1 && (
               <div className="row-cards report-preview">
+                <div className="head">
+                  <h4>Excel Data</h4>
+                </div>
                 <div className="preview-table">
                   <table>
                     <thead>
@@ -620,12 +655,14 @@ class Compare extends Component {
                 </div>
                 <div className="preview-totals">
                   <div>
-                    <p>Count</p>
-                    <p>{this.state.excelTotals.totalTransactions}</p>
+                    <p>Count:</p>
+                    <p className="p2">
+                      {this.state.excelTotals.totalTransactions}
+                    </p>
                   </div>
                   <div>
-                    <p>Sum</p>
-                    <p>{this.state.excelTotals.totalAmount}</p>
+                    <p>Sum:</p>
+                    <p className="p2">{this.state.receivedAmount}</p>
                   </div>
                 </div>
               </div>
@@ -633,94 +670,129 @@ class Compare extends Component {
           </div>
 
           {mismatchModal && (
-            <div className="modal">
-              <div className="row-cards trans-settle-view">
-                <h4>Transaction</h4>
-                <div className="compare-line "></div>
-
-                <div className="header-container">
-                  <div className="left-div">
-                    <span className="date-section">From: <p className="p2">{this.state.fromDate}</p>  To: <p className="p2">{this.state.toDate}</p> </span>
-                    <span>Total Amount: {totalAmount} /- </span>
-                    <span>Received Amount: {receivedAmount}/- </span>
-                  </div>
-                  <div className="right-div">
-                    <h4 style={{ color: this.state.color }}>
-                      {this.state.message} {this.state.matchPercentage}%
-                    </h4>
-                  </div>
+             <Modal
+             onClose={() => this.closeModal("close")}
+             onDecline={() => this.closeModal("decline")}
+             onAccept={() => this.handleSettleData()}
+             showDeclinebtn={"Cancel"}
+			 acceptbtnname={this.state.hasSettled ? "Settled" : "Settle Now"}
+             showFotter={true}
+             modalHeading={"Transaction 📝"}
+             enableDragging={true}
+             modalBody={
+              <>
+              <div className="header-container">
+                <div className="left-div">
+                  <span className="date-section">
+                    <span>
+                      From:{" "}
+                      <p className="p2">
+                        {this.formatDate(this.state.fromDate)}
+                      </p>
+                    </span>
+                    <span>
+                      To:{" "}
+                      <p className="p2">
+                        {this.formatDate(this.state.toDate)}
+                      </p>
+                    </span>
+                  </span>
+                  <span>Total Amount: {totalAmount} /- </span>
+                  <span>Received Amount: {receivedAmount}/- </span>
                 </div>
-
-                <div className="txn-search-table-Body">
-                  <div className="compare-table">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>S.NO.</th>
-                          <th>Reference Id</th>
-                          <th>Amount</th>
-                          <th>Status</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {this.state.unmatchedExcelData.map((data, index) => (
-                          <tr key={index}>
-                            <td>{index + 1}</td>
-                            <td>{data.reference_id}</td>
-                            <td>{data.amount}</td>
-                            <td>{data.status}</td>
-                          </tr>
-                        ))}
-
-                        {this.state.unmatchedSelectedData.map((data, index) => (
-                          <tr
-                            key={index + this.state.unmatchedExcelData.length}
-                          >
-                            <td>
-                              {this.state.unmatchedExcelData.length + index + 1}
-                            </td>
-                            <td>{data.reference_id}</td>
-                            <td>{data.amount}</td>
-                            <td>{data.status}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-                <div className="header-container">
-                  <div className="imprt-exprt-div">
-                    <p>Export: </p>
-                    <div onClick={this.handleExcelReferenceIds}>
-                      <Import className="primary-color-icon" />
-                    </div>
-                    /
-                    <div onClick={this.handleExcelReferenceIds}>
-                      <Export className="primary-color-icon" />
-                    </div>
-                  </div>
-
-                  <p className="p3" onClick={this.handleCopyReferenceIds}>
-                    Copy
-                  </p>
-                </div>
-                <div className="compare-line "></div>
-                <div className="header-container">
-                  <p className="p4">help?</p>
-                  <div className="settle-btns">
-                    <button className="btn-secondary" onClick={this.closeModal}>
-                      Cancel
-                    </button>
-                    <button
-                      className="btn-primary"
-                      onClick={this.handleSettleData}
-                    >
-                      Settle Now
-                    </button>
-                  </div>
+                <div className="right-div">
+                  <h4 style={{ color: this.state.color }}>
+                    {this.state.message} {this.state.matchPercentage}%
+                  </h4>
                 </div>
               </div>
-            </div>
+
+              <div className="txn-search-table-Body">
+                <div className="compare-table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>S.NO.</th>
+                        <th>Reference Id</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {this.state.unmatchedExcelData.length > 0 ||
+                      this.state.unmatchedSelectedData.length > 0 ? (
+                        <>
+                          {this.state.unmatchedExcelData.map(
+                            (data, index) => (
+                              <tr key={index}>
+                                <td>{index + 1}</td>
+                                <td>{data.reference_id}</td>
+                                <td>{data.amount}</td>
+                                <td>{data.status}</td>
+                              </tr>
+                            )
+                          )}
+
+                          {this.state.unmatchedSelectedData.map(
+                            (data, index) => (
+                              <tr
+                                key={
+                                  index + this.state.unmatchedExcelData.length
+                                }
+                              >
+                                <td>
+                                  {this.state.unmatchedExcelData.length +
+                                    index +
+                                    1}
+                                </td>
+                                <td>{data.reference_id}</td>
+                                <td>{data.amount}</td>
+                                <td>{data.status}</td>
+                              </tr>
+                            )
+                          )}
+                        </>
+                      ) : (
+                        <tr>
+                          <td colSpan={4}>
+                            <div>
+                              <div className="search-result-head">
+                                <div>
+                                  <h4>Whoops!</h4>
+                                </div>
+                                <p className="p2">No Transaction Found....</p>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div className="header-container">
+                <div className="imprt-exprt-div">
+                  <p>Export: </p>
+                  <div onClick={this.handleExcelReferenceIds}>
+                    <Import className="primary-color-icon" />
+                  </div>
+                  /
+                  <div onClick={this.handleExcelReferenceIds}>
+                    <Export className="primary-color-icon" />
+                  </div>
+                </div>
+
+                <p className="p3" onClick={this.handleCopyReferenceIds}>
+                  Copy
+                </p>
+              </div>
+              <div className="compare-line "></div>
+              <div className="help-div">
+                <p className="p4">help?</p>
+              </div>
+            </>
+             }
+           />
           )}
         </div>
       </>

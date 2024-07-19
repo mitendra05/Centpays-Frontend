@@ -24,7 +24,7 @@ class Sidebar extends Component {
 		super(props);
 		this.state = {
 			sidebaropen: true,
-			userRole: this.getCookie("role") || localStorage.getItem('userRole'),
+			userRole: this.getCookie('role'),
 			companyName: this.getCookie('company_name'),
 			menuOpen: {
 				masterSetting: false,
@@ -220,15 +220,30 @@ class Sidebar extends Component {
 										</ul>
 									)}
 									<li>
-										<div className={`menu-item ${currentPath === '/settlements' ? 'sidebaractive' : ''}`}>
-											<ManageSettlement className='icon menu-item-icon-color' />
-											<Link to='/settlements'>
-												<div className="menu-item-collapsive" onClick={() => this.handleMenuClick('manageSettlement')}>
-													<p>Manage Settlement<i style={{ color: 'red' }}>*</i></p>
-												</div>
-											</Link>
+										<div className={`menu-item ${menuOpen.finance ? 'sidebaractive' : ''}`}>
+											<TransactionReport className='icon menu-item-icon-color' />
+											<div className="menu-item-collapsive" onClick={() => this.handleMenuClick('finance')}>
+												<p>Finance</p>
+												{menuOpen.finance === true ? <DownSign className='icon' /> : <RightSign className='icon' />}
+											</div>
 										</div>
 									</li>
+									{menuOpen.finance && (
+										<ul className="sub-menu">
+											<Link to="/settlements">
+												<li><div><p>Merchant Settlement</p></div></li>
+											</Link>
+											<Link to="/banksettle">
+												<li><div><p>Bank Settlement</p></div></li>
+											</Link>
+											<Link to="/compare">
+												<li><div><p>Reconcile</p></div></li>
+											</Link>
+											<Link to="/livereport">
+												<li><div><p>Live Report</p></div></li>
+											</Link>
+										</ul>
+									)}
 									<li>
 										<div className={`menu-item ${currentPath === '/acquirertestingenv' ? 'sidebaractive' : ''}`}>
 											<Dashboard className='icon menu-item-icon-color' />

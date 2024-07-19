@@ -77,6 +77,7 @@ class Dashboard extends Component {
 			tableData : [],
 			  currency: this.props.selectedCurrency,
 		};
+		this.calendarRef = React.createRef();
 	}
 
 	getCookie = (name) => {
@@ -87,7 +88,6 @@ class Dashboard extends Component {
     }
 
 	componentDidMount = async () => {
-		console.log(this.state.currency, "Dashboard C")
 		
 		this.dataInterval = setInterval(() => {
 			this.fetchData();
@@ -95,11 +95,19 @@ class Dashboard extends Component {
 		}, 300000);
 		this.fetchTableData();
 		this.interval = setInterval(this.fetchTableData, 2000);
+		document.addEventListener('mousedown', this.handleClickOutside);
 	}
 
 	componentWillUnmount() {
 		clearInterval(this.interval);
+		 document.removeEventListener('mousedown', this.handleClickOutside);
 	}
+
+	handleClickOutside = (event) => {
+		if (this.calendarRef.current && !this.calendarRef.current.contains(event.target)) {
+		  this.setState({ showCalendar: false });
+		}
+	  };
 
 	fetchCurrencyList = async () => {
         const backendURL = process.env.REACT_APP_BACKEND_URL;
@@ -567,6 +575,7 @@ class Dashboard extends Component {
 										</div>
 										<CustomTooltip
 										maxWidth={250}
+										leftMargin={-5}
 											details={
 												<ul>
 													<li>
@@ -582,7 +591,7 @@ class Dashboard extends Component {
 										</CustomTooltip>
 
 										{showCalendar && (
-											<div className="options-container">
+											<div className="options-container" ref={this.calendarRef}>
 												<div className="option dates">
 													<span>{this.formatDateRange(startDate, endDate)}</span>
 													<div className="arrows">
@@ -599,6 +608,7 @@ class Dashboard extends Component {
 												<div className="option">
 													<input
 														type="date"
+														className="input-calender"
 														onChange={this.handleDateChange}
 														value={this.state.selectedDate.toISOString().split("T")[0]}
 													/>
@@ -790,6 +800,7 @@ class Dashboard extends Component {
 									<h4>Weekly Country-wise Overview</h4>
 									<CustomTooltip
 										maxWidth={300}
+										leftMargin={-15}
 										details={
 											<ul>
 												<li>
@@ -876,7 +887,8 @@ class Dashboard extends Component {
 							<div className="row-cards fourth-row-card1">
 								<div className="card-head-with-view-more">
 									<h4>Performance This Month</h4>
-									<CustomTooltip maxWidth={280} details={<p>This card shows key metrics for transactions in the last month total number of transactions, total volume of transactions, number of successful transactions, volume of successful transactions</p>}>
+									<CustomTooltip maxWidth={350}
+										leftMargin={-15} details={<p>This card shows key metrics for transactions in the last month total number of transactions, total volume of transactions, number of successful transactions, volume of successful transactions</p>}>
 										<Infoicon className="icon2" />
 									</CustomTooltip>
 								</div>
@@ -1108,6 +1120,7 @@ class Dashboard extends Component {
 										</div>
 										<CustomTooltip
 											maxWidth={250}
+											leftMargin={-5}
 											details={
 												<ul>
 													<li>
@@ -1331,6 +1344,7 @@ class Dashboard extends Component {
 									<h4>Weekly Country-wise Overview</h4>
 									<CustomTooltip
 										maxWidth={300}
+										leftMargin={-15}
 										details={
 											<ul>
 												<li>
@@ -1417,7 +1431,8 @@ class Dashboard extends Component {
 							<div className="row-cards fourth-row-card1">
 								<div className="card-head-with-view-more">
 									<h4>Performance This Month</h4>
-									<CustomTooltip maxWidth={250} details={<p>This card shows key metrics for transactions in the last month total number of transactions, total volume of transactions, number of successful transactions, volume of successful transactions</p>}>
+									<CustomTooltip  maxWidth={350}
+										leftMargin={-15} details={<p>This card shows key metrics for transactions in the last month total number of transactions, total volume of transactions, number of successful transactions, volume of successful transactions</p>}>
 										<Infoicon className="icon2" />
 									</CustomTooltip>
 								</div>

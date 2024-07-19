@@ -97,13 +97,14 @@ class Table extends Component {
     this.setState({
       searchText,
       highlightedOptions: filteredOptions,
-      noResultsFound: filteredOptions.length === 0
+      noResultsFound: filteredOptions.length === 0,
+      currentPage:1
     });
   };
 
   handleAddMerchant = (val) => {
-    this.setState({
-      isAddMerchantPanelOpen: val,
+    this.setState({ isAddMerchantPanelOpen: false }, () => {
+      this.setState({ isAddMerchantPanelOpen: val });
     });
   };
 

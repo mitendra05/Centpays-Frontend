@@ -4,30 +4,44 @@ import { UpDoubleArrow, DownDoubleArrow } from "../../media/icon/SVGicons";
 class ScrollUpAndDown extends Component {
   state = {
     isTop: true, 
+    isScrollable: false,
   };
 
-  componentDidMount() {
-    let tableBody = document.querySelector('.table-Body');
-    if (!tableBody) {
-      tableBody = document.querySelector('.txn-search-table-Body');
-    }
+  resizeObserver = null;
 
-    if (tableBody) {
-      tableBody.addEventListener('scroll', this.handleScroll);
-      this.checkScrollVisibility(tableBody.scrollTop, tableBody.scrollHeight, tableBody.clientHeight);
-    }
+  componentDidMount() {
+    this.initializeTableBody();
   }
 
   componentWillUnmount() {
-    let tableBody = document.querySelector('.table-Body');
-    if (!tableBody) {
-      tableBody = document.querySelector('.txn-search-table-Body');
-    }
+    this.cleanupTableBody();
+  }
 
+  initializeTableBody = () => {
+    let tableBody = document.querySelector('.table-Body') || document.querySelector('.txn-search-table-Body');
+    
+    if (tableBody) {
+      tableBody.addEventListener('scroll', this.handleScroll);
+      this.checkScrollVisibility(tableBody.scrollTop, tableBody.scrollHeight, tableBody.clientHeight);
+
+      this.resizeObserver = new ResizeObserver(() => {
+        this.checkScrollVisibility(tableBody.scrollTop, tableBody.scrollHeight, tableBody.clientHeight);
+      });
+
+      this.resizeObserver.observe(tableBody);
+    }
+  };
+
+  cleanupTableBody = () => {
+    let tableBody = document.querySelector('.table-Body') || document.querySelector('.txn-search-table-Body');
+    
     if (tableBody) {
       tableBody.removeEventListener('scroll', this.handleScroll);
+      if (this.resizeObserver) {
+        this.resizeObserver.unobserve(tableBody);
+      }
     }
-  }
+  };
 
   handleScroll = (event) => {
     const { scrollTop, scrollHeight, clientHeight } = event.target;
@@ -36,23 +50,13 @@ class ScrollUpAndDown extends Component {
 
   checkScrollVisibility = (scrollTop, scrollHeight, clientHeight) => {
     const isAtTop = scrollTop === 0;
-    const isAtBottom = scrollTop + clientHeight >= scrollHeight;
-
-    if (isAtTop) {
-      this.setState({ isTop: true });
-    } else if (isAtBottom) {
-      this.setState({ isTop: false });
-    } else {
-      this.setState({ isTop: false });
-    }
+    const isScrollable = scrollHeight > clientHeight;
+    this.setState({ isTop: isAtTop, isScrollable });
   };
 
   scrollToTopOrBottom = () => {
-    let tableBody = document.querySelector('.table-Body');
-    if (!tableBody) {
-      tableBody = document.querySelector('.txn-search-table-Body');
-    }
-
+    let tableBody = document.querySelector('.table-Body') || document.querySelector('.txn-search-table-Body');
+    
     if (tableBody) {
       const { isTop } = this.state;
       const scrollHeight = tableBody.scrollHeight;
@@ -62,26 +66,30 @@ class ScrollUpAndDown extends Component {
           top: scrollHeight,
           behavior: 'smooth'
         });
-        this.setState({ isTop: false });
       } else {
         tableBody.scrollTo({
           top: 0,
           behavior: 'smooth'
         });
-        this.setState({ isTop: true });
       }
+
+      this.setState({ isTop });
     }
   };
 
   render() {
-    const { isTop } = this.state;
+    const { isTop, isScrollable } = this.state;
+
+    if (!isScrollable) {
+      return null;
+    }
 
     return (
       <button
         onClick={this.scrollToTopOrBottom}
-        className="scroll-top-and-bottom-button"
+        className="scroll-top-and-bottom-button scroll-top-and-bottom-btn-div"
       >
-        {isTop ? <DownDoubleArrow className='primary-color-icon top-icon'/> : <UpDoubleArrow className='primary-color-icon top-icon'/>}
+        {isTop ? <DownDoubleArrow className='white-icon scrollupdown-icon'/> : <UpDoubleArrow className='white-icon scrollupdown-icon'/>}
       </button>
     );
   }

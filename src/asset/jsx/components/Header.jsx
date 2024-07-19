@@ -330,7 +330,7 @@ class Header extends Component {
                 <div id="header" className={scrolled ? "scrolled" : ""}>
                     <nav>
                         <div className="header-left" onClick={this.toggleSearch}>
-                            <CustomTooltip title="Search Bar">
+                            <CustomTooltip title="Search Bar" leftMargin={25}>
                                 <Search className="icon"></Search>
                             </CustomTooltip>
                             <CustomTooltip title="Press Ctrl+k">
@@ -376,7 +376,7 @@ class Header extends Component {
                                 <Notification className="icon"></Notification>
                             </CustomTooltip>
                             <div className="user-profile-div">
-                                <CustomTooltip title="Your Profile">
+                                <CustomTooltip title="Your Profile"  leftMargin={-25}>
                                     <img
                                         className="icon user-profile"
                                         src={user}

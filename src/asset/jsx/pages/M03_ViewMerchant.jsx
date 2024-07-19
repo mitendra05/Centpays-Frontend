@@ -72,11 +72,14 @@ class ViewMerchant extends Component {
       idforEdit: [],
       idforRatedata: [],
       buttonLabel: "Suspend",
+      email: "",
+      password: "",
+      showPassword: false,
       errorMessage: "",
       messageType: "",
       rootAccountKey: "",
-      apiKey: "0987654321",
-      secretKey: "1122334455",
+      apiKey: "001134098237654321",
+      secretKey: "110863876737654321",
       showApiKey: false,
       showSecretKey: false,
       copied: {
@@ -97,13 +100,182 @@ class ViewMerchant extends Component {
     return window.location.pathname.split("/viewmerchant/")[1];
   };
 
+  fetchClientId = async (company_name) => {
+    const backendURL = process.env.REACT_APP_BACKEND_URL;
+    try {
+      const response = await fetch(`${backendURL}/viewclient?company_name=${company_name}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.state.token}`, 
+          'Content-Type': 'application/json'
+        }
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+  
+      const data = await response.json();
+      return data.client_id;
+    } catch (error) {
+      console.error("Error fetching client ID:", error.message);
+      return null;
+    }
+  };
+
+  fetchAndSetClientId = async () => {
+    const company_name = this.extractENameFromURL();
+   
+    const client_id = await this.fetchClientId(company_name);
+  
+    if (client_id) {
+      console.log('Client ID:', client_id);
+      this.setState({ client_id });
+    }
+  };
+
   getCookie = (name) => {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
     return parts.length === 2 ? parts.pop().split(";").shift() : null;
   };
 
+  async loginCredentials() {
+    const companyName = this.extractENameFromURL();
+    const backendURL = process.env.REACT_APP_BACKEND_URL;
+    try {
+      const response = await fetch(`${backendURL}/logincredentials?company_name=${companyName}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.state.token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      this.setState({
+        email: data.email,
+        password: data.password,
+      });
+    } catch (error) {
+      console.error('Error fetching login credentials:', error);
+      // this.setState({ errorMessage: 'Failed to fetch login credentials. Please check your token and try again.', messageType: 'fail' });
+    }
+  }
+
+  // handleSubmit = async () => {
+  //   const backendURL = process.env.REACT_APP_BACKEND_URL;
+  //   const { email, password } = this.state;
+
+  //   // Open a new window
+  //   const newWindow = window.open('', '_blank');
+
+  //   try {
+  //     const response = await fetch(`${backendURL}/login`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         email,
+  //         password,
+  //       }),
+  //     });
+
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       if (data) {
+  //         newWindow.document.cookie = `token=${data.token};path=/`;
+  //         newWindow.document.cookie = `role=${data.user.role};path=/`;
+  //         newWindow.document.cookie = `email=${data.user.email};path=/`;
+  //         newWindow.document.cookie = `name=${data.user.name};path=/`;
+  //         newWindow.document.cookie = `company_name=${data.user.company_name};path=/`;
+
+  //         newWindow.location.href = `http://localhost:3001/dashboard`; 
+
+  //         this.setState({
+  //           email: "",
+  //           password: "",
+  //           userLogged: true,
+  //         });
+
+  //         const token = this.getCookie('token');
+  //         console.log("token in login", token);
+  //       } else {
+  //         this.setState({ errorMessage: "Token not generated", messageType: "fail" });
+  //       }
+  //     } else {
+  //       this.setState({ errorMessage: "Wrong Username & Password", messageType: "fail" });
+  //       newWindow.close(); // Close the new window if login fails
+  //     }
+  //   } catch (error) {
+  //     this.setState({ errorMessage: "There was a problem with your fetch operation:", messageType: "fail" });
+  //     newWindow.close(); // Close the new window if an error occurs
+  //   }
+  // };
+
+  handleSubmit = () => {
+    const { email, password } = this.state;
+    const backendURL = process.env.REACT_APP_BACKEND_URL;
+    const newWindow = window.open('', '_blank');
+
+    const scriptContent = `
+      window.addEventListener('message', async (event) => {
+        if (event.data.type === 'LOGIN') {
+          const { email, password } = event.data;
+  
+          try {
+            const response = await fetch("${process.env.REACT_APP_BACKEND_URL}/login", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ email, password }),
+            });
+  
+            if (response.ok) {
+              const data = await response.json();
+              if (data) {
+                sessionStorage.setItem('token', data.token);
+                sessionStorage.setItem('role', data.user.role);
+                sessionStorage.setItem('email', data.user.email);
+                sessionStorage.setItem('name', data.user.name);
+                sessionStorage.setItem('company_name', data.user.company_name);
+  
+                window.location.href = '${backendURL}/dashboard';
+              } else {
+                console.error("Token not generated");
+              }
+            } else {
+              console.error("Wrong Username & Password");
+            }
+          } catch (error) {
+            console.error("There was a problem with your fetch operation:", error);
+          }
+        }
+      });
+  
+      window.opener.postMessage({ type: 'LOGIN', email: '${email}', password: '${password}' }, '*');
+    `;
+
+    // Write the script to the new window's document
+    newWindow.document.write(`
+      <html>
+        <body>
+          <script>${scriptContent}<\/script>
+        </body>
+      </html>
+    `);
+
+    this.setState({ email, password });
+  };
+
   componentDidMount() {
+    this.fetchAndSetClientId();
+    this.loginCredentials();
     const {
       company_name: stateCompanyName,
       companyName,
@@ -150,7 +322,7 @@ class ViewMerchant extends Component {
   startSlideshow = () => {
     this.interval = setInterval(() => {
       this.nextSlide();
-    }, 2000);
+    }, 5000);
   };
 
   nextSlide = () => {
@@ -205,36 +377,42 @@ class ViewMerchant extends Component {
       }
     );
   };
-
-  updateMerchantStatus = async (statusText, idforEdit) => {
-    const backendURL = process.env.REACT_APP_BACKEND_URL;
+  
+  updateMerchantStatus = async (status, idforEdit) => {
     const { token } = this.state;
-
+    console.log(idforEdit, status);
+  
     try {
-      const response = await fetch(`${backendURL}/updateclient`, {
+      const response = await fetch("https://www.paylinkup.online/updateclient", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ id: idforEdit, status: statusText }),
+        body: JSON.stringify({ id: idforEdit, status: status }),
       });
-
-      if (!response.ok) {
-        throw new Error("Network response was not ok.");
+  
+      if (response.ok) {
+        const data = await response.json();
+        this.setState({
+          errorMessage: "Status updated successfully",
+          messageType: "success",
+        });
+      } else {
+        this.setState({
+          errorMessage: "Error updating status. Please try again later.",
+          messageType: "fail",
+        });
       }
-
-      this.setState({
-        errorMessage: "Status updated successfully",
-        messageType: "success",
-      });
     } catch (error) {
+      console.error("Error updating status:", error);
       this.setState({
-        errorMessage: "Status Not Updated",
-        messageType: "fail",
+        errorMessage: "An unexpected error occurred. Please try again later.",
+        messageType: "error",
       });
     }
   };
+  
 
   fetchRatesData = async () => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
@@ -375,7 +553,7 @@ class ViewMerchant extends Component {
     const { states } = this.state;
     const currentIndex = states.indexOf(current);
     const newIndex = (currentIndex - 1 + states.length) % states.length;
-     const { slideIndex, slides } = this.state;
+    const { slideIndex, slides } = this.state;
     // Calculate the previous slide index in a circular manner
     const prevIndex = (slideIndex - 1 + slides.length) % slides.length;
     this.setState({
@@ -405,9 +583,9 @@ class ViewMerchant extends Component {
       settlementInfo: false,
       secretsInfo: false,
     };
-
+  
     newState[buttonName] = true;
-
+  
     this.setState(newState, () => {
       if (buttonName === "ratesInfo") {
         this.fetchRatesData();
@@ -466,17 +644,34 @@ class ViewMerchant extends Component {
     );
   };
 
+  // generateSignedToken = (clientId, role) => {
+  //   const payload = { clientId, role };
+  //   console.log(payload);
+  //   const payloadString = JSON.stringify(payload);
+  //   console.log(payloadString);
+  //   const token = CryptoJS.AES.encrypt(
+  //     payloadString,
+  //     process.env.REACT_APP_KEY_SECRET
+  //   ).toString();
+  //   return token;
+  // };
+
   generateSignedToken = (clientId, role) => {
     const payload = { clientId, role };
-    console.log(payload);
     const payloadString = JSON.stringify(payload);
-    console.log(payloadString);
-    const token = CryptoJS.AES.encrypt(
+  
+    const encrypted = CryptoJS.AES.encrypt(
       payloadString,
       process.env.REACT_APP_KEY_SECRET
     ).toString();
+  
+    // Convert to URL-safe Base64 string
+    let token = btoa(encrypted);
+    token = token.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  
     return token;
   };
+  
 
   maskString = (key) => {
     if (key.length > 12) {
@@ -486,15 +681,60 @@ class ViewMerchant extends Component {
     return key;
   };
 
-  handleCopy = (key, text) => {
-    navigator.clipboard.writeText(text);
-    this.setState({ errorMessage: "Key Copied!", messageType: "success" });
+  // handleCopy = (key, keyType) => {
+  //   navigator.clipboard.writeText(key);
+  //   let message;
+  //   switch (keyType) {
+  //     case 'api':
+  //       message = 'API Key Copied!';
+  //       break;
+  //     case 'secret':
+  //       message = 'Secret Key Copied!';
+  //       break;
+  //     case 'root':
+  //       message = 'Account Creation Key Copied!';
+  //       break;
+  //     default:
+  //       message = 'Key Copied!';
+  //   }
+  //   this.setState({ errorMessage: message, messageType: 'success' });
+  //   this.setState((prevState) => ({
+  //     copied: {
+  //       ...prevState.copied,
+  //       [key]: true,
+  //     },
+  //   }));
+  // };
+
+  handleCopy = (key, keyType, elementId) => {
+    navigator.clipboard.writeText(key);
+    let message;
+    switch (keyType) {
+      case 'api':
+        message = 'API Key Copied!';
+        break;
+      case 'secret':
+        message = 'Secret Key Copied!';
+        break;
+      case 'root':
+        message = 'Account Creation Key Copied!';
+        break;
+      default:
+        message = 'Key Copied!';
+    }
+    this.setState({ errorMessage: message, messageType: 'success' });
     this.setState((prevState) => ({
       copied: {
         ...prevState.copied,
         [key]: true,
       },
     }));
+
+    const element = document.getElementById(elementId);
+    element.classList.add('zoom-animation');
+    setTimeout(() => {
+      element.classList.remove('zoom-animation');
+    }, 300);
   };
 
   toggleVisibility = (key) => {
@@ -533,6 +773,9 @@ class ViewMerchant extends Component {
       slides,
       approvalData,
       volumeData,
+      email,
+      password,
+      showPassword
     } = this.state;
     const currentSlide = slides[slideIndex];
 
@@ -549,11 +792,10 @@ class ViewMerchant extends Component {
           <Header />
           <Sidebar />
           <div
-            className={`main-screen ${
-              this.state.sidebaropen
-                ? "collapsed-main-screen"
-                : "expanded-main-screen"
-            }  `}
+            className={`main-screen ${this.state.sidebaropen
+              ? "collapsed-main-screen"
+              : "expanded-main-screen"
+              }  `}
           >
             <div className="view-merchant-container">
               <div className="row-cards left-section">
@@ -569,11 +811,10 @@ class ViewMerchant extends Component {
                     {this.state.company_name.split(/[^a-zA-Z\s]+/).join(" ")}
                   </h5>
                   <div
-                    className={`status-div ${
-                      statusText === "Active"
-                        ? "success-status"
-                        : "failed-status"
-                    }`}
+                    className={`status-div ${statusText === "Active"
+                      ? "success-status"
+                      : "failed-status"
+                      }`}
                   >
                     <p>{statusText}</p>
                   </div>
@@ -584,24 +825,25 @@ class ViewMerchant extends Component {
                           className="icon2"
                           onClick={this.handleBackArrowclick}
                         />
-
-                        <div className="approval-div-section">
-                          <div>
-                            <div className="creditcard-div">
-                              <ApprovalRatio className="creditcard-img primary-color-icon" />
+                        <div className="scroll-animation">
+                          <div className="approval-div-section">
+                            <div>
+                              <div className="creditcard-div">
+                                <ApprovalRatio className="creditcard-img primary-color-icon" />
+                              </div>
                             </div>
-                          </div>
-                          <div>
-                            <h5>
-                              {approvalData &&
-                              approvalData.approvalRatio !== undefined
-                                ? parseFloat(
-                                    approvalData.approvalRatio.toFixed(2)
-                                  )
-                                : "N/A"}
-                              %
-                            </h5>
-                            <p className="p2">Approval Ratio</p>
+                            <div>
+                              <h5>
+                                {approvalData &&
+                                approvalData.approvalRatio !== undefined
+                                  ? parseFloat(
+                                      approvalData.approvalRatio.toFixed(2)
+                                    )
+                                  : "N/A"}
+                                %
+                              </h5>
+                              <p className="p2">Approval Ratio</p>
+                            </div>
                           </div>
                         </div>
 
@@ -618,16 +860,19 @@ class ViewMerchant extends Component {
                           className="icon2"
                           onClick={this.handleBackArrowclick}
                         />
-
-                        <div className="approval-div-section">
-                          <div>
-                            <div className="creditcard-div">
-                              <CreaditCard className="creditcard-img primary-color-icon" />
+                        <div className="scroll-animation">
+                          <div className="approval-div-section">
+                            <div>
+                              <div className="creditcard-div">
+                                <CreaditCard className="creditcard-img primary-color-icon" />
+                              </div>
                             </div>
-                          </div>
-                          <div>
-                            <h5>${this.formatValue(volumeData.totalVolume)}</h5>
-                            <p className="p2">Total Volume</p>
+                            <div>
+                              <h5>
+                                ${this.formatValue(volumeData.totalVolume)}
+                              </h5>
+                              <p className="p2">Total Volume</p>
+                            </div>
                           </div>
                         </div>
 
@@ -644,18 +889,19 @@ class ViewMerchant extends Component {
                           className="icon2"
                           onClick={this.handleBackArrowclick}
                         />
-
-                        <div className="approval-div-section">
-                          <div>
-                            <div className="creditcard-div">
-                              <DollarCircle className="creditcard-img primary-color-icon" />
+                        <div className="scroll-animation">
+                          <div className="approval-div-section">
+                            <div>
+                              <div className="creditcard-div">
+                                <DollarCircle className="creditcard-img primary-color-icon" />
+                              </div>
                             </div>
-                          </div>
-                          <div>
-                            <h5>
-                              ${this.formatValue(volumeData.settledVolume)}
-                            </h5>
-                            <p className="p2">Settled Volume</p>
+                            <div>
+                              <h5>
+                                ${this.formatValue(volumeData.settledVolume)}
+                              </h5>
+                              <p className="p2">Settled Volume</p>
+                            </div>
                           </div>
                         </div>
 
@@ -666,7 +912,7 @@ class ViewMerchant extends Component {
                       </div>
                     )}
                   </div>
-                </div>
+                </div> 
                 <div className="left-section-middle">
                   <p>Details</p>
                   <div className="create-settelments-horizontal-line"></div>
@@ -742,9 +988,8 @@ class ViewMerchant extends Component {
                     Edit
                   </button>
                   <button
-                    className={`btn-secondary ${
-                      statusText === "Active" ? "btn-suspend" : "btn-activate"
-                    }`}
+                    className={`btn-secondary ${statusText === "Active" ? "btn-suspend" : "btn-activate"
+                      }`}
                     onClick={this.handleStatusChange}
                   >
                     {buttonLabel}
@@ -958,8 +1203,7 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${
-                                    ratesData.txn_app
+                                  `${ratesData.txn_app
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -983,8 +1227,7 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${
-                                    ratesData.txn_dec
+                                  `${ratesData.txn_dec
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -1006,8 +1249,7 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${
-                                    ratesData.refund_fee
+                                  `${ratesData.refund_fee
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -1029,8 +1271,7 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${
-                                    ratesData.chargeback_fee
+                                  `${ratesData.chargeback_fee
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -1083,8 +1324,7 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${
-                                    ratesData.setup_fee
+                                  `${ratesData.setup_fee
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -1173,8 +1413,7 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${
-                                    ratesData.annual_maintenance_fee
+                                  `${ratesData.annual_maintenance_fee
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -1236,86 +1475,111 @@ class ViewMerchant extends Component {
                   {this.state.secretsInfo && (
                     <div className="right-section-middle-body">
                       <div className="settlements-container">
-                        <div className="integration-Key">
-                          <h5>Integration Key</h5>
-                          <div className="secret-field">
-                            <p className="p2">API Key</p>
-                            <div className="input-container">
-                              <div
-                                className="icon-container copy-icon"
-                                onClick={() => this.handleCopy(apiKey)}
-                              >
-                                <Copy className="grey-icon" />
-                              </div>
-                              <input
-                                className="inputFeild secretkey-input"
-                                type="text"
-                                id="apiKey"
-                                value={
-                                  showApiKey ? apiKey : this.maskString(apiKey)
-                                }
-                                readOnly
-                              />
-                              <div
-                                className="icon-container eye-icon"
-                                onClick={() =>
-                                  this.toggleVisibility("showApiKey")
-                                }
-                              >
-                                {showApiKey ? (
-                                  <EyeOff className="grey-icon" />
-                                ) : (
-                                  <Eye className="grey-icon" />
-                                )}
-                              </div>
-                            </div>
+                        <h4 className="head-head">API Key List & Access</h4>
+                        <p className="head-head fonttt">An API key is a simple encrypted string that identifies an application without any principal. They are useful for accessing public data anonymously, and are used to associate API requests with your project for quota and billing.</p>
+                        <div className="api-key-container">
+                          <div className="api-key-container-div">
+                          <h6 className="heading-text">API Key</h6>
+                          <div className="mini-container">
+                            <p>Public Key</p>
                           </div>
-
-                          <div className="secret-field">
-                            <p className="p2">Secret Key</p>
-                            <div className="input-container">
-                              <div
-                                className="icon-container copy-icon"
-                                onClick={() => this.handleCopy(secretKey)}
+                          </div>
+                          <div className="api-key-content">
+                            <p id="api-key">
+                              {showApiKey ? this.apiKey : this.maskString(this.state.apiKey)}
+                            </p>
+                            <div
+                                onClick={() => this.handleCopy(apiKey, 'api', 'api-key')}
                               >
-                                <Copy className="grey-icon" />
+                                <Copy className="grey-icon zoom copy-icon-signupkey" />
                               </div>
-                              <input
-                                className="inputFeild secretkey-input"
-                                type="text"
-                                id="secretKey"
-                                value={
-                                  showSecretKey
-                                    ? secretKey
-                                    : this.maskString(secretKey)
-                                }
-                                readOnly
-                              />
-                              <div
-                                className="icon-container eye-icon"
-                                onClick={() =>
-                                  this.toggleVisibility("showSecretKey")
-                                }
-                              >
-                                {showSecretKey ? (
-                                  <EyeOff className="grey-icon" />
-                                ) : (
-                                  <Eye className="grey-icon" />
-                                )}
-                              </div>
-                            </div>
+                          </div>
+                          <div className="subtext-api">
+                            <p >Created on 28 Apr 2021, 18:20 GTM+4:10</p>
                           </div>
                         </div>
-                        {!overviewData.rootAccountCreated && (
+
+                        <div className="api-key-container">
+                          <div className="api-key-container-div">
+                            <h6 className="heading-text">Secret Key</h6>
+                            <div className="mini-container">
+                            <p>Private Key</p>
+                            </div>
+                          </div>
+                          <div className="api-key-content">
+                            <p id="secret-key">
+                              {showSecretKey ? secretKey : this.maskString(secretKey)}
+                            </p>
+                            <div
+                                onClick={() => this.handleCopy(secretKey, 'secret', 'secret-key')}
+                              >
+                                <Copy className="grey-icon copy-icon-signupkey" />
+                              </div>
+                          </div>
+                          <div className="subtext-api">
+                            <p >Created on 28 Apr 2021, 18:20 GTM+4:10</p>
+                          </div>
+                        </div>
+
+                        {overviewData.rootAccountCreated ? (
+                          <div className="api-key-container">
+                            <h6 className="heading-text">Login Credentials</h6>
+                            <div className="input-group margins">
+                            <input
+                              type="text"
+                              id="Email"
+                              className="inputFeild auth-input inputFeild-secret"
+                              value={email}
+                            />
+                            <label className="inputLabel" htmlFor="email">
+                              Email
+                            </label>
+                            </div>
+                            <div className="input-group margins passd">
+                            <input
+                              type="password"
+                              id="Password"
+                              className="inputFeild auth-input inputFeild-secret"
+                              value={password}
+                            />
+                            <label className="inputLabel" htmlFor="email">
+                              Password
+                            </label>
+                            </div>
+                            <button className="btn-primary login-secret" onClick={this.handleSubmit}>Login</button>
+                            </div>
+                        ) : (
+                          <div className="api-key-container">
+                            <div className="api-key-container-div">
+                            <h6 className="heading-text">Account Creation Key</h6>
+                          </div>
+                            <div className="api-key-content">
+                              <p id='root-key'>
+                                {this.maskString(rootAccountKey)}
+                              </p>
+                              <div
+                                  className={`copy-icon-signupkey ${copied.rootAccountKey ? "disabled" : ""}`}
+                                  onClick={() =>
+                                    !copied.rootAccountKey && this.handleCopy(rootAccountKey, 'root', 'root-key')
+                                  }
+                                >
+                                  <Copy className="grey-icon" />
+                                </div>
+                            </div>
+                            <div className="subtext-api">
+                            <p>Root account not created</p>
+                            </div>
+                          </div>
+                        )}
+                        {/* {!overviewData.rootAccountCreated && (
                           <>
                             <h5>Account Creation Key</h5>
                             <div className="secret-field">
                               <p className="p2">Root User Sign Up Key</p>
                               <div className="input-container">
                                 <div
-                                  className={`icon-container copy-icon ${
-                                    copied.rootAccountKey ? "disabled" : ""
-                                  }`}
+                                  className={`icon-container copy-icon ${copied.rootAccountKey ? "disabled" : ""
+                                    }`}
                                   onClick={() =>
                                     !copied.rootAccountKey &&
                                     this.handleCopy(
@@ -1337,7 +1601,7 @@ class ViewMerchant extends Component {
                               <p className="p2">Root account not created</p>
                             </div>
                           </>
-                        )}
+                        )} */}
                       </div>
                     </div>
                   )}
@@ -1410,11 +1674,10 @@ class ViewMerchant extends Component {
           <Header />
           <Sidebar />
           <div
-            className={`main-screen ${
-              this.state.sidebaropen
-                ? "collapsed-main-screen"
-                : "expanded-main-screen"
-            }  `}
+            className={`main-screen ${this.state.sidebaropen
+              ? "collapsed-main-screen"
+              : "expanded-main-screen"
+              }  `}
           >
             <div className="view-merchant-container">
               <div className="row-cards left-section">
@@ -1424,11 +1687,10 @@ class ViewMerchant extends Component {
                   </div>
                   <h5>{this.state.company_name}</h5>
                   <div
-                    className={`status-div ${
-                      statusText === "Active"
-                        ? "success-status"
-                        : "failed-status"
-                    }`}
+                    className={`status-div ${statusText === "Active"
+                      ? "success-status"
+                      : "failed-status"
+                      }`}
                   >
                     <p>{statusText}</p>
                   </div>
@@ -1439,27 +1701,26 @@ class ViewMerchant extends Component {
                           className="icon2"
                           onClick={this.handleBackArrowclick}
                         />
-
-                        <div className="approval-div-section">
-                          <div>
-                            <div className="creditcard-div">
-                              <ApprovalRatio className="creditcard-img primary-color-icon" />
+                        <div className="scroll-animation">
+                          <div className="approval-div-section">
+                            <div>
+                              <div className="creditcard-div">
+                                <ApprovalRatio className="creditcard-img primary-color-icon" />
+                              </div>
+                            </div>
+                            <div>
+                              <h5>
+                                {approvalData &&
+                                approvalData.approvalRatio !== undefined
+                                  ? parseFloat(
+                                      approvalData.approvalRatio.toFixed(2)
+                                    )
+                                  : "N/A"}
+                                %
+                              </h5>
+                              <p className="p2">Approval Ratio</p>
                             </div>
                           </div>
-                        </div>
-                        <div>
-                          <h5>
-                            {this.state.approvalData &&
-                            this.state.approvalData.approvalRatio !== undefined
-                              ? parseFloat(
-                                  this.state.approvalData.approvalRatio.toFixed(
-                                    2
-                                  )
-                                )
-                              : "N/A"}
-                            %
-                          </h5>
-                          <p className="p2">Approval Ratio</p>
                         </div>
 
                         <RightSign
@@ -1475,16 +1736,19 @@ class ViewMerchant extends Component {
                           className="icon2"
                           onClick={this.handleBackArrowclick}
                         />
-
-                        <div className="approval-div-section">
-                          <div>
-                            <div className="creditcard-div">
-                              <CreaditCard className="creditcard-img primary-color-icon" />
+                        <div className="scroll-animation">
+                          <div className="approval-div-section">
+                            <div>
+                              <div className="creditcard-div">
+                                <CreaditCard className="creditcard-img primary-color-icon" />
+                              </div>
                             </div>
-                          </div>
-                          <div>
-                            <h5>${this.formatValue(volumeData.totalVolume)}</h5>
-                            <p className="p2">Total Volume</p>
+                            <div>
+                              <h5>
+                                ${this.formatValue(volumeData.totalVolume)}
+                              </h5>
+                              <p className="p2">Total Volume</p>
+                            </div>
                           </div>
                         </div>
 
@@ -1501,18 +1765,19 @@ class ViewMerchant extends Component {
                           className="icon2"
                           onClick={this.handleBackArrowclick}
                         />
-
-                        <div className="approval-div-section">
-                          <div>
-                            <div className="creditcard-div">
-                              <DollarCircle className="creditcard-img primary-color-icon" />
+                        <div className="scroll-animation">
+                          <div className="approval-div-section">
+                            <div>
+                              <div className="creditcard-div">
+                                <DollarCircle className="creditcard-img primary-color-icon" />
+                              </div>
                             </div>
-                          </div>
-                          <div>
-                            <h5>
-                              ${this.formatValue(volumeData.settledVolume)}
-                            </h5>
-                            <p className="p2">Settled Volume</p>
+                            <div>
+                              <h5>
+                                ${this.formatValue(volumeData.settledVolume)}
+                              </h5>
+                              <p className="p2">Settled Volume</p>
+                            </div>
                           </div>
                         </div>
 
@@ -1523,7 +1788,7 @@ class ViewMerchant extends Component {
                       </div>
                     )}
                   </div>
-                </div>
+                </div> 
                 <div className="left-section-middle">
                   <p>Details</p>
                   <div className="create-settelments-horizontal-line"></div>
@@ -1811,8 +2076,7 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${
-                                    ratesData.txn_app
+                                  `${ratesData.txn_app
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -1836,8 +2100,7 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${
-                                    ratesData.txn_dec
+                                  `${ratesData.txn_dec
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -1859,8 +2122,7 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${
-                                    ratesData.refund_fee
+                                  `${ratesData.refund_fee
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -1882,8 +2144,7 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${
-                                    ratesData.chargeback_fee
+                                  `${ratesData.chargeback_fee
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -1936,8 +2197,7 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${
-                                    ratesData.setup_fee
+                                  `${ratesData.setup_fee
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -2026,8 +2286,7 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${
-                                    ratesData.annual_maintenance_fee
+                                  `${ratesData.annual_maintenance_fee
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`

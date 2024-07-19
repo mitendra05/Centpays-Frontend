@@ -32,23 +32,133 @@ class Signup extends Component {
     this.setState({ [event.target.id]: event.target.value });
   };
 
+  // decodeSignedToken = (token) => {
+  //   try {
+  //     const bytes = CryptoJS.AES.decrypt(
+  //       token,
+  //       process.env.REACT_APP_KEY_SECRET
+  //     );
+  //     const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+  //     return decryptedData;
+  //   } catch (error) {
+  //     console.error("Error decoding token:", error.message);
+  //     return null;
+  //   }
+  // };
+
   decodeSignedToken = (token) => {
     try {
-      const bytes = CryptoJS.AES.decrypt(
-        token,
-        process.env.REACT_APP_KEY_SECRET
-      );
-      const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-      return decryptedData;
+      let decryptedString;
+  
+      if (/^[A-Za-z0-9_-]+$/.test(token)) {
+        let base64Token = token.replace(/-/g, '+').replace(/_/g, '/');
+        while (base64Token.length % 4 !== 0) {
+          base64Token += '=';
+        }
+  
+        const encryptedString = atob(base64Token);
+        const bytes = CryptoJS.AES.decrypt(encryptedString, process.env.REACT_APP_KEY_SECRET);
+        decryptedString = bytes.toString(CryptoJS.enc.Utf8);
+      } else {
+        const bytes = CryptoJS.AES.decrypt(token, process.env.REACT_APP_KEY_SECRET);
+        decryptedString = bytes.toString(CryptoJS.enc.Utf8);
+      }
+  
+      if (!decryptedString) {
+        console.error("Decrypted string is empty or undefined.");
+        console.log("Token:", token);
+        return null;
+      }
+  
+      console.log("Decrypted String:", decryptedString); // Debugging output
+      try {
+        const decryptedData = JSON.parse(decryptedString);
+        return decryptedData;
+      } catch (jsonError) {
+        console.error("Error parsing decrypted string as JSON:", jsonError.message);
+        return null;
+      }
     } catch (error) {
-      console.error("Error decoding token:", error.message);
+      console.error("General error decoding token:", error.message);
       return null;
     }
   };
+  
+
+  // handleSubmit = async (e) => {
+  //   const backendURL = process.env.REACT_APP_BACKEND_URL;
+  //   e.preventDefault();
+  //   const {
+  //     userName,
+  //     userEmail,
+  //     userMobile_no,
+  //     userCountry,
+  //     userPassword,
+  //     userConfirm_password,
+  //     userSignupKey,
+  //   } = this.state;
+  //   console.log("signup key", userSignupKey);
+  //   const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
+
+  //   if (!passwordRegex.test(userPassword)) {
+  //     this.setState({
+  //       errorMessage:
+  //         "Password must be at least 8 characters long and contain at least one uppercase letter, one digit, and one special character.",
+  //       messageType: "Failed",
+  //     });
+  //     return;
+  //   }
+  //   const signupKey = this.decodeSignedToken(
+  //     userSignupKey,
+  //     process.env.REACT_APP_KEY_SECRET
+  //   );
+  //   console.log("decoded key", signupKey);
+  //   try {
+  //     const response = await fetch(`${backendURL}/signup`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         name: userName,
+  //         email: userEmail,
+  //         mobile_no: userMobile_no,
+  //         country: userCountry,
+  //         password: userPassword,
+  //         confirm_password: userConfirm_password,
+  //         client_id: signupKey.clientId,
+  //         role: signupKey.role,
+  //       }),
+  //     });
+  //     if (response.ok) {
+  //       document.cookie = `signupEmail=${userEmail};path=/`;
+  //       this.setState({
+  //         userName: "",
+  //         userEmail: "",
+  //         userMobile_no: "",
+  //         userCountry: "",
+  //         userPassword: "",
+  //         userConfirm_password: "",
+  //         userSignupKey: "",
+  //       });
+  //       this.handleSignupSuccessModalToggle("open");
+  //     } else {
+  //       this.setState({
+  //         errorMessage: "Error creating user. Please try again later.",
+  //         messageType: "Failed",
+  //       });
+  //     }
+  //   } catch (error) {
+  //     this.setState({
+  //       errorMessage: "An unexpected error occurred. Please try again later.",
+  //       messageType: "Failed",
+  //     });
+  //   }
+  // };
 
   handleSubmit = async (e) => {
-    const backendURL = process.env.REACT_APP_BACKEND_URL;
     e.preventDefault();
+    const backendURL = process.env.REACT_APP_BACKEND_URL;
     const {
       userName,
       userEmail,
@@ -58,9 +168,9 @@ class Signup extends Component {
       userConfirm_password,
       userSignupKey,
     } = this.state;
-    console.log("signup key", userSignupKey);
+  
+    // Validate password format
     const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
-
     if (!passwordRegex.test(userPassword)) {
       this.setState({
         errorMessage:
@@ -69,28 +179,34 @@ class Signup extends Component {
       });
       return;
     }
-    const signupKey = this.decodeSignedToken(
-      userSignupKey,
-      process.env.REACT_APP_KEY_SECRET
-    );
-    console.log("decoded key", signupKey);
+  
+    // Decode signup key
+    const signupKey = this.decodeSignedToken(userSignupKey, process.env.REACT_APP_KEY_SECRET);
+    console.log("Decoded key:", signupKey);
+  
+    // Prepare request body
+    const requestBody = {
+      name: userName,
+      email: userEmail,
+      mobile_no: userMobile_no,
+      country: userCountry,
+      password: userPassword,
+      confirm_password: userConfirm_password,
+      client_id: signupKey ? signupKey.clientId : null,
+      role: signupKey ? signupKey.role : null,
+    };
+  
     try {
+      // Send POST request
       const response = await fetch(`${backendURL}/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          name: userName,
-          email: userEmail,
-          mobile_no: userMobile_no,
-          country: userCountry,
-          password: userPassword,
-          confirm_password: userConfirm_password,
-          client_id: signupKey.clientId,
-          role: signupKey.role,
-        }),
+        body: JSON.stringify(requestBody),
       });
+  
+      // Handle response
       if (response.ok) {
         document.cookie = `signupEmail=${userEmail};path=/`;
         this.setState({
@@ -104,18 +220,21 @@ class Signup extends Component {
         });
         this.handleSignupSuccessModalToggle("open");
       } else {
+        const errorText = await response.text(); // Get error message from response
         this.setState({
-          errorMessage: "Error creating user. Please try again later.",
+          errorMessage: `Error creating user: ${errorText}`,
           messageType: "Failed",
         });
       }
     } catch (error) {
+      console.error("An unexpected error occurred:", error);
       this.setState({
         errorMessage: "An unexpected error occurred. Please try again later.",
         messageType: "Failed",
       });
     }
   };
+  
 
   handleSignupSuccessModalToggle = (action) => {
     this.setState({ isSignupSuccessful: action === "open" ? true : false });
@@ -142,7 +261,7 @@ class Signup extends Component {
                 </h5>
                 <button
                   className="btn-primary loginbutton-modal"
-                  onClick={() => (window.location.href = "/")}
+                  onClick={() => (window.location.replace("/"))}
                 >
                   Login
                 </button>
@@ -210,8 +329,7 @@ class Signup extends Component {
                         Mobile No
                       </label>
                     </div>
-                  </div>
-                  <div className="input-group">
+                    <div className="input-group">
                     <input
                       type="text"
                       id="userCountry"
@@ -222,6 +340,21 @@ class Signup extends Component {
                     />
                     <label htmlFor="country" className="inputLabel">
                       Country
+                    </label>
+                  </div>
+                  </div>
+                  
+                  <div className="input-group">
+                    <input
+                      type="password"
+                      id="userSignupKey"
+                      className="inputFeild auth-input"
+                      required
+                      value={this.state.userSignupKey}
+                      onChange={this.handleInputChange}
+                    />
+                    <label htmlFor="country" className="inputLabel">
+                      Sign-Up Key
                     </label>
                   </div>
 
@@ -254,19 +387,6 @@ class Signup extends Component {
                     </div>
                   </div>
 
-                  <div className="input-group">
-                    <input
-                      type="password"
-                      id="userSignupKey"
-                      className="inputFeild auth-input"
-                      required
-                      value={this.state.userSignupKey}
-                      onChange={this.handleInputChange}
-                    />
-                    <label htmlFor="country" className="inputLabel">
-                      Sign-Up Key
-                    </label>
-                  </div>
 
                   <div className="checkbox-container">
                     <div>
@@ -282,7 +402,7 @@ class Signup extends Component {
                       </label>
                     </div>
                   </div>
-                  <button type="submit" className="btn-primary auth-btn-signup">
+                  <button type="submit" className="btn-primary auth-btn">
                     Sign Up
                   </button>
 
