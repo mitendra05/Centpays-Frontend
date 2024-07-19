@@ -202,6 +202,7 @@ class Table extends Component {
       searchText,
       highlightedOptions: filteredOptions,
       noResultsFound: filteredOptions.length === 0,
+      currentPage:1,
     });
   };
 
@@ -294,6 +295,7 @@ class Table extends Component {
               showDeclinebtn={false}
               acceptbtnname={"OK"}
               showFotter={true}
+              stopScroll={true}
               modalHeading={"Rates 🪙"}
               modalBody={
                 <div>
@@ -362,6 +364,8 @@ class Table extends Component {
               showDeclinebtn={false}
               acceptbtnname={"Update"}
               showFotter={true}
+              stopScroll={true}
+              enableDragging={true}
               modalHeading={"Edit Status 📝"}
               modalBody={
                 <div className="edit-status">

@@ -12,7 +12,7 @@ import { Search, Oops, DownSign, UpSign, Eye } from "../../media/icon/SVGicons";
 import searchImg from "../../media/image/search-transaction.png";
 import ViewTransaction from "../components/ViewTransaction";
 
-class TransactionMonitoring extends Component {
+class LiveReport extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -26,20 +26,20 @@ class TransactionMonitoring extends Component {
       messageType: "",
       headerLabels: [
         { id: 1, heading: "Txn ID", label: "txnid" },
-        { id: 2, heading: "Merchant Txn ID", label: "merchantTxnId" },
-        { id: 3, heading: "Merchant", label: "merchant" },
-        { id: 4, heading: "Payment Gateway", label: "paymentgateway" },
+        { id: 2, heading: "Merchant", label: "merchant" },
+        { id: 3, heading: "Payment Gateway", label: "paymentgateway" },
+        { id: 4, heading: "Amount", label: "amount" },
         { id: 5, heading: "Status", label: "Status" },
-        { id: 6, heading: "Message", label: "message" },
-        { id: 7, heading: "Transaction Date", label: "transactiondate" },
-        { id: 8, heading: "Order No", label: "orderNo" },
-        { id: 9, heading: "MID", label: "mid" },
-        { id: 10, heading: "Customer Name", label: "cname" },
-        { id: 11, heading: "Email", label: "email" },
-        { id: 12, heading: "Amount", label: "amount" },
-        { id: 13, heading: "Currency", label: "currency" },
-        { id: 14, heading: "Card Number", label: "cardnumber" },
-        { id: 15, heading: "Card Type", label: "cardtype" },
+        { id: 6, heading: "Currency", label: "currency" },
+        { id: 7, heading: "Is Bank Settle", label: "isBankSettled" },
+        { id: 8, heading: "Transaction Date", label: "transactiondate" },
+        { id: 9, heading: "Customer Name", label: "cname" },
+        { id: 10, heading: "Email", label: "email" },
+        { id: 11, heading: "Order No", label: "orderNo" },
+        { id: 12, heading: "Card Number", label: "cardnumber" },
+        { id: 13, heading: "Card Type", label: "cardtype" },
+        { id: 14, heading: "MID", label: "mid" },
+        { id: 15, heading: "Message", label: "message" },
         { id: 16, heading: "Country", label: "country" },
         { id: 17, heading: "Web URL", label: "web_url" },
       ],
@@ -73,21 +73,12 @@ class TransactionMonitoring extends Component {
   };
 
   componentDidMount() {
-    const token = this.getCookie('token');
-    if (!token) {
-      window.location.href = '/';
-      return;
-    }
     const backendURL = process.env.REACT_APP_BACKEND_URL;
     this.fetchData(`${backendURL}/companylist`, "companyList");
     this.fetchData(`${backendURL}/listofmids`, "midList");
-    this.fetchMidList();
     this.fetchData(`${backendURL}/listofcountries`, "countryList");
     this.fetchData(`${backendURL}/acquirerlist`, "paymentgatewayList");
     window.addEventListener("click", this.handleClickOutside);
-    if (this.state.userRole === "merchant") {
-      this.handleSearch();
-    }
   }
 
   componentWillUnmount() {
@@ -125,69 +116,12 @@ class TransactionMonitoring extends Component {
     }
   };
 
-  fetchMidList = async () => {
-    const { token, merchant } = this.state;
-    const backendURL = process.env.REACT_APP_BACKEND_URL;
-    let url = `${backendURL}/listofmids`;
-
-    if (merchant) {
-      url += `?merchant=${merchant}`;
-    }
-    try {
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      const data = await response.json();
-      this.setState({ midList: data });
-    } catch (error) {
-      this.setState({
-        errorMessage: "Error in Fetching data. Please try again later.",
-        messageType: "",
-      });
-    }
-  };
-
-  handleCompanySelect = (event) => {
-    const merchant = event.target.value;
-    this.setState({ merchant }, () => {
-      if (merchant) {
-        this.fetchMidList();
-      } else {
-        this.setState({ midList: [] });
-      }
-    });
-  };
-
   handleInputChange = (event) => {
     const { id, value } = event.target;
-    const searchIdsArray = value.split(/[\s,]+/);
-
-    const threshold = 52; 
-
     this.setState({
       [id]: value,
-      searchIdsArray: searchIdsArray,
-      showIdsArray: value.length > threshold && searchIdsArray.length > 1,
-      showIds:
-        value.length > threshold &&
-        searchIdsArray.length > 1 &&
-        this.state.showIds,
+      showIds: false,
     });
-    this.handleSearch();
-  };
-
-  handleKeyDown = (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      this.handleSearch();
-    }
   };
 
   handleKeyDown = (event) => {
@@ -213,14 +147,6 @@ class TransactionMonitoring extends Component {
     this.setState({ selectedRowToView: row });
   };
 
-  // handleCardNumber = (cardNo) => {
-  //   if (cardNo) {
-  //     return cardNo.slice(0, 6) + "******" + cardNo.slice(6, 10);
-  //   } else {
-  //     return cardNo;
-  //   }
-  // };
-
   handleClear = () => {
     this.setState({
       searchIds: "",
@@ -236,19 +162,18 @@ class TransactionMonitoring extends Component {
       cardnumber: "",
       searchedResult: null,
       activeQuickSearchbtn: "",
-    }, () => {
-      this.fetchMidList();
+      showIds: null,
     });
+    
   };
-
 
   handleSearch = async () => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
-    const { token, userRole, merchantName } = this.state;
+    const { token,userRole,merchantName} = this.state;
     const searchedData = {
       searchIds: this.state.searchIds,
       status: this.state.status,
-      merchant: userRole === "merchant" ? merchantName : this.state.merchant,
+      merchant: userRole=="merchant"? merchantName:this.state.merchant,
       fromDate: this.state.fromDate,
       toDate: this.state.toDate,
       mid: this.state.mid,
@@ -301,14 +226,14 @@ class TransactionMonitoring extends Component {
   };
 
   exportData = () => {
-    const { searchedResult } = this.state;
+    const {searchedResult} = this.state;
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.json_to_sheet(searchedResult);
 
     XLSX.utils.book_append_sheet(workbook, worksheet, "Mismatch Data");
 
     XLSX.writeFile(workbook, "Mismatch_Data.xlsx");
-  };
+  }
 
   handleQuickSearch = (buttonName) => {
     if (this.state.activeQuickSearchbtn === buttonName) {
@@ -383,10 +308,9 @@ class TransactionMonitoring extends Component {
         activeQuickSearchbtn: buttonName,
       });
     }
-    
+
     // Last Week
     else if (buttonName === "Last Week") {
-
       const today = new Date();
       const dayOfWeek = today.getDay();
       const daysSinceLastMonday = ((dayOfWeek + 6) % 7) + 7;
@@ -413,7 +337,6 @@ class TransactionMonitoring extends Component {
 
     // This Month
     else if (buttonName === "This Month") {
-
       const currentDate = new Date();
       const from = `${currentDate.getFullYear()}-${(
         "0" +
@@ -432,7 +355,6 @@ class TransactionMonitoring extends Component {
 
     // Last Month
     else if (buttonName === "Last Month") {
-
       const currentDate = new Date();
       const endDate = new Date(
         currentDate.getFullYear(),
@@ -588,7 +510,6 @@ class TransactionMonitoring extends Component {
                           id="merchant"
                           value={merchant}
                           onChange={this.handleCompanySelect}
-
                         >
                           <option value="">Select Merchant</option>
                           {this.state.companyList.map((company) => (
@@ -1218,7 +1139,7 @@ class TransactionMonitoring extends Component {
                             onKeyDown={this.handleKeyDown}
                           />
                         </div>
-                      {this.state.showIds &&
+                        {this.state.showIds &&
                           this.state.searchIdsArray.length > 0 && (
                             <div ref={(ref) => (this.modalRef = ref)}>
                               <select
@@ -1564,7 +1485,6 @@ class TransactionMonitoring extends Component {
                             Id:
                           </label>
                           {this.state.showIdsArray && (
-
                             <div
                               className="icon-container"
                               ref={(ref) => (this.iconContainerRef = ref)}
@@ -1827,4 +1747,4 @@ class TransactionMonitoring extends Component {
   }
 }
 
-export default TransactionMonitoring;
+export default LiveReport;

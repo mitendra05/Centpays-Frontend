@@ -110,25 +110,62 @@ class MerchantForm extends Component {
     }
   };
 
-  generateSignedToken = (clientId, role) => {
-    const payload = { clientId, role };
-    console.log(payload)
-    const payloadString = JSON.stringify(payload);
-    console.log(payloadString)
-    const token = CryptoJS.AES.encrypt(payloadString, process.env.REACT_APP_KEY_SECRET).toString();
-    return token;
+//   generateSignedToken = (clientId, role) => {
+//     const payload = { clientId, role };
+//     console.log(payload)
+//     const payloadString = JSON.stringify(payload);
+//     console.log(payloadString)
+//     const token = CryptoJS.AES.encrypt(payloadString, process.env.REACT_APP_KEY_SECRET).toString();
+//     return token;
+// };
+
+// decodeSignedToken = (token) => {
+//   try {
+//       const bytes = CryptoJS.AES.decrypt(token, process.env.REACT_APP_KEY_SECRET);
+//       const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+//       return decryptedData;
+//   } catch (error) {
+//       console.error("Error decoding token:", error.message);
+//       return null;
+//   }
+// };
+
+generateSignedToken = (clientId, role) => {
+  const payload = { clientId, role };
+  const payloadString = JSON.stringify(payload);
+  const encrypted = CryptoJS.AES.encrypt(
+    payloadString,
+    process.env.REACT_APP_KEY_SECRET
+  ).toString();
+  let token = btoa(encrypted);
+  token = token.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return token;
 };
 
 decodeSignedToken = (token) => {
   try {
+    let decryptedString;
+    if (/^[A-Za-z0-9]+$/.test(token)) {
+      let base64Token = token.replace(/0/g, '+').replace(/1/g, '/');
+      while (base64Token.length % 4) {
+        base64Token += '=';
+      }
+      const encryptedString = atob(base64Token);
+      const bytes = CryptoJS.AES.decrypt(encryptedString, process.env.REACT_APP_KEY_SECRET);
+      decryptedString = bytes.toString(CryptoJS.enc.Utf8);
+    } else {
       const bytes = CryptoJS.AES.decrypt(token, process.env.REACT_APP_KEY_SECRET);
-      const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-      return decryptedData;
+      decryptedString = bytes.toString(CryptoJS.enc.Utf8);
+    }
+
+    const decryptedData = JSON.parse(decryptedString);
+    return decryptedData;
   } catch (error) {
-      console.error("Error decoding token:", error.message);
-      return null;
+    console.error("Error decoding token:", error.message);
+    return null;
   }
 };
+
 
  handleSubmit = async (event) => {
   event.preventDefault();
@@ -162,7 +199,6 @@ decodeSignedToken = (token) => {
     skype_id: this.state.skype_id,
   };
   const isUpdate = !!this.state._id;
-
   const url = isUpdate ? `${backendURL}/updateclient/` : `${backendURL}/clients`;
   const method = isUpdate ? "PATCH" : "POST";
   const data = isUpdate ? { id: this.state._id, ...newData } : newData;
@@ -188,10 +224,12 @@ decodeSignedToken = (token) => {
         if (!isUpdate) {
           console.log("id",client_data.client.client_id)
           rootAccountKey = this.generateSignedToken(client_data.client.client_id, 'root');
-          this.setState({isAddMerchantPanelOpen:false, showSecretKeyModal:true, rootAccountKey})
+          this.setState({ showSecretKeyModal:true, rootAccountKey})
         }
 
         this.setState({
+          isAddMerchantPanelOpen:false,
+
           showSecretKeyModal: !isUpdate,
           errorMessage: isUpdate
             ? "Data Updated Successfully"
@@ -258,6 +296,8 @@ decodeSignedToken = (token) => {
       .catch(err => {
         this.setState({errorMessage:"Fail to copied!"})
       });
+      this.setState({ showSecretKeyModal: false });
+
   };
 
   maskString = (number) => {

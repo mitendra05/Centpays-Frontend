@@ -33,9 +33,9 @@ class ScrollToTopButton extends Component {
     return (
         <button
         onClick={this.scrollToTop}
-        className={`scroll-to-top-button ${isVisible ? 'show' : 'hide'}`}
+        className={`scroll-top-and-bottom-button scroll-to-top-button ${isVisible ? 'show' : 'hide'}`}
       >
-        <UpDoubleArrow className='top-icon white-icon'/>
+        <UpDoubleArrow className='white-icon scrollupdown-icon'/>
       </button>
     );
   }

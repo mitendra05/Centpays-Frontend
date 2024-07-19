@@ -8,7 +8,7 @@ import Modal from "../components/Modal";
 
 import { Folder, Excel, Import, Export, Bin } from "../../media/icon/SVGicons";
 
-class Compare extends Component {
+class BankSettlement extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -800,4 +800,4 @@ class Compare extends Component {
   }
 }
 
-export default Compare;
+export default BankSettlement;
