@@ -343,7 +343,7 @@ class Signup extends Component {
                     </label>
                   </div>
                   </div>
-                  
+            
                   <div className="input-group">
                     <input
                       type="password"
@@ -357,7 +357,6 @@ class Signup extends Component {
                       Sign-Up Key
                     </label>
                   </div>
-
                   <div className="input-group-div">
                     <div className="input-group">
                       <input

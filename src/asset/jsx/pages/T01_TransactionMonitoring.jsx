@@ -85,6 +85,9 @@ class TransactionMonitoring extends Component {
     this.fetchData(`${backendURL}/listofcountries`, "countryList");
     this.fetchData(`${backendURL}/acquirerlist`, "paymentgatewayList");
     window.addEventListener("click", this.handleClickOutside);
+    if (this.state.userRole === "merchant") {
+      this.handleSearch();
+    }
   }
 
   componentWillUnmount() {
@@ -177,6 +180,14 @@ class TransactionMonitoring extends Component {
         searchIdsArray.length > 1 &&
         this.state.showIds,
     });
+    this.handleSearch();
+  };
+
+  handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      this.handleSearch();
+    }
   };
 
   handleKeyDown = (event) => {
@@ -372,9 +383,10 @@ class TransactionMonitoring extends Component {
         activeQuickSearchbtn: buttonName,
       });
     }
-
+    
     // Last Week
     else if (buttonName === "Last Week") {
+
       const today = new Date();
       const dayOfWeek = today.getDay();
       const daysSinceLastMonday = ((dayOfWeek + 6) % 7) + 7;
@@ -401,6 +413,7 @@ class TransactionMonitoring extends Component {
 
     // This Month
     else if (buttonName === "This Month") {
+
       const currentDate = new Date();
       const from = `${currentDate.getFullYear()}-${(
         "0" +
@@ -419,6 +432,7 @@ class TransactionMonitoring extends Component {
 
     // Last Month
     else if (buttonName === "Last Month") {
+
       const currentDate = new Date();
       const endDate = new Date(
         currentDate.getFullYear(),
@@ -574,6 +588,7 @@ class TransactionMonitoring extends Component {
                           id="merchant"
                           value={merchant}
                           onChange={this.handleCompanySelect}
+
                         >
                           <option value="">Select Merchant</option>
                           {this.state.companyList.map((company) => (
@@ -1203,7 +1218,7 @@ class TransactionMonitoring extends Component {
                             onKeyDown={this.handleKeyDown}
                           />
                         </div>
-                        {this.state.showIds &&
+                      {this.state.showIds &&
                           this.state.searchIdsArray.length > 0 && (
                             <div ref={(ref) => (this.modalRef = ref)}>
                               <select
@@ -1549,6 +1564,7 @@ class TransactionMonitoring extends Component {
                             Id:
                           </label>
                           {this.state.showIdsArray && (
+
                             <div
                               className="icon-container"
                               ref={(ref) => (this.iconContainerRef = ref)}

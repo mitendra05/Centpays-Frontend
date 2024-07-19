@@ -99,7 +99,7 @@ class ViewMerchant extends Component {
   extractENameFromURL = () => {
     return window.location.pathname.split("/viewmerchant/")[1];
   };
-
+  
   fetchClientId = async (company_name) => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
     try {
@@ -276,6 +276,7 @@ class ViewMerchant extends Component {
   componentDidMount() {
     this.fetchAndSetClientId();
     this.loginCredentials();
+
     const {
       company_name: stateCompanyName,
       companyName,
@@ -323,6 +324,7 @@ class ViewMerchant extends Component {
     this.interval = setInterval(() => {
       this.nextSlide();
     }, 5000);
+
   };
 
   nextSlide = () => {
@@ -407,8 +409,10 @@ class ViewMerchant extends Component {
     } catch (error) {
       console.error("Error updating status:", error);
       this.setState({
+
         errorMessage: "An unexpected error occurred. Please try again later.",
         messageType: "error",
+
       });
     }
   };
@@ -554,6 +558,7 @@ class ViewMerchant extends Component {
     const currentIndex = states.indexOf(current);
     const newIndex = (currentIndex - 1 + states.length) % states.length;
     const { slideIndex, slides } = this.state;
+
     // Calculate the previous slide index in a circular manner
     const prevIndex = (slideIndex - 1 + slides.length) % slides.length;
     this.setState({
@@ -671,7 +676,6 @@ class ViewMerchant extends Component {
   
     return token;
   };
-  
 
   maskString = (key) => {
     if (key.length > 12) {
@@ -1602,6 +1606,7 @@ class ViewMerchant extends Component {
                             </div>
                           </>
                         )} */}
+
                       </div>
                     </div>
                   )}
@@ -1735,7 +1740,6 @@ class ViewMerchant extends Component {
                         <LeftSign
                           className="icon2"
                           onClick={this.handleBackArrowclick}
-                        />
                         <div className="scroll-animation">
                           <div className="approval-div-section">
                             <div>
@@ -1789,6 +1793,7 @@ class ViewMerchant extends Component {
                     )}
                   </div>
                 </div> 
+
                 <div className="left-section-middle">
                   <p>Details</p>
                   <div className="create-settelments-horizontal-line"></div>
@@ -2144,7 +2149,9 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
+
                                   `${ratesData.chargeback_fee
+
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`

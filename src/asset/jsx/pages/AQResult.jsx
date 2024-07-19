@@ -221,6 +221,7 @@ class AQResult extends Component {
       </div>
     );
   }
+
 }
 
 export default AQResult;

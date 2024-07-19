@@ -46,15 +46,19 @@ class CustomSelect extends Component {
   };
 
   setDefaultOption = () => {
+
     const { options, defaultLabel, selectedValue } = this.props;
     if (!selectedValue && defaultLabel && options && options.length === 1) {
+
       this.setState({ selectedOptions: options[0] });
       this.props.onChange(options[0]);
     }
   };
 
   render() {
+
     const { options = [], width = '170px', height = 'auto', showDropdownIcon = false, defaultLabel, selectedValue } = this.props;
+
     const { selectedOptions, isOpen, searchValue } = this.state;
 
     const filteredOptions = options.filter(option =>
@@ -99,6 +103,7 @@ class CustomSelect extends Component {
                 className={`custom-select-option ${this.props.multiSelect ?
                   (selectedOptions.includes(option) ? 'selected' : '')
                   : (selectedValue === option ? 'selected' : '')
+
                 }`}
               >
                 {this.props.multiSelect ? (

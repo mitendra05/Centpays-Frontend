@@ -199,7 +199,6 @@ decodeSignedToken = (token) => {
     skype_id: this.state.skype_id,
   };
   const isUpdate = !!this.state._id;
-
   const url = isUpdate ? `${backendURL}/updateclient/` : `${backendURL}/clients`;
   const method = isUpdate ? "PATCH" : "POST";
   const data = isUpdate ? { id: this.state._id, ...newData } : newData;
@@ -230,6 +229,7 @@ decodeSignedToken = (token) => {
 
         this.setState({
           isAddMerchantPanelOpen:false,
+
           showSecretKeyModal: !isUpdate,
           errorMessage: isUpdate
             ? "Data Updated Successfully"
@@ -297,6 +297,7 @@ decodeSignedToken = (token) => {
         this.setState({errorMessage:"Fail to copied!"})
       });
       this.setState({ showSecretKeyModal: false });
+
   };
 
   maskString = (number) => {

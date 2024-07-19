@@ -48,6 +48,7 @@ import AQTest from "./asset/jsx/pages/AQTest";
 import AQResult from "./asset/jsx/pages/AQResult";
 
 import Setting from "./asset/jsx/pages/setting";
+
 import BankSettlement from "./asset/jsx/pages/Bank_Settlements";
 import LiveReport from "./asset/jsx/pages/LiveReport";
 
@@ -103,8 +104,10 @@ function App() {
           <Route path="/settings" element={<Setting />}></Route>
 		      <Route path="/acquirertestingenv" element={<AQTest />}></Route>
 		      <Route path="/paymentresult/:orderNo" element={<AQResult />}></Route>
+
           <Route path="/banksettle" element={<BankSettlement />}></Route>
           <Route path="/livereport" element={<LiveReport/>}></Route>
+
         </Routes>
       </BrowserRouter>
     </>
