@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import CryptoJS from "crypto-js";
 
 // import component
-// import MessageBox from "../components/Message_box";
+import MessageBox from "../components/Message_box";
 import Modal from "../components/Modal";
 
 // import images
@@ -16,6 +16,7 @@ class Signup extends Component {
     super(props);
     this.state = {
       errorMessage: "",
+      messageType:"",
       isSignupSuccessful: false,
       // api states
       userName: "",
@@ -169,22 +170,57 @@ class Signup extends Component {
       userSignupKey,
     } = this.state;
   
-    // Validate password format
-    const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
-    if (!passwordRegex.test(userPassword)) {
+    if (userPassword !== userConfirm_password) {
       this.setState({
-        errorMessage:
-          "Password must be at least 8 characters long and contain at least one uppercase letter, one digit, and one special character.",
+        errorMessage: "Passwords do not match. Please try again.",
+        messageType: "Failed",
+      });
+      console.log("Passwords do not match.");
+      return;
+    }
+    // Validate password format
+    if (userPassword.length < 8) {
+      this.setState({
+        errorMessage: "Password must be at least 8 characters long.",
+        messageType: "Failed",
+      });
+      console.log("Password must be at least 8 characters long.");
+      return;
+    }
+    if (!/[A-Z]/.test(userPassword)) {
+      this.setState({
+        errorMessage: "Password must contain at least one uppercase letter.",
+        messageType: "Failed",
+      });
+      console.log("Password must contain at least one uppercase letter.");
+      return;
+    }
+    if (!/[0-9]/.test(userPassword)) {
+      this.setState({
+        errorMessage: "Password must contain at least one digit.",
+        messageType: "Failed",
+      });
+      console.log("Password must contain at least one digit.");
+      return;
+    }
+    if (!/[!@#$%^&*]/.test(userPassword)) {
+      this.setState({
+        errorMessage: "Password must contain at least one special character.",
+        messageType: "Failed",
+      });
+      console.log("Password must contain at least one special character.");
+      return;
+    }
+  
+    const signupKey = this.decodeSignedToken(userSignupKey, process.env.REACT_APP_KEY_SECRET);
+    if (!signupKey) {
+      this.setState({
+        errorMessage: "Invalid signup key. Please check and try again.",
         messageType: "Failed",
       });
       return;
     }
-  
-    // Decode signup key
-    const signupKey = this.decodeSignedToken(userSignupKey, process.env.REACT_APP_KEY_SECRET);
-    console.log("Decoded key:", signupKey);
-  
-    // Prepare request body
+    
     const requestBody = {
       name: userName,
       email: userEmail,
@@ -192,12 +228,11 @@ class Signup extends Component {
       country: userCountry,
       password: userPassword,
       confirm_password: userConfirm_password,
-      client_id: signupKey ? signupKey.clientId : null,
-      role: signupKey ? signupKey.role : null,
+      client_id: signupKey.clientId,
+      role: signupKey.role,
     };
   
     try {
-      // Send POST request
       const response = await fetch(`${backendURL}/signup`, {
         method: "POST",
         headers: {
@@ -217,17 +252,18 @@ class Signup extends Component {
           userPassword: "",
           userConfirm_password: "",
           userSignupKey: "",
+          errorMessage: "",
+          messageType: "",
         });
         this.handleSignupSuccessModalToggle("open");
       } else {
-        const errorText = await response.text(); // Get error message from response
+        const errorData = await response.json(); // Get error message from response
         this.setState({
-          errorMessage: `Error creating user: ${errorText}`,
+          errorMessage: errorData.message || "Error creating user. Please try again later.",
           messageType: "Failed",
         });
       }
     } catch (error) {
-      console.error("An unexpected error occurred:", error);
       this.setState({
         errorMessage: "An unexpected error occurred. Please try again later.",
         messageType: "Failed",
@@ -241,9 +277,16 @@ class Signup extends Component {
   };
 
   render() {
-    const { isSignupSuccessful } = this.state;
+    const { isSignupSuccessful,errorMessage,messageType } = this.state;
     return (
       <>
+      {errorMessage && (
+						<MessageBox
+							message={errorMessage}
+							messageType={messageType}
+							onClose={() => this.setState({ errorMessage: "" })}
+						/>
+					)}
         {isSignupSuccessful && (
           <Modal onClose={() => this.setState({ isSignupSuccessful: false })} />
         )}
@@ -261,7 +304,9 @@ class Signup extends Component {
                 </h5>
                 <button
                   className="btn-primary loginbutton-modal"
-                  onClick={() => (window.location.replace("/"))}
+                  onClick={() => {
+                    window.location.href = "/";
+                  }}
                 >
                   Login
                 </button>

@@ -5,6 +5,9 @@ import * as XLSX from "xlsx";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import Table from "../components/Table";
+import Loader from "../components/Loder";
+
+import CustomSelect from "../components/Custom-select";
 
 //SVG Icons
 import { Search, Oops, DownSign, UpSign, Eye } from "../../media/icon/SVGicons";
@@ -62,6 +65,7 @@ class TransactionMonitoring extends Component {
       cardnumber: "",
       activeQuickSearchbtn: "",
       showIds: false,
+      loading: false,
     };
   }
 
@@ -73,9 +77,9 @@ class TransactionMonitoring extends Component {
   };
 
   componentDidMount() {
-    const token = this.getCookie('token');
+    const token = this.getCookie("token");
     if (!token) {
-      window.location.href = '/';
+      window.location.href = "/";
       return;
     }
     const backendURL = process.env.REACT_APP_BACKEND_URL;
@@ -85,9 +89,6 @@ class TransactionMonitoring extends Component {
     this.fetchData(`${backendURL}/listofcountries`, "countryList");
     this.fetchData(`${backendURL}/acquirerlist`, "paymentgatewayList");
     window.addEventListener("click", this.handleClickOutside);
-    if (this.state.userRole === "merchant") {
-      this.handleSearch();
-    }
   }
 
   componentWillUnmount() {
@@ -169,7 +170,7 @@ class TransactionMonitoring extends Component {
     const { id, value } = event.target;
     const searchIdsArray = value.split(/[\s,]+/);
 
-    const threshold = 52; 
+    const threshold = 52;
 
     this.setState({
       [id]: value,
@@ -180,14 +181,6 @@ class TransactionMonitoring extends Component {
         searchIdsArray.length > 1 &&
         this.state.showIds,
     });
-    this.handleSearch();
-  };
-
-  handleKeyDown = (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      this.handleSearch();
-    }
   };
 
   handleKeyDown = (event) => {
@@ -222,25 +215,27 @@ class TransactionMonitoring extends Component {
   // };
 
   handleClear = () => {
-    this.setState({
-      searchIds: "",
-      status: "",
-      merchant: "",
-      fromDate: "",
-      toDate: "",
-      mid: "",
-      paymentgateway: "",
-      currency: "",
-      country: "",
-      cardtype: "",
-      cardnumber: "",
-      searchedResult: null,
-      activeQuickSearchbtn: "",
-    }, () => {
-      this.fetchMidList();
-    });
+    this.setState(
+      {
+        searchIds: "",
+        status: "",
+        merchant: "",
+        fromDate: "",
+        toDate: "",
+        mid: "",
+        paymentgateway: "",
+        currency: "",
+        country: "",
+        cardtype: "",
+        cardnumber: "",
+        searchedResult: null,
+        activeQuickSearchbtn: "",
+      },
+      () => {
+        this.fetchMidList();
+      }
+    );
   };
-
 
   handleSearch = async () => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
@@ -259,6 +254,7 @@ class TransactionMonitoring extends Component {
       cardnumber: this.state.cardnumber,
     };
 
+    this.setState({ loading: true });
     try {
       const response = await fetch(`${backendURL}/transactionreport`, {
         method: "POST",
@@ -271,19 +267,21 @@ class TransactionMonitoring extends Component {
       if (response.ok) {
         const data = await response.json();
         // Update searchedResult and then calculate showTotalAmount
-        this.setState({ searchedResult: data }, () => {
+        this.setState({ searchedResult: data, loading: false }, () => {
           this.calculateShowTotalAmount();
         });
       } else {
         this.setState({
           errorMessage: "Error searching. Please try again later.",
           messageType: "fail",
+          loading: false,
         });
       }
     } catch (error) {
       this.setState({
         errorMessage: "An unexpected error occurred. Please try again later.",
         messageType: "fail",
+        loading: false,
       });
     }
   };
@@ -383,10 +381,9 @@ class TransactionMonitoring extends Component {
         activeQuickSearchbtn: buttonName,
       });
     }
-    
+
     // Last Week
     else if (buttonName === "Last Week") {
-
       const today = new Date();
       const dayOfWeek = today.getDay();
       const daysSinceLastMonday = ((dayOfWeek + 6) % 7) + 7;
@@ -413,7 +410,6 @@ class TransactionMonitoring extends Component {
 
     // This Month
     else if (buttonName === "This Month") {
-
       const currentDate = new Date();
       const from = `${currentDate.getFullYear()}-${(
         "0" +
@@ -432,7 +428,6 @@ class TransactionMonitoring extends Component {
 
     // Last Month
     else if (buttonName === "Last Month") {
-
       const currentDate = new Date();
       const endDate = new Date(
         currentDate.getFullYear(),
@@ -480,11 +475,10 @@ class TransactionMonitoring extends Component {
       activeQuickSearchbtn,
       selectedRowToView,
       userRole,
-      showIds,
       searchIds,
-      merchant
+      merchant,
+      loading,
     } = this.state;
-    const searchIdsArray = searchIds.split(/[\s,]+/);
     if (userRole === "admin" || userRole === "employee") {
       if (!selectedRowToView) {
         return (
@@ -501,7 +495,7 @@ class TransactionMonitoring extends Component {
               <div className="main-screen-rows transaction-monitoring-first-row">
                 {this.state.showMoreOptions ? (
                   <div className="row-cards search-card">
-                     <div className="id-search-row-div">
+                    <div className="id-search-row-div">
                       <div className="id-input-div">
                         <div>
                           <label
@@ -576,9 +570,10 @@ class TransactionMonitoring extends Component {
                         </select>
                       </div>
                       <div className="search-select-div search-status-div">
-                      <label
-                          className={`id-label ${this.state.merchant ? "filled-id-label" : ""
-                            } `}
+                        <label
+                          className={`id-label ${
+                            this.state.merchant ? "filled-id-label" : ""
+                          } `}
                           htmlFor="merchant"
                         >
                           Merchant:
@@ -588,7 +583,6 @@ class TransactionMonitoring extends Component {
                           id="merchant"
                           value={merchant}
                           onChange={this.handleCompanySelect}
-
                         >
                           <option value="">Select Merchant</option>
                           {this.state.companyList.map((company) => (
@@ -952,9 +946,10 @@ class TransactionMonitoring extends Component {
                         </select>
                       </div>
                       <div className="search-select-div search-status-div">
-                      <label
-                          className={`id-label ${this.state.merchant ? "filled-id-label" : ""
-                            } `}
+                        <label
+                          className={`id-label ${
+                            this.state.merchant ? "filled-id-label" : ""
+                          } `}
                           htmlFor="merchant"
                         >
                           Merchant:
@@ -972,6 +967,7 @@ class TransactionMonitoring extends Component {
                             </option>
                           ))}
                         </select>
+                        
                       </div>
                       <div className="txn-monitoring-btn-div">
                         <button
@@ -1121,7 +1117,11 @@ class TransactionMonitoring extends Component {
                 )}
               </div>
               <div className="main-screen-rows transaction-monitoring-second-row">
-                {this.state.searchedResult === null ? (
+                {this.state.loading ? (
+                  <div className="row-cards search-result">
+                  <Loader/>
+                  </div>
+                ) : this.state.searchedResult === null ? (
                   <div className="row-cards search-result">
                     <div className="search-result-head">
                       <div>
@@ -1218,7 +1218,7 @@ class TransactionMonitoring extends Component {
                             onKeyDown={this.handleKeyDown}
                           />
                         </div>
-                      {this.state.showIds &&
+                        {this.state.showIds &&
                           this.state.searchIdsArray.length > 0 && (
                             <div ref={(ref) => (this.modalRef = ref)}>
                               <select
@@ -1564,7 +1564,6 @@ class TransactionMonitoring extends Component {
                             Id:
                           </label>
                           {this.state.showIdsArray && (
-
                             <div
                               className="icon-container"
                               ref={(ref) => (this.iconContainerRef = ref)}

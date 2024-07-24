@@ -223,7 +223,7 @@ decodeSignedToken = (token) => {
         let rootAccountKey;
         if (!isUpdate) {
           console.log("id",client_data.client.client_id)
-          rootAccountKey = this.generateSignedToken(client_data.client.client_id, 'root');
+          rootAccountKey = this.generateSignedToken(client_data.client.client_id, 'merchant');
           this.setState({ showSecretKeyModal:true, rootAccountKey})
         }
 

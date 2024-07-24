@@ -599,8 +599,9 @@ class ViewMerchant extends Component {
         if (!overviewData.rootAccountCreated) {
           const rootAccountKey = this.generateSignedToken(
             overviewData.client_id,
-            "root"
+            "merchant"
           );
+          console.log(rootAccountKey)
           this.setState({ rootAccountKey });
         }
       }
@@ -1739,7 +1740,7 @@ class ViewMerchant extends Component {
                       <div className="approve-volume-container">
                         <LeftSign
                           className="icon2"
-                          onClick={this.handleBackArrowclick}
+                          onClick={this.handleBackArrowclick}/>
                         <div className="scroll-animation">
                           <div className="approval-div-section">
                             <div>

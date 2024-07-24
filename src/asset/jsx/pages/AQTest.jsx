@@ -81,8 +81,8 @@ export class AQTest extends Component {
     handlePay = async (e) => {
         const backendURL = process.env.REACT_APP_BACKEND_URL;
         e.preventDefault();
-        const { billingName, billingEmail, billingPhoneNumber, amount,
-            selectedCurrency, cardHolderName, cardNumder, expiryDate, cvvno, selectedCard, isLoader } = this.state;
+        const {billingEmail, billingPhoneNumber, amount, 
+            selectedCurrency, cardHolderName, cardNumder, expiryDate, cvvno, api_key, secret_key, mid} = this.state;
 
         // Generate random transaction ID and order number
         const generateRandomString = (length) => {
@@ -97,9 +97,12 @@ export class AQTest extends Component {
         const transaction_id = generateRandomString(6);
         const order_number = generateRandomString(6);
 
+        
         const payload = {
-       
             merchantID:"1044",
+            apiKey: api_key,
+            apiSecret: secret_key,
+            mid: mid,
             name: cardHolderName,
             email: billingEmail,
             phone: billingPhoneNumber,
@@ -117,16 +120,18 @@ export class AQTest extends Component {
         const headers = {
             'Content-Type': 'application/json',
         };
-
+        console.log(payload)    
         try {
+           
             const response = await fetch(`${backendURL}/paymentlink`, {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify(payload),
             });
-
+            // 5260990238200758
+            console.log(response)
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(`HTTP error! status: ${response.stats}`);
             }
 
             const data = await response.json();
@@ -160,7 +165,7 @@ export class AQTest extends Component {
     render() {
         const { billingName, billingEmail, billingPhoneNumber, amount, selectedCurrency,
 
-            proceedClicked, cardHolderName, cardNumder, expiryDate, cvvno, selectedCard, userName, userRole, isLoader } = this.state;
+            proceedClicked, cardHolderName, cardNumder, expiryDate, cvvno, selectedCard, userName, userRole, isLoader, mid, api_key,secret_key } = this.state;
             return (
                 <>
                     <Header />
@@ -170,9 +175,39 @@ export class AQTest extends Component {
                         : "expanded-main-screen "
                         }  `}
                     >
+                        <div className='init-payment-details'>
+                            <input
+                                className='paymentInput'
+                                type='text'
+                                name='api_key'
+                                placeholder='api-key'
+                                value={api_key}
+                                required
+                                onChange={this.handleInputChange}
+                            />
+                            <input
+                                className='paymentInput'
+                                type='text'
+                                name='secret_key'
+                                placeholder='secret-key'
+                                value={secret_key}
+                                required
+                                onChange={this.handleInputChange}
+                            />
+                            <input
+                                className='paymentInput'
+                                type='text'
+                                name='mid'
+                                placeholder='MID'
+                                value={mid}
+                                required
+                                onChange={this.handleInputChange}
+                            />
+                        </div>
                         <div id='paymentscreen'>
                             <div className='paymentscreen'>
                                 <div className='paymentDetails'>
+                                    
                                     {isLoader ? <img src={Loader} className='loadingIcon' alt='loading gif' /> : <>{proceedClicked ?
                                         <div className='min-cardDetails'>
                                             <div className='userImage'></div>

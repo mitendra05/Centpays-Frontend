@@ -66,13 +66,16 @@ class BankSettlement extends Component {
   };
 
   handleInputChange = (event) => {
-    const { id, value, files } = event.target;
+    const { id, files } = event.target;
 
     if (id === "attachment" && files.length > 0) {
       this.setState({ fileName: files[0].name, attachment: files[0] });
       this.readExcel(files[0]);
+
+      // Clear the file input to allow re-upload of the same file
+      event.target.value = null;
     } else {
-      this.setState({ [id]: value });
+      this.setState({ [id]: event.target.value });
     }
   };
 
