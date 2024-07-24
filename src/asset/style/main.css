@@ -4240,7 +4240,7 @@ hr {
 	color: var(--light-text);
 	border-bottom: 1px solid var(--border-gray);
 	outline: none;
-	width: 200px;
+	width: 90%;
 	margin: -60px 13px;
 	border-radius: 2px;
 	text-align: center;
@@ -5409,3 +5409,68 @@ hr {
 	color: var(--lightblack);
 	margin-top: -10px;
 }
+
+.init-payment-details{
+	position: absolute;
+	margin: 20px;
+}
+
+.init-payment-details input{
+	margin: 0px 10px;
+}
+
+/* ....Loader.... */
+.table-loader {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+	position: relative;
+	top: 50%;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 300px;
+  }
+  
+  @keyframes dotFlashing {
+	0% {
+	  background-color: var(--secondary);
+	}
+	25% {
+	  background-color: var(--primary);
+	}
+	50% {
+	  background-color:var(--secondary);
+	}
+	75% {
+	  background-color: var(--primary-dark);
+	}
+	100% {
+	  background-color: var(--primary);
+	}
+  }
+  
+  .colorful-dots-loader {
+	width: 60px;
+	display: flex;
+	justify-content: space-between;
+  }
+  
+  .colorful-dots-loader span {
+	width: 14px;
+	height: 14px;
+	background-color: var(--secondary);
+	border-radius: 50%;
+	animation: dotFlashing 1s infinite linear alternate;
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  }
+  
+  .colorful-dots-loader span:nth-child(2) {
+	animation-delay: 0.2s;
+  }
+  
+  .colorful-dots-loader span:nth-child(3) {
+	animation-delay: 0.4s;
+  }
+  
