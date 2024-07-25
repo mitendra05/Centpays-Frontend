@@ -6,6 +6,7 @@ import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import MerchantForm from "../components/Merchant_Form";
 import MessageBox from "../components/Message_box";
+import CustomTooltip from "../components/Custom-tooltip";
 // import ApprovalRatioChart from "../components/ApprovalRatioChart";
 
 // SVG Icons
@@ -32,6 +33,7 @@ import {
   Eye,
   Copy,
   EyeOff,
+  Infoicon
 } from "../../media/icon/SVGicons";
 
 //Images and Icons
@@ -581,6 +583,7 @@ class ViewMerchant extends Component {
     this.nextSlide();
   };
 
+
   handleButtonClick = (buttonName) => {
     const newState = {
       overviewInfo: false,
@@ -597,12 +600,11 @@ class ViewMerchant extends Component {
       } else if (buttonName === "secretsInfo") {
         const overviewData = this.state;
         if (!overviewData.rootAccountCreated) {
-          const rootAccountKey = this.generateSignedToken(
+          const { fullToken, truncatedToken } = this.generateSignedToken(
             overviewData.client_id,
             "merchant"
           );
-          console.log(rootAccountKey)
-          this.setState({ rootAccountKey });
+          this.setState({ rootAccountKey: fullToken, truncatedToken });
         }
       }
     });
@@ -650,32 +652,19 @@ class ViewMerchant extends Component {
     );
   };
 
-  // generateSignedToken = (clientId, role) => {
-  //   const payload = { clientId, role };
-  //   console.log(payload);
-  //   const payloadString = JSON.stringify(payload);
-  //   console.log(payloadString);
-  //   const token = CryptoJS.AES.encrypt(
-  //     payloadString,
-  //     process.env.REACT_APP_KEY_SECRET
-  //   ).toString();
-  //   return token;
-  // };
-
   generateSignedToken = (clientId, role) => {
     const payload = { clientId, role };
     const payloadString = JSON.stringify(payload);
-  
     const encrypted = CryptoJS.AES.encrypt(
       payloadString,
       process.env.REACT_APP_KEY_SECRET
     ).toString();
+    
+    const fullToken = encrypted;
   
-    // Convert to URL-safe Base64 string
-    let token = btoa(encrypted);
-    token = token.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    const truncatedToken = btoa(encrypted).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   
-    return token;
+    return { fullToken, truncatedToken };
   };
 
   maskString = (key) => {
@@ -1477,102 +1466,151 @@ class ViewMerchant extends Component {
                     </div>
                   )}
 
-                  {this.state.secretsInfo && (
+{this.state.secretsInfo && (
                     <div className="right-section-middle-body">
                       <div className="settlements-container">
                         <h4 className="head-head">API Key List & Access</h4>
-                        <p className="head-head fonttt">An API key is a simple encrypted string that identifies an application without any principal. They are useful for accessing public data anonymously, and are used to associate API requests with your project for quota and billing.</p>
+                        <p className="head-head fonttt">
+                          An API key is a simple encrypted string that
+                          identifies an application without any principal. They
+                          are useful for accessing public data anonymously, and
+                          are used to associate API requests with your project
+                          for quota and billing.
+                        </p>
                         <div className="api-key-container">
-                          <div className="api-key-container-div">
-                          <h6 className="heading-text">API Key</h6>
-                          <div className="mini-container">
-                            <p>Public Key</p>
-                          </div>
+                          <div className="api-key-container-head-div">
+                            <div className="api-key-container-div">
+                              <h6 className="heading-text">API Key</h6>
+                              <div className="mini-container">
+                                <p>Public Key</p>
+                              </div>
+                            </div>
+                            <CustomTooltip details={<p className="white-color">Essential for API access. Protect it like a password.</p>}>
+                              <Infoicon className="icon2" />
+                            </CustomTooltip>
                           </div>
                           <div className="api-key-content">
                             <p id="api-key">
-                              {showApiKey ? this.apiKey : this.maskString(this.state.apiKey)}
+                              {showApiKey
+                                ? this.apiKey
+                                : this.maskString(this.state.apiKey)}
                             </p>
                             <div
-                                onClick={() => this.handleCopy(apiKey, 'api', 'api-key')}
-                              >
-                                <Copy className="grey-icon zoom copy-icon-signupkey" />
-                              </div>
+                              onClick={() =>
+                                this.handleCopy(apiKey, "api", "api-key")
+                              }
+                            >
+                              <Copy className="grey-icon zoom copy-icon-signupkey" />
+                            </div>
                           </div>
                           <div className="subtext-api">
-                            <p >Created on 28 Apr 2021, 18:20 GTM+4:10</p>
+                            <p>Created on 28 Apr 2021, 18:20 GTM+4:10</p>
                           </div>
                         </div>
 
                         <div className="api-key-container">
-                          <div className="api-key-container-div">
-                            <h6 className="heading-text">Secret Key</h6>
-                            <div className="mini-container">
-                            <p>Private Key</p>
+                          <div className="api-key-container-head-div">
+                            <div className="api-key-container-div">
+                              <h6 className="heading-text">Secret Key</h6>
+                              <div className="mini-container">
+                                <p>Private Key</p>
+                              </div>
                             </div>
+                            <CustomTooltip details={<p className="white-color"> Highest level of security for API authentication. Keep it confidential.</p>}>
+                              <Infoicon className="icon2" />
+                            </CustomTooltip>
                           </div>
                           <div className="api-key-content">
                             <p id="secret-key">
-                              {showSecretKey ? secretKey : this.maskString(secretKey)}
+                              {showSecretKey
+                                ? secretKey
+                                : this.maskString(secretKey)}
                             </p>
                             <div
-                                onClick={() => this.handleCopy(secretKey, 'secret', 'secret-key')}
-                              >
-                                <Copy className="grey-icon copy-icon-signupkey" />
-                              </div>
+                              onClick={() =>
+                                this.handleCopy(
+                                  secretKey,
+                                  "secret",
+                                  "secret-key"
+                                )
+                              }
+                            >
+                              <Copy className="grey-icon copy-icon-signupkey" />
+                            </div>
                           </div>
                           <div className="subtext-api">
-                            <p >Created on 28 Apr 2021, 18:20 GTM+4:10</p>
+                            <p>Created on 28 Apr 2021, 18:20 GTM+4:10</p>
                           </div>
                         </div>
 
                         {overviewData.rootAccountCreated ? (
                           <div className="api-key-container">
                             <h6 className="heading-text">Login Credentials</h6>
-                            <div className="input-group margins">
-                            <input
-                              type="text"
-                              id="Email"
-                              className="inputFeild auth-input inputFeild-secret"
-                              value={email}
-                            />
-                            <label className="inputLabel" htmlFor="email">
-                              Email
-                            </label>
+                            <div className="login-key-container">
+                              <div className="input-group">
+                                <input
+                                  type="text"
+                                  id="Email"
+                                  className="inputFeild"
+                                  value={email}
+                                />
+                                <label className="inputLabel" htmlFor="email">
+                                  Email
+                                </label>
+                              </div>
+                              <div className="input-group">
+                                <input
+                                  type="password"
+                                  id="Password"
+                                  className="inputFeild"
+                                  value={password}
+                                />
+                                <label className="inputLabel" htmlFor="email">
+                                  Password
+                                </label>
+                              </div>
+                              <button
+                                className="btn-primary login-secret"
+                                onClick={this.handleSubmit}
+                              >
+                                Login
+                              </button>
                             </div>
-                            <div className="input-group margins passd">
-                            <input
-                              type="password"
-                              id="Password"
-                              className="inputFeild auth-input inputFeild-secret"
-                              value={password}
-                            />
-                            <label className="inputLabel" htmlFor="email">
-                              Password
-                            </label>
-                            </div>
-                            <button className="btn-primary login-secret" onClick={this.handleSubmit}>Login</button>
-                            </div>
+                          </div>
                         ) : (
                           <div className="api-key-container">
+                             <div className="api-key-container-head-div">
                             <div className="api-key-container-div">
-                            <h6 className="heading-text">Account Creation Key</h6>
+                              <h6 className="heading-text">
+                                Account Creation Key
+                              </h6>
+                            </div>
+                            <CustomTooltip details={<p className="white-color"> Restricted key for account creation. Handle with extreme care.</p>}>
+                              <Infoicon className="icon2" />
+                            </CustomTooltip>
                           </div>
                             <div className="api-key-content">
-                              <p id='root-key'>
+                              <p id="root-key">
                                 {this.maskString(rootAccountKey)}
                               </p>
                               <div
-                                  className={`copy-icon-signupkey ${copied.rootAccountKey ? "disabled" : ""}`}
-                                  onClick={() =>
-                                    !copied.rootAccountKey && this.handleCopy(rootAccountKey, 'root', 'root-key')
-                                  }
-                                >
-                                  <Copy className="grey-icon" />
-                                </div>
+                                className={`copy-icon-signupkey ${
+                                  copied.rootAccountKey ? "disabled" : ""
+                                }`}
+                                onClick={() =>
+                                  !copied.rootAccountKey &&
+                                  this.handleCopy(
+                                    rootAccountKey,
+                                    "root",
+                                    "root-key"
+                                  )
+                                }
+                              >
+                                <Copy className="grey-icon" />
+                              </div>
                             </div>
                             <div className="subtext-api">
-                            <p>Root account not created</p>
+                              <p>Root account not created</p>
                             </div>
                           </div>
                         )}
@@ -1607,7 +1645,6 @@ class ViewMerchant extends Component {
                             </div>
                           </>
                         )} */}
-
                       </div>
                     </div>
                   )}
@@ -2345,7 +2382,145 @@ class ViewMerchant extends Component {
                     </div>
                   )}
 
-                  {this.state.secretsInfo && (
+{this.state.secretsInfo && (
+                    <div className="right-section-middle-body">
+                      <div className="settlements-container">
+                        <h4 className="head-head">API Key List & Access</h4>
+                        <p className="head-head fonttt">
+                          An API key is a simple encrypted string that
+                          identifies an application without any principal. They
+                          are useful for accessing public data anonymously, and
+                          are used to associate API requests with your project
+                          for quota and billing.
+                        </p>
+                        <div className="api-key-container">
+                          <div className="api-key-container-head-div">
+                            <div className="api-key-container-div">
+                              <h6 className="heading-text">API Key</h6>
+                              <div className="mini-container">
+                                <p>Public Key</p>
+                              </div>
+                            </div>
+                            <CustomTooltip details={<p className="white-color">Essential for API access. Protect it like a password.</p>}>
+                              <Infoicon className="icon2" />
+                            </CustomTooltip>
+                          </div>
+                          <div className="api-key-content">
+                            <div
+                              className="icon-container"
+                              onClick={() =>
+                                this.toggleVisibility("showApiKey")
+                              }
+                            >
+                              {showApiKey ? (
+                                <EyeOff className="grey-icon" />
+                              ) : (
+                                <Eye className="grey-icon" />
+                              )}
+                            </div>
+                            <p id="api-key">
+                              {showApiKey ? apiKey : this.maskString(apiKey)}
+                            </p>
+                            <div
+                              onClick={() =>
+                                this.handleCopy(apiKey, "api", "api-key")
+                              }
+                            >
+                              <Copy className="grey-icon zoom copy-icon-signupkey" />
+                            </div>
+                          </div>
+                          <div className="subtext-api">
+                            <p>Created on 28 Apr 2021, 18:20 GTM+4:10</p>
+                          </div>
+                        </div>
+
+                        <div className="api-key-container">
+                          <div className="api-key-container-head-div">
+                            <div className="api-key-container-div">
+                              <h6 className="heading-text">Secret Key</h6>
+                              <div className="mini-container">
+                                <p>Private Key</p>
+                              </div>
+                            </div>
+                            <CustomTooltip details={<p className="white-color"> Highest level of security for API authentication. Keep it confidential.</p>}>
+                              <Infoicon className="icon2" />
+                            </CustomTooltip>
+                          </div>
+                          <div className="api-key-content">
+                            <div
+                              className="icon-container"
+                              onClick={() =>
+                                this.toggleVisibility("showSecretKey")
+                              }
+                            >
+                              {showSecretKey ? (
+                                <EyeOff className="grey-icon" />
+                              ) : (
+                                <Eye className="grey-icon" />
+                              )}
+                            </div>
+                            <p id="secret-key">
+                              {showSecretKey
+                                ? secretKey
+                                : this.maskString(secretKey)}
+                            </p>
+                            <div
+                              onClick={() =>
+                                this.handleCopy(
+                                  secretKey,
+                                  "secret",
+                                  "secret-key"
+                                )
+                              }
+                            >
+                              <Copy className="grey-icon copy-icon-signupkey" />
+                            </div>
+                          </div>
+                          <div className="subtext-api">
+                            <p>Created on 28 Apr 2021, 18:20 GTM+4:10</p>
+                          </div>
+                        </div>
+
+                        <div className="api-key-container">
+                          <div className="api-key-container-head-div">
+                            <div className="api-key-container-div">
+                              <h6 className="heading-text">Webhook Url</h6>
+                              <div className="mini-container">
+                                <p>Web Url</p>
+                              </div>
+                            </div>
+                            <div>
+                              <CustomTooltip details={<p className="white-color">This highly secure webhook URL for API authentication.
+                                </p>}>
+                                <Infoicon className="icon2" />
+                              </CustomTooltip>
+                            </div>
+                          </div>
+                          <div className="login-key-container">
+                            <div className="input-group">
+                              <input
+                                type="text"
+                                id="weburl"
+                                className="inputFeild web-input"
+                                value={this.state.weburl}
+                              />
+                              <label className="inputLabel" htmlFor="email">
+                                Web Url
+                              </label>
+                            </div>
+                            <button
+                              className="btn-primary"
+                              onClick={this.handleSubmit}
+                            >
+                              Submit
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* {this.state.secretsInfo && (
                     <div className="right-section-middle-body">
                       <div className="settlements-container">
                         <div className="integration-Key">
@@ -2419,7 +2594,7 @@ class ViewMerchant extends Component {
                           </div>
                         </div>
                         <h5>Account Creation Key</h5>
-                        {/* <div className="secret-field">
+                        <div className="secret-field">
                           <p className="p2">Root User Sign Up Key</p>
                           <div className="input-container">
                             <div
@@ -2445,10 +2620,10 @@ class ViewMerchant extends Component {
                               readOnly
                             />
                           </div>
-                        </div> */}
+                        </div>
                       </div>
                     </div>
-                  )}
+                  )} */}
                   {this.state.isAddMerchantPanelOpen && (
                     <MerchantForm
                       handleAddMerchant={this.handleAddMerchant}

@@ -70,7 +70,7 @@ class Login extends Component {
 				const data = await response.json();
 				if (data) {
 					document.cookie = `token=${data.token};path=/`;
-					document.cookie = `role=${role};path=/`;
+					document.cookie = `role=${data.user.role};path=/`;
 					document.cookie = `email=${data.user.email};path=/`;
 					document.cookie = `name=${data.user.name};path=/`;
 					document.cookie = `company_name=${data.user.company_name};path=/`;

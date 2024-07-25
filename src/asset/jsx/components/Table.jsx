@@ -164,10 +164,10 @@ class Table extends Component {
     const { headerLabels, onViewClick, shouldRenderRightSign } = this.props;
     const { expandedRows, currentPage, rowsPerPage, sortedData, isDescending } =
       this.state;
-
+  
     const startIndex = (currentPage - 1) * rowsPerPage;
     const currentData = sortedData.slice(startIndex, startIndex + rowsPerPage);
-
+  
     const totalRows = sortedData.length;
     const totalPages = Math.ceil(totalRows / rowsPerPage);
     const totalAmountCurrentPage = currentData.reduce(
@@ -179,7 +179,7 @@ class Table extends Component {
       0
     );
     const shouldShowTotal = totalPages === 1 || currentPage === totalPages;
-
+  
     return (
       <div className="txn-search-table-container">
         <div className="table-Header table-head-btn">
@@ -187,29 +187,31 @@ class Table extends Component {
             <ExportIcon className="white-icon" />
             <p>Export</p>
           </button>
-          <div>
-            {isDescending ? (
-              <div className="ascndicon2">
-                <Descending
-                  className="ascndicon"
-                  width="30"
-                  height="30"
-                  onClick={this.sortData}
-                />
-              </div>
-            ) : (
-              <div className="ascndicon2">
-                <Ascending
-                  className="ascndicon"
-                  width="30"
-                  height="30"
-                  onClick={this.sortData}
-                />
-              </div>
-            )}
-          </div>
+          {totalRows > 1 && (
+            <div>
+              {isDescending ? (
+                <div className="ascndicon2">
+                  <Descending
+                    className="ascndicon"
+                    width="30"
+                    height="30"
+                    onClick={this.sortData}
+                  />
+                </div>
+              ) : (
+                <div className="ascndicon2">
+                  <Ascending
+                    className="ascndicon"
+                    width="30"
+                    height="30"
+                    onClick={this.sortData}
+                  />
+                </div>
+              )}
+            </div>
+          )}
         </div>
-
+  
         <div className="txn-search-table-Body">
           <ScrollTopAndBottomButton />
           <table>
@@ -290,7 +292,7 @@ class Table extends Component {
                   )}
                 </React.Fragment>
               ))}
-
+  
               <tr className="p2 total-amount-row">
                 <td className="txn-amount-blank" colSpan={4}></td>
                 <td className="txn-amount-head" colSpan={4}>
@@ -364,7 +366,7 @@ class Table extends Component {
         </div>
       </div>
     );
-  }
+  }  
 }
 
 export default Table;

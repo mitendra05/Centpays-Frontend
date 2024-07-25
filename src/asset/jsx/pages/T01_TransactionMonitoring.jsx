@@ -168,19 +168,22 @@ class TransactionMonitoring extends Component {
 
   handleInputChange = (event) => {
     const { id, value } = event.target;
-    const searchIdsArray = value.split(/[\s,]+/);
-
-    const threshold = 52;
-
+  
     this.setState({
       [id]: value,
-      searchIdsArray: searchIdsArray,
-      showIdsArray: value.length > threshold && searchIdsArray.length > 1,
-      showIds:
-        value.length > threshold &&
-        searchIdsArray.length > 1 &&
-        this.state.showIds,
     });
+    if (id === "searchIds") {
+      const searchIdsArray = value.split(/[\s,]+/);
+      const threshold = 54; 
+      this.setState({
+        searchIdsArray: searchIdsArray,
+        showIdsArray: value.length > threshold && searchIdsArray.length > 1,
+        showIds:
+          value.length > threshold &&
+          searchIdsArray.length > 1 &&
+          this.state.showIds,
+      });
+    }
   };
 
   handleKeyDown = (event) => {
