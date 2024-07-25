@@ -511,7 +511,7 @@ class Dashboard extends Component {
 									<h4>
 										Congratulations <span style={{ fontWeight: '600' }}>{merchantName}</span>!🎉
 									</h4>
-									<p className="card1-paragraph">
+									<p className="p2">
 										You have done {card1_data.successPercentage}% sales today 😎
 									</p>
 								</div>
@@ -1057,7 +1057,7 @@ class Dashboard extends Component {
 									<h4>
 										Congratulations <span style={{ fontWeight: '600' }}>{merchantName}</span>!🎉
 									</h4>
-									<p className="card1-paragraph">
+									<p className="p2">
 										You have done {card1_data.successPercentage}% sales today 😎
 									</p>
 								</div>

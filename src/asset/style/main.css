@@ -31,6 +31,7 @@
 	--light-black-color: #0000000a;
 	--red-color: rgb(220, 0, 0);
 	--login-Bg-desing: #ecedf3;
+	--inputfieldcolor: linear-gradient(to bottom, rgba(255, 255, 255, 0) 80%, white 20%);
 }
 
 body {
@@ -289,7 +290,7 @@ p {
 	padding: 0 5px;
 	height: 10px;
 	color: var(--light-text);
-	background-color: #ffffff;
+	background:var(--inputfieldcolor);
 }
 
 .active {
@@ -1318,11 +1319,8 @@ input[type="checkbox"] {
 
 .first-row-card1-head {
 	width: 60%;
-}
-
-.card1-paragraph {
-	margin-top: 50px;
-	color: grey;
+	display: grid;
+	gap: 25px;
 }
 
 .first-row-card1-image {
@@ -2729,6 +2727,7 @@ border-bottom: none !important;
 
   .icon-container{
 	cursor: pointer;
+	margin-right: 15px;
   }
 
   .sort-icon{
@@ -5226,10 +5225,11 @@ hr {
 /* .........Secret key........ */
 
 .login-secret{
-	margin-left: 548px;
-	margin-top: -44px;
-	width: 100px;
-	cursor: pointer;
+	margin-left: 30px;
+}
+
+.web-input{
+	width: 450px;
 }
 
 .head-head{
@@ -5239,6 +5239,13 @@ hr {
 .head-head p{
 	margin-left: 15px;
 	font-size: 300px;
+}
+
+.api-key-container-head-div{
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding-right: 15px;
 }
 
 .api-key-container-div{
@@ -5298,18 +5305,15 @@ hr {
 	animation: zoomed 0.3s ease-in-out;
   }
 
-  .margins{
+  .login-key-container{
+	display: flex;
+	align-items: center;
+	gap: 15px;
+	margin-top: 20px;
 	margin-left: 10px;
   }
-
-  .passd{
-	margin-left: 300px;
-	margin-top: -50px;
-	width: 85%;
-  }
-
   
-  .api-key-container {
+.api-key-container {
 	height: 130px;
 	width: 715px;
 	border-radius: 10px;
@@ -5321,6 +5325,7 @@ hr {
 .api-key-content p{
 	font-size: 15px;
 	color: #808080;
+	width: 145px;
 }
 
 .subtext-api{
@@ -5352,7 +5357,7 @@ hr {
 	margin-bottom: 25px;
 	margin-left: 15px;
 	color: #000;
-	gap: 5px;
+	gap: 1px;
 }
 
 .label-key{
@@ -5377,7 +5382,7 @@ hr {
 	margin-bottom: 5px;
 }
 
-.inputFeild-secret {
+/* .inputFeild-secret {
 	border: 2px solid var(--border-gray);
 	border-radius: 5px;
 	height: 50px;
@@ -5397,7 +5402,7 @@ hr {
 .inputFeild-secret:focus {
 	outline: none;
 	border-color: var(--primary) !important;
-}
+} */
 
 .inputFeild-pass-secret{
 	border: 2px solid var(--border-gray);
@@ -5410,15 +5415,9 @@ hr {
 	margin-top: -10px;
 }
 
-.init-payment-details{
-	position: absolute;
-	margin: 20px;
+.white-color{
+	color: var(--white) !important;
 }
-
-.init-payment-details input{
-	margin: 0px 10px;
-}
-
 /* ....Loader.... */
 .table-loader {
 	display: flex;
