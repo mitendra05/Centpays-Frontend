@@ -35,6 +35,7 @@ class PreviewSettlement extends Component {
       showReport: true,
       errorMessage: "",
       messageType: "",
+      loading:false,
     };
   }
 
@@ -59,6 +60,7 @@ class PreviewSettlement extends Component {
   showSettlementRecord = async (company_name) => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
     const { token } = this.state;
+   
     try {
       const response = await fetch(
         `${backendURL}/settlements?company_name=${company_name}`,
@@ -71,7 +73,7 @@ class PreviewSettlement extends Component {
         }
       );
       const result = await response.json();
-      this.setState({ apiData: result });
+      this.setState({ apiData: result});
     } catch (error) {
       this.setState({
         errorMessage: "Error fetching settlement details:",
@@ -83,6 +85,7 @@ class PreviewSettlement extends Component {
   fetchData = async (company_name) => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
     const { token } = this.state;
+    this.setState({loading:true})
     try {
       const response = await fetch(
         `${backendURL}/volumesum?company_name=${company_name}`,
@@ -95,11 +98,12 @@ class PreviewSettlement extends Component {
         }
       );
       const result = await response.json();
-      this.setState({ volumeData: result });
+      this.setState({ volumeData: result,loading:false  });
     } catch (error) {
       this.setState({
         errorMessage: "Error fetching settlement details:",
         messageType: "fail",
+        loading:false 
       });
     }
   };
@@ -126,6 +130,7 @@ class PreviewSettlement extends Component {
       errorMessage,
       messageType,
       userRole,
+      loading
     } = this.state;
 
     const length = apiData.length;
@@ -223,6 +228,7 @@ class PreviewSettlement extends Component {
                   showReport={showReport}
                   company_name={this.state.company_name}
                   showSettlementRecord={this.showSettlementRecord}
+                  loading={loading}
                 />
               </div>
             </div>
@@ -318,6 +324,7 @@ class PreviewSettlement extends Component {
                   showReport={showReport}
                   company_name={this.state.company_name}
                   showSettlementRecord={this.showSettlementRecord}
+                  loading={loading}
                 />
               </div>
             </div>

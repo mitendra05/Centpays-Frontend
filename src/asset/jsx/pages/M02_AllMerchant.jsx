@@ -5,7 +5,7 @@ import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import MerchantTable from "../components/Merchant_Table"
 import MessageBox from "../components/Message_box";
-// import ScrollToTopButton from "../components/ScrollToTop";
+import ScrollToTopButton from "../components/ScrollToTop";
 
 //SVG Icons
 import { TotalUserIcon, ActiveUserIcon, InactiveUserIcon, PendingUserIcon } from "../../media/icon/SVGicons";
@@ -27,6 +27,7 @@ class ListSettlement extends Component {
       apiData: [],
       showMerchants: true,
       errorMessage: "",
+      loading:false,
     };
   }
 
@@ -44,6 +45,7 @@ class ListSettlement extends Component {
   fetchData = async () => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
     const { token } = this.state;
+    this.setState({loading:true});
     try {
       const response = await fetch(`${backendURL}/clients`, {
         method: "GET",
@@ -55,12 +57,13 @@ class ListSettlement extends Component {
 
       if (response.ok) {
         let data = await response.json();
-        this.setState({ apiData: data });
+        this.setState({ apiData: data,loading:false });
       } else {
         console.error("Error fetching data:", response.statusText);
         this.setState({
           errorMessage: "Error in Fetching data. Please try again later.",
           messageType: "fail",
+          loading:false
         });
       }
     } catch (error) {
@@ -68,6 +71,7 @@ class ListSettlement extends Component {
       this.setState({
         errorMessage: "An unexpected error occurred. Please try again later.",
         messageType: "",
+        loading:false
       });
     }
   };
@@ -191,9 +195,10 @@ class ListSettlement extends Component {
                 headerLabels={headerLabels}
                 apiData={apiData}
                 showMerchants={showMerchants}
+                loading={this.state.loading}
               />
             </div>
-            {/* <ScrollToTopButton/> */}
+            <ScrollToTopButton/>
           </div>
         </div>
       </>

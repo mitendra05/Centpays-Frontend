@@ -1,11 +1,12 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 
-// component
+// components
 import MessageBox from "./Message_box";
 import MerchantForm from "./Merchant_Form";
+import Loader from "./Loder";
 
-//SVG icons
+// SVG icons
 import { RightSign, Oops, LeftSign, LeftDoubleArrow, RightDoubleArrow } from "../../media/icon/SVGicons";
 import searchImg from "../../media/image/search-transaction.png";
 import ScrollTopAndBottomButton from "./ScrollUpAndDown";
@@ -49,6 +50,7 @@ class Table extends Component {
       },
       rowsPerPage: 10,
       currentPage: 1,
+      loading: false, 
     };
   }
 
@@ -98,7 +100,7 @@ class Table extends Component {
       searchText,
       highlightedOptions: filteredOptions,
       noResultsFound: filteredOptions.length === 0,
-      currentPage:1
+      currentPage: 1
     });
   };
 
@@ -122,7 +124,7 @@ class Table extends Component {
   };
 
   render() {
-    const { headerLabels, showMerchants, apiData } = this.props;
+    const { headerLabels, showMerchants,loading,} = this.props;
     const {
       highlightedOptions,
       errorMessage,
@@ -131,6 +133,7 @@ class Table extends Component {
       noResultsFound,
       rowsPerPage,
       currentPage,
+   
     } = this.state;
 
     const dataToRender =
@@ -177,65 +180,69 @@ class Table extends Component {
             )}
           </div>
           <div className="table-Body">
-            <table>
-              {!noResultsFound && (
-                <thead>
-                  <tr>
-                    <th className="p1">S.No.</th>
-                    {headerLabels.map((item) => (
-                      <th key={item.label} className="p1">
-                        {item.heading}
-                      </th>
-                    ))}
-                    <th></th>
-                    {showMerchants && <th></th>}
-                  </tr>
-                </thead>
-              )}
-              {!noResultsFound ? (
-                <tbody>
-                  {paginatedData.map((row, index) => (
-                    <tr className="p2" key={index}>
-                      <td>{startIndex + index + 1}</td>
-                      {headerLabels.map((collabel, labelIndex) => (
-                        <td key={labelIndex}>
-                          {collabel.id === 2 && showMerchants
-                            ? this.getStatusText(row[collabel.label])
-                            : row[collabel.label]}
-                        </td>
+            {loading ? (
+              <Loader /> // Display Loader while loading
+            ) : (
+              <table>
+                {!noResultsFound && (
+                  <thead>
+                    <tr>
+                      <th className="p1">S.No.</th>
+                      {headerLabels.map((item) => (
+                        <th key={item.label} className="p1">
+                          {item.heading}
+                        </th>
                       ))}
-                      {showMerchants && (
-                        <td>
-                          <Link to={`/viewmerchant/${row.company_name}`}>
-                            <RightSign className="icon2" title="View More" />
-                          </Link>
-                        </td>
-                      )}
+                      <th></th>
+                      {showMerchants && <th></th>}
                     </tr>
-                  ))}
-                </tbody>
-              ) : (
-                <tbody>
-                  <tr>
-                    <td colSpan={headerLabels.length + (showMerchants ? 2 : 1)}>
-                      <div>
-                        <div className="search-result-head">
-                          <div>
-                            <h4>Oops...</h4> <Oops className="primary-color-icon" />
+                  </thead>
+                )}
+                {!noResultsFound ? (
+                  <tbody>
+                    {paginatedData.map((row, index) => (
+                      <tr className="p2" key={index}>
+                        <td>{startIndex + index + 1}</td>
+                        {headerLabels.map((collabel, labelIndex) => (
+                          <td key={labelIndex}>
+                            {collabel.id === 2 && showMerchants
+                              ? this.getStatusText(row[collabel.label])
+                              : row[collabel.label]}
+                          </td>
+                        ))}
+                        {showMerchants && (
+                          <td>
+                            <Link to={`/viewmerchant/${row.company_name}`}>
+                              <RightSign className="icon2" title="View More" />
+                            </Link>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                ) : (
+                  <tbody>
+                    <tr>
+                      <td colSpan={headerLabels.length + (showMerchants ? 2 : 1)}>
+                        <div>
+                          <div className="search-result-head">
+                            <div>
+                              <h4>Oops...</h4> <Oops className="primary-color-icon" />
+                            </div>
+                            <p className="p2">
+                              We couldn't find what you are looking for.
+                            </p>
                           </div>
-                          <p className="p2">
-                            We couldn't find what you are looking for.
-                          </p>
+                          <div className="search-result-img">
+                            <img src={searchImg} alt="search"></img>
+                          </div>
                         </div>
-                        <div className="search-result-img">
-                          <img src={searchImg} alt="search"></img>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              )}
-            </table>
+                      </td>
+                    </tr>
+                  </tbody>
+                )}
+              </table>
+            )}
           </div>
           {!noResultsFound && (
             <div className="table-Footer">
@@ -279,7 +286,6 @@ class Table extends Component {
                 <RightDoubleArrow />
               </button>
               </div>
-
             </div>
           )}
         </div>

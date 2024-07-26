@@ -7,6 +7,7 @@ import Modal from "./Modal";
 import MessageBox from "./Message_box";
 import ScrollTopAndBottomButton from "./ScrollUpAndDown";
 import searchImg from "../../media/image/search-transaction.png";
+import Loader from "./Loder";
 //SVG icons
 import {
   Excel,
@@ -26,8 +27,8 @@ class Table extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      token: this.getCookie('token'),
-      userRole: this.getCookie('role'),
+      token: this.getCookie("token"),
+      userRole: this.getCookie("role"),
       isRatesModal: false,
       ratesdata: [],
       isEditStatusModal: false,
@@ -50,9 +51,9 @@ class Table extends Component {
   getCookie = (name) => {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
+    if (parts.length === 2) return parts.pop().split(";").shift();
     return null;
-  }
+  };
 
   handleRowsChange = (event) => {
     this.setState({
@@ -202,7 +203,7 @@ class Table extends Component {
       searchText,
       highlightedOptions: filteredOptions,
       noResultsFound: filteredOptions.length === 0,
-      currentPage:1,
+      currentPage: 1,
     });
   };
 
@@ -255,7 +256,8 @@ class Table extends Component {
   };
 
   render() {
-    const { headerLabels, showRates, showReport, company_name } = this.props;
+    const { headerLabels, showRates, showReport, company_name, loading } =
+      this.props;
     const {
       isRatesModal,
       ratesdata,
@@ -268,7 +270,7 @@ class Table extends Component {
       rows,
       currentPage,
       messageType,
-      userRole
+      userRole,
     } = this.state;
     const dataToRender =
       highlightedOptions.length > 0 ? highlightedOptions : this.props.apiData;
@@ -416,7 +418,9 @@ class Table extends Component {
                       type="date"
                       className="inputFeild"
                       value={this.state.toDate}
-                      onChange={(e) => this.setState({ toDate: e.target.value })}
+                      onChange={(e) =>
+                        this.setState({ toDate: e.target.value })
+                      }
                     ></input>
                   </div>
                 </div>
@@ -459,97 +463,106 @@ class Table extends Component {
 
             <div className="table-Body">
               {!noResultsFound && <ScrollTopAndBottomButton />}
-
-              <table>
-                <thead>
-                  <tr>
-                    <th className="p1">S.No.</th>
-                    {headerLabels.map((item, index) => (
-                      <th className="p1" key={index}>
-                        {item.heading}
-                      </th>
-                    ))}
-                    {showRates && <th className="p1">Rates</th>}
-                    <th></th>
-                  </tr>
-                </thead>
-                {!noResultsFound && (
-                  <tbody>
-                    {paginatedData.map((row, index) => (
-                      <tr className="p2" key={index}>
-                        <td>{startIdx + index + 1}</td>
-                        {headerLabels.map((collabel, labelIndex) => (
-                          <td key={labelIndex}>
-                            {collabel.id === 2
-                              ? showRates
-                                ? this.getStatusText(row[collabel.label])
-                                : this.getStatusImage(row[collabel.label])
-                              : row[collabel.label]}
-                          </td>
-                        ))}
-                        {showRates && (
-                          <>
-                            <td>
-                              <RateIcon
-                                className="icon2"
-                                onClick={() =>
-                                  this.handleRatesModal(row.company_name, false)
-                                }
-                              ></RateIcon>
+              {loading ? (
+                <Loader />
+              ) : (
+                <table>
+                  <thead>
+                    <tr>
+                      <th className="p1">S.No.</th>
+                      {headerLabels.map((item, index) => (
+                        <th className="p1" key={index}>
+                          {item.heading}
+                        </th>
+                      ))}
+                      {showRates && <th className="p1">Rates</th>}
+                      <th></th>
+                    </tr>
+                  </thead>
+                  {!noResultsFound && (
+                    <tbody>
+                      {paginatedData.map((row, index) => (
+                        <tr className="p2" key={index}>
+                          <td>{startIdx + index + 1}</td>
+                          {headerLabels.map((collabel, labelIndex) => (
+                            <td key={labelIndex}>
+                              {collabel.id === 2
+                                ? showRates
+                                  ? this.getStatusText(row[collabel.label])
+                                  : this.getStatusImage(row[collabel.label])
+                                : row[collabel.label]}
                             </td>
+                          ))}
+                          {showRates && (
+                            <>
+                              <td>
+                                <RateIcon
+                                  className="icon2"
+                                  onClick={() =>
+                                    this.handleRatesModal(
+                                      row.company_name,
+                                      false
+                                    )
+                                  }
+                                ></RateIcon>
+                              </td>
+                              <td>
+                                <Link
+                                  to={`/previewsettlement/${row.company_name}`}
+                                >
+                                  <RightSign
+                                    className="icon2"
+                                    title="View More"
+                                  ></RightSign>
+                                </Link>
+                              </td>
+                            </>
+                          )}
+                          {showReport && (
                             <td>
-                              <Link to={`/previewsettlement/${row.company_name}`}>
+                              <Link to={`/previewreport/${row._id}`}>
                                 <RightSign
                                   className="icon2"
                                   title="View More"
                                 ></RightSign>
                               </Link>
-                            </td>
-                          </>
-                        )}
-                        {showReport && (
-                          <td>
-                            <Link to={`/previewreport/${row._id}`}>
-                              <RightSign
+
+                              <More
                                 className="icon2"
-                                title="View More"
-                              ></RightSign>
-                            </Link>
+                                onClick={() => this.handleEditStatus(row)}
+                              />
+                            </td>
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  )}
 
-                            <More
-                              className="icon2"
-                              onClick={() => this.handleEditStatus(row)}
-                            />
-                          </td>
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                )}
-
-                {noResultsFound && (
-                  <tbody>
-                    <tr>
-                      <td colSpan={headerLabels.length + (showRates ? 2 : 1)}>
-                        <div>
-                          <div className="search-result-head">
-                            <div>
-                              <h4>Whoops!</h4>{" "}
-                              <Oops className="primary-color-icon" />
+                  {noResultsFound && (
+                    <tbody>
+                      <tr>
+                        <td colSpan={headerLabels.length + (showRates ? 2 : 1)}>
+                          <div>
+                            <div className="search-result-head">
+                              <div>
+                                <h4>Whoops!</h4>{" "}
+                                <Oops className="primary-color-icon" />
+                              </div>
+                              <p className="p2">
+                                We couldn't find the transaction you are looking
+                                for
+                              </p>
                             </div>
-                            <p className="p2">
-                              We couldn't find the transaction you are looking for
-                            </p>
+                            <div className="search-result-img">
+                              <img src={searchImg} alt="search"></img>
+                            </div>
                           </div>
-                          <div className="search-result-img">
-                            <img src={searchImg} alt="search"></img>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                )}
-              </table>
+                        </td>
+                      </tr>
+                    </tbody>
+                  )}
+                </table>
+              )}
             </div>
 
             {!noResultsFound && (
@@ -574,12 +587,12 @@ class Table extends Component {
                     )} of ${dataToRender.length}`}
                   </p>
                   <button
-                onClick={() => this.setState({ currentPage: 1 })}
-                disabled={currentPage === 1}
-                className={currentPage === 1 ? 'disabled-button' : ''}
-              >
-                <LeftDoubleArrow />
-              </button>
+                    onClick={() => this.setState({ currentPage: 1 })}
+                    disabled={currentPage === 1}
+                    className={currentPage === 1 ? "disabled-button" : ""}
+                  >
+                    <LeftDoubleArrow />
+                  </button>
                   <button
                     onClick={() => this.handlePageChange("prev")}
                     disabled={currentPage === 1}
@@ -597,11 +610,13 @@ class Table extends Component {
                     <RightSign />
                   </button>
                   <button
-                onClick={() => this.setState({ currentPage: totalPages })}
-                className={currentPage === totalPages ? 'disabled-button' : ''}
-              >
-                <RightDoubleArrow />
-              </button>
+                    onClick={() => this.setState({ currentPage: totalPages })}
+                    className={
+                      currentPage === totalPages ? "disabled-button" : ""
+                    }
+                  >
+                    <RightDoubleArrow />
+                  </button>
                 </div>
               </div>
             )}
@@ -744,7 +759,9 @@ class Table extends Component {
                       type="date"
                       className="inputFeild"
                       value={this.state.toDate}
-                      onChange={(e) => this.setState({ toDate: e.target.value })}
+                      onChange={(e) =>
+                        this.setState({ toDate: e.target.value })
+                      }
                     ></input>
                   </div>
                 </div>
@@ -833,9 +850,7 @@ class Table extends Component {
                           .filter((collabel) => collabel.id !== 2)
                           .map((collabel, labelIndex) => (
                             <td key={labelIndex}>
-                              {collabel.id === 2
-                                ? null
-                                : row[collabel.label]}
+                              {collabel.id === 2 ? null : row[collabel.label]}
                             </td>
                           ))}
                         {showRates && (
@@ -849,7 +864,9 @@ class Table extends Component {
                               ></RateIcon>
                             </td>
                             <td>
-                              <Link to={`/previewsettlement/${row.company_name}`}>
+                              <Link
+                                to={`/previewsettlement/${row.company_name}`}
+                              >
                                 <RightSign
                                   className="icon2"
                                   title="View More"
@@ -889,7 +906,8 @@ class Table extends Component {
                               <Oops className="primary-color-icon" />
                             </div>
                             <p className="p2">
-                              We couldn't find the transaction you are looking for
+                              We couldn't find the transaction you are looking
+                              for
                             </p>
                           </div>
                           <div className="search-result-img">
@@ -927,7 +945,7 @@ class Table extends Component {
                   <button
                     onClick={() => this.setState({ currentPage: 1 })}
                     disabled={currentPage === 1}
-                    className={currentPage === 1 ? 'disabled-button' : ''}
+                    className={currentPage === 1 ? "disabled-button" : ""}
                   >
                     <LeftDoubleArrow />
                   </button>
@@ -949,7 +967,9 @@ class Table extends Component {
                   </button>
                   <button
                     onClick={() => this.setState({ currentPage: totalPages })}
-                    className={currentPage === totalPages ? 'disabled-button' : ''}
+                    className={
+                      currentPage === totalPages ? "disabled-button" : ""
+                    }
                   >
                     <RightDoubleArrow />
                   </button>

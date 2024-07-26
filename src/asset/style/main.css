@@ -2633,7 +2633,6 @@ td {
 	padding: 5px;
 	position: sticky;
 	right: 0;
-	background-color: var(--white);
 	z-index: 0;
 	box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
 }
@@ -5325,7 +5324,6 @@ hr {
 .api-key-content p{
 	font-size: 15px;
 	color: #808080;
-	width: 145px;
 }
 
 .subtext-api{
@@ -5382,6 +5380,10 @@ hr {
 	margin-bottom: 5px;
 }
 
+.accntkey{
+	width: 140px;
+}
+
 /* .inputFeild-secret {
 	border: 2px solid var(--border-gray);
 	border-radius: 5px;
@@ -5418,7 +5420,8 @@ hr {
 .white-color{
 	color: var(--white) !important;
 }
-/* ....Loader.... */
+
+/* Loader.css */
 .table-loader {
 	display: flex;
 	justify-content: center;
@@ -5432,44 +5435,97 @@ hr {
 	height: 300px;
   }
   
-  @keyframes dotFlashing {
+  .container {
+	--uib-size: 40px;
+	--uib-color:var(--primary);
+	--uib-speed: .9s;
+	--uib-stroke: 5px;
+	--mask-size: calc(var(--uib-size) / 2 - var(--uib-stroke));
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	height: var(--uib-size);
+	width: var(--uib-size);
+	-webkit-mask: radial-gradient(
+	  circle var(--mask-size),
+	  transparent 99%,
+	 var(--primary) 100%
+	);
+	mask: radial-gradient(circle var(--mask-size), transparent 99%, var(--primary) 100%);
+	background-image: conic-gradient(transparent 25%, var(--uib-color));
+	animation: spin calc(var(--uib-speed)) linear infinite;
+	border-radius: 50%;
+  }
+  
+  @keyframes spin {
 	0% {
-	  background-color: var(--secondary);
-	}
-	25% {
-	  background-color: var(--primary);
-	}
-	50% {
-	  background-color:var(--secondary);
-	}
-	75% {
-	  background-color: var(--primary-dark);
+	  transform: rotate(0deg);
 	}
 	100% {
-	  background-color: var(--primary);
+	  transform: rotate(360deg);
 	}
   }
   
-  .colorful-dots-loader {
-	width: 60px;
-	display: flex;
-	justify-content: space-between;
+
+
+  /* css */
+
+  .intro-paragraph{
+		margin-bottom: 40px;
   }
-  
-  .colorful-dots-loader span {
-	width: 14px;
-	height: 14px;
-	background-color: var(--secondary);
-	border-radius: 50%;
-	animation: dotFlashing 1s infinite linear alternate;
-	box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+
+  .intro-paragraph p{
+		color: #989898;
   }
-  
-  .colorful-dots-loader span:nth-child(2) {
-	animation-delay: 0.2s;
+
+  .qpay-container h5{
+		font-weight: 550;
+		margin-bottom: 5px;
   }
-  
-  .colorful-dots-loader span:nth-child(3) {
-	animation-delay: 0.4s;
+  .qpay-container {
+		padding: 20px;
+		max-width: 650px;
+		height: 600px;
+		border-radius: 10px;
+		margin: 0 auto;
+		background: var(--white);
   }
-  
+
+  .billing-details div{
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 15px;
+   }
+
+   .cardnumberinput{
+	  width: 610px;
+   }
+
+   .form-container {
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+	}
+
+	.selects-container {
+		display: flex;
+		justify-content: space-between;
+		gap: 10px;
+	}
+
+	.expiry-cvv {
+		display: flex;
+		gap: 10px;
+		margin-top: 15px;
+	}
+
+	.Qpaybtn{
+		width: 450px;
+		margin:20px 70px;
+	
+	}
+
+	.loader-container{
+		margin-top: 120px;
+	}

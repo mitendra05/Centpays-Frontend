@@ -20,7 +20,6 @@ import visa from "../../media/icon/logoVisa.png";
 import mastercard from "../../media/icon/LogoMastercard.png";
 import CopyToClipboard from "./CopyToClipboard";
 import ScrollTopAndBottomButton from "../../jsx/components/ScrollUpAndDown";
-import CustomTooltip from "./Custom-tooltip";
 
 class Table extends Component {
   constructor(props) {

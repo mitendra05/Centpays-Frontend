@@ -44,7 +44,7 @@ import Adduser from "./asset/jsx/pages/AddUser";
 import AllUser from "./asset/jsx/pages/AllUser";
 import MerchantSettings from "./asset/jsx/pages/Merchant_Settings";
 
-import AQTest from "./asset/jsx/pages/AQTest";
+import Qpay from "./asset/jsx/pages/QPay";
 import AQResult from "./asset/jsx/pages/AQResult";
 
 import Setting from "./asset/jsx/pages/setting";
@@ -102,7 +102,7 @@ function App() {
           <Route path="/adduser" element={<Adduser />}></Route>
 
           <Route path="/settings" element={<Setting />}></Route>
-		      <Route path="/acquirertestingenv" element={<AQTest />}></Route>
+		      <Route path="/acquirertestingenv" element={<Qpay />}></Route>
 		      <Route path="/paymentresult/:orderNo" element={<AQResult />}></Route>
 
           <Route path="/banksettle" element={<BankSettlement />}></Route>

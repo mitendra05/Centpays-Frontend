@@ -160,15 +160,10 @@ class Dashboard extends Component {
 			throw new Error('Failed to fetch data');
 		  }
 		  const data = await response.json();
-	  
-		  // Filter data based on selected currency and merchant
 		  const filteredData = data.filter(item => {
-			// Check if item matches selected merchant (if provided)
 			const matchesMerchant = !merchant || item.merchant === merchant;
-			// Check if item matches selected currency (if provided)
 			const matchesCurrency = !currency || item.currency === currency;
 	  
-			// Item should match both criteria if both are provided
 			return matchesMerchant && matchesCurrency;
 		  });
 	  
