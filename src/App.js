@@ -48,9 +48,7 @@ import Qpay from "./asset/jsx/pages/QPay";
 import AQResult from "./asset/jsx/pages/AQResult";
 
 import Setting from "./asset/jsx/pages/setting";
-
-import BankSettlement from "./asset/jsx/pages/Bank_Settlements";
-import LiveReport from "./asset/jsx/pages/LiveReport";
+import RCompare from "./asset/jsx/pages/R06_Compare";
 
 function App() {
   return (
@@ -104,10 +102,7 @@ function App() {
           <Route path="/settings" element={<Setting />}></Route>
 		      <Route path="/acquirertestingenv" element={<Qpay />}></Route>
 		      <Route path="/paymentresult/:orderNo" element={<AQResult />}></Route>
-
-          <Route path="/banksettle" element={<BankSettlement />}></Route>
-          <Route path="/livereport" element={<LiveReport/>}></Route>
-
+          <Route path="/rcompare" element={<RCompare />}></Route>
         </Routes>
       </BrowserRouter>
     </>

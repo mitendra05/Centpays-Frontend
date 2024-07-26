@@ -234,6 +234,8 @@ class CreateSettlement extends Component {
     }
 };
 
+
+
   handlePreview = async () => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
     const {

@@ -133,6 +133,14 @@ class PreviewReport extends Component {
 		  window.history.back();
 		}
 	  };
+		const { id,company_name} = this.state;
+		const currentPath = window.location.pathname;
+		if (currentPath === `/previewreport/${id}`) {
+		  window.location.href = `/previewsettlement/${company_name}`;
+		} else {
+		  window.history.back();
+		}
+	  };
 
 
 	render() {
