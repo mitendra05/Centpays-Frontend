@@ -382,39 +382,31 @@ class ViewMerchant extends Component {
     );
   };
   
-  updateMerchantStatus = async (status, idforEdit) => {
+  updateMerchantStatus = async (statusText, idforEdit) => {
+    const backendURL = process.env.REACT_APP_BACKEND_URL;
     const { token } = this.state;
-    console.log(idforEdit, status);
-  
+
     try {
-      const response = await fetch("https://www.paylinkup.online/updateclient", {
+      const response = await fetch(`${backendURL}/updateclient`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ id: idforEdit, status: status }),
+        body: JSON.stringify({ id: idforEdit, status: statusText }),
       });
-  
-      if (response.ok) {
-        const data = await response.json();
-        this.setState({
-          errorMessage: "Status updated successfully",
-          messageType: "success",
-        });
-      } else {
-        this.setState({
-          errorMessage: "Error updating status. Please try again later.",
-          messageType: "fail",
-        });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok.");
       }
-    } catch (error) {
-      console.error("Error updating status:", error);
       this.setState({
-
-        errorMessage: "An unexpected error occurred. Please try again later.",
-        messageType: "error",
-
+        errorMessage: "Status updated successfully",
+        messageType: "success",
+      });
+    } catch (error) {
+      this.setState({
+        errorMessage: "Status Not Update",
+        messageType: "fail",
       });
     }
   };
@@ -1466,7 +1458,7 @@ class ViewMerchant extends Component {
                     </div>
                   )}
 
-{this.state.secretsInfo && (
+                 {this.state.secretsInfo && (
                     <div className="right-section-middle-body">
                       <div className="settlements-container">
                         <h4 className="head-head">API Key List & Access</h4>
@@ -1579,7 +1571,7 @@ class ViewMerchant extends Component {
                           </div>
                         ) : (
                           <div className="api-key-container">
-                             <div className="api-key-container-head-div">
+                          <div className="api-key-container-head-div">
                             <div className="api-key-container-div">
                               <h6 className="heading-text">
                                 Account Creation Key
@@ -1590,7 +1582,7 @@ class ViewMerchant extends Component {
                             </CustomTooltip>
                           </div>
                             <div className="api-key-content">
-                              <p id="root-key">
+                              <p>
                                 {this.maskString(rootAccountKey)}
                               </p>
                               <div
@@ -2382,7 +2374,7 @@ class ViewMerchant extends Component {
                     </div>
                   )}
 
-{this.state.secretsInfo && (
+                {this.state.secretsInfo && (
                     <div className="right-section-middle-body">
                       <div className="settlements-container">
                         <h4 className="head-head">API Key List & Access</h4>
@@ -2418,9 +2410,11 @@ class ViewMerchant extends Component {
                                 <Eye className="grey-icon" />
                               )}
                             </div>
+                            <div className="accntkey">
                             <p id="api-key">
                               {showApiKey ? apiKey : this.maskString(apiKey)}
                             </p>
+                            </div>
                             <div
                               onClick={() =>
                                 this.handleCopy(apiKey, "api", "api-key")
@@ -2459,11 +2453,13 @@ class ViewMerchant extends Component {
                                 <Eye className="grey-icon" />
                               )}
                             </div>
+                            <div className="accntkey">
                             <p id="secret-key">
                               {showSecretKey
                                 ? secretKey
                                 : this.maskString(secretKey)}
                             </p>
+                            </div>
                             <div
                               onClick={() =>
                                 this.handleCopy(

@@ -18,7 +18,7 @@ class Compare extends Component {
       searchedResult: [],
       paymentgateway: "",
       fromDate: "",
-      toDate: "",
+      toDate: "",null
       attachment: null,
       fileName: "No File Chosen",
       excelData: [],
