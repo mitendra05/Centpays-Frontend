@@ -416,7 +416,7 @@ class Sidebar extends Component {
                           onClick={() => this.handleMenuClick("aqtest")}
                         >
                           <p>
-                            AQ Test<i style={{ color: "red" }}>*</i>
+                          Quick Pay<i style={{ color: "red" }}>*</i>
                           </p>
                         </div>
                       </Link>
