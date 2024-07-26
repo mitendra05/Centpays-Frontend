@@ -6,7 +6,7 @@ import MessageBox from "./Message_box";
 import Modal from "./Modal";
 
 //SVG icons
-import { LeftArrow, RightArrow, Reset, Close} from "../../media/icon/SVGicons";
+import { LeftArrow, RightArrow, Reset, Close,Copy } from "../../media/icon/SVGicons";
 import CustomTooltip from "./Custom-tooltip";
 
 class MerchantForm extends Component {
@@ -22,8 +22,8 @@ class MerchantForm extends Component {
       directorInfo: false,
       ...props.merchantData,
       isUpdate: false,
-      showSeceretKeyModal: false,
-       rootAccountKey: ""
+      showSecretKeyModal: false,
+      rootAccountKey: ""
     };
   }
 
@@ -223,15 +223,14 @@ decodeSignedToken = (token) => {
         let rootAccountKey;
         if (!isUpdate) {
           console.log("id",client_data.client.client_id)
-          rootAccountKey = this.generateSignedToken(client_data.client.client_id, 'root');
-          this.setState({isAddMerchantPanelOpen:false, showSecretKeyModal:true, rootAccountKey})
+          rootAccountKey = this.generateSignedToken(client_data.client.client_id, 'merchant');
+          this.setState({ showSecretKeyModal:true, rootAccountKey})
         }
 
         this.setState({
-          generatedKey: rootAccountKey || '',
           isAddMerchantPanelOpen:false,
 
-          showSeceretKeyModal: !isUpdate,
+          showSecretKeyModal: !isUpdate,
           errorMessage: isUpdate
             ? "Data Updated Successfully"
             : "Data Submitted Successfully",
@@ -297,7 +296,6 @@ decodeSignedToken = (token) => {
       .catch(err => {
         this.setState({errorMessage:"Fail to copied!"})
       });
-      this.setState({ showSeceretKeyModal: false });
       this.setState({ showSecretKeyModal: false });
 
   };

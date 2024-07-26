@@ -115,6 +115,7 @@ export class QPay extends Component {
       mid,
     } = this.state;
 
+    // Generate random transaction ID and order number
     const generateRandomString = (length) => {
       const characters =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

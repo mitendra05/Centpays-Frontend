@@ -52,18 +52,15 @@ class ScrollUpAndDown extends Component {
     const isAtTop = scrollTop === 0;
     const isScrollable = scrollHeight > clientHeight;
     this.setState({ isTop: isAtTop, isScrollable });
-    
-    // Update the state based on the current scroll position
-    this.setState({ isTop: isAtTop });
   };
-  
+
   scrollToTopOrBottom = () => {
     let tableBody = document.querySelector('.table-Body') || document.querySelector('.txn-search-table-Body');
     
     if (tableBody) {
       const { isTop } = this.state;
       const scrollHeight = tableBody.scrollHeight;
-  
+
       if (isTop) {
         tableBody.scrollTo({
           top: scrollHeight,
@@ -79,7 +76,6 @@ class ScrollUpAndDown extends Component {
       this.setState({ isTop });
     }
   };
-  
 
   render() {
     const { isTop, isScrollable } = this.state;
