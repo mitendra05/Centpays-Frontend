@@ -4,6 +4,7 @@ import React, { Component } from "react";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import Loader from "../components/Loder";
+import MessageBox from "../components/Message_box";
 
 export class QPay extends Component {
   constructor(props) {
@@ -33,6 +34,7 @@ export class QPay extends Component {
       companyList: [],
       midList: [],
       selectedMerchant: "", // Added state for selected merchant
+      messageType: "",
     };
   }
 
@@ -68,7 +70,7 @@ export class QPay extends Component {
     }
   };
 
-  fetchMIDs = async (merchant) => {
+  fetchCredentials = async (merchant) => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
     const { token } = this.state;
     try {
@@ -85,7 +87,11 @@ export class QPay extends Component {
       const data = await response.json();
 
       if (data && Array.isArray(data.uniqueMIDs)) {
-        this.setState({ midList: data.uniqueMIDs });
+        this.setState({
+          midList: data.uniqueMIDs,
+          api_key: data.apiKey,
+          secret_key: data.secretKey,
+        });
       } else {
         this.setState({ midList: [] });
         console.error(
@@ -104,12 +110,22 @@ export class QPay extends Component {
   handleInputChange = (e) => {
     const { name, value } = e.target;
     this.setState({ [name]: value });
-
+  
     if (name === "selectedMerchant") {
-      this.setState({ selectedMerchant: value });
-      this.fetchMIDs(value); // Fetch MIDs when merchant is selected
+      this.setState({ selectedMerchant: value, errorMessage: "" });
+      this.fetchCredentials(value);
     }
   };
+  
+
+  handleMIDClick = () => {
+    const { selectedMerchant } = this.state;
+  
+    if (!selectedMerchant) {
+      this.setState({ errorMessage: "Please select a merchant before choosing MID." });
+    }
+  };
+  
 
   handlePay = async (e) => {
     e.preventDefault();
@@ -148,7 +164,7 @@ export class QPay extends Component {
       merchantID: "1044",
       apiKey: api_key,
       apiSecret: secret_key,
-      mid: mid,
+      mid: mid === "No MID" ? "No MID" : mid,
       name: cardHolderName,
       email: billingEmail,
       phone: billingPhoneNumber,
@@ -163,11 +179,10 @@ export class QPay extends Component {
       cardCVV: cvvno,
     };
 
+    console.log("", payload);
     const headers = {
       "Content-Type": "application/json",
     };
-
-    console.log("Payload:", payload);
 
     try {
       const response = await fetch(
@@ -223,10 +238,19 @@ export class QPay extends Component {
       isLoader,
       selectedMerchant,
       midList,
+      errorMessage,
+      messageType,
     } = this.state;
 
     return (
       <>
+        {errorMessage && (
+          <MessageBox
+            message={errorMessage}
+            messageType={messageType}
+            onClose={() => this.setState({ errorMessage: "" })}
+          />
+        )}
         <Header />
         <Sidebar />
         <div
@@ -267,7 +291,13 @@ export class QPay extends Component {
                       ))}
                     </select>
 
-                    <select name="mid" className="inputFeild cardnumberinput">
+                    <select
+                      name="mid"
+                      className="inputFeild cardnumberinput"
+                      onChange={this.handleInputChange}
+                      onClick={this.handleMIDClick}
+                      value={this.state.mid || ""}
+                    >
                       <option value="" disabled selected>
                         Select MID
                       </option>
@@ -278,7 +308,7 @@ export class QPay extends Component {
                             {mid}
                           </option>
                         ))}
-                      <option value="">No MID</option>
+                      <option  value="No MID">No MID</option>
                     </select>
                   </div>
                   <div className="billing-details">
