@@ -32,6 +32,7 @@ export class QPay extends Component {
       currency: "",
       companyList: [],
       midList: [],
+      selectedMerchant: "", // Added state for selected merchant
     };
   }
 
@@ -45,7 +46,6 @@ export class QPay extends Component {
   componentDidMount() {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
     this.fetchMerchants(`${backendURL}/companylist`, "companyList");
-    this.fetchMerchants(`${backendURL}/listofmids`, "midList");
   }
 
   fetchMerchants = async (url, dataVariable) => {
@@ -68,34 +68,47 @@ export class QPay extends Component {
     }
   };
 
-  fetchData = async () => {
-    this.setState({ isLoading: true, error: null });
+  fetchMIDs = async (merchant) => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
+    const { token } = this.state;
     try {
-      const API_URL = `${backendURL}/transactionflow/get_transaction?orderNo=${this.state.orderNo}`;
-      const response = await fetch(API_URL);
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
+      const response = await fetch(
+        `${backendURL}/merchantkeys?merchant=${merchant}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       const data = await response.json();
-      this.setState({ data });
-      console.log("Fetched data:", data);
-      this.setState({ status: data.status });
+
+      if (data && Array.isArray(data.uniqueMIDs)) {
+        this.setState({ midList: data.uniqueMIDs });
+      } else {
+        this.setState({ midList: [] });
+        console.error(
+          "API response does not contain valid uniqueMIDs array:",
+          data
+        );
+      }
     } catch (error) {
       this.setState({
-        error: error.message || "An error occurred while fetching data.",
+        errorMessage: "Error in Fetching MIDs. Please try again later.",
+        messageType: "",
       });
-    } finally {
-      this.setState({ isLoading: false });
     }
   };
 
   handleInputChange = (e) => {
-    this.setState({ [e.target.name]: e.target.value });
-  };
+    const { name, value } = e.target;
+    this.setState({ [name]: value });
 
-  toggleCard = (card) => {
-    this.setState({ selectedCard: card });
+    if (name === "selectedMerchant") {
+      this.setState({ selectedMerchant: value });
+      this.fetchMIDs(value); // Fetch MIDs when merchant is selected
+    }
   };
 
   handlePay = async (e) => {
@@ -208,6 +221,8 @@ export class QPay extends Component {
       expiryDate,
       cvvno,
       isLoader,
+      selectedMerchant,
+      midList,
     } = this.state;
 
     return (
@@ -231,7 +246,6 @@ export class QPay extends Component {
                 <div className="intro-paragraph">
                   <h5>Payment Page</h5>
                   <p>
-                    {" "}
                     Welcome to the CentPays Payment Test Page! Here, merchants
                     can simulate transactions and test the full functionality of
                     our payment gateway before integrating it into their system.
@@ -240,24 +254,31 @@ export class QPay extends Component {
                 <div className="form-container">
                   <div className="selects-container">
                     <select
-                      name="merchant"
+                      name="selectedMerchant"
                       className="inputFeild cardnumberinput"
+                      value={selectedMerchant}
+                      onChange={this.handleInputChange}
                     >
                       <option value="">Select Merchant</option>
                       {this.state.companyList.map((merchant, index) => (
-                        <option key={index} value={index}>
+                        <option key={index} value={merchant}>
                           {merchant}
                         </option>
                       ))}
                     </select>
 
                     <select name="mid" className="inputFeild cardnumberinput">
-                      <option value="">Select MID</option>
-                      {this.state.midList.map((midlist, index) => (
-                        <option key={index} value={index}>
-                          {midlist}
-                        </option>
-                      ))}
+                      <option value="" disabled selected>
+                        Select MID
+                      </option>
+                      {midList
+                        .filter((mid) => mid !== "")
+                        .map((mid, index) => (
+                          <option key={index} value={mid}>
+                            {mid}
+                          </option>
+                        ))}
+                      <option value="">No MID</option>
                     </select>
                   </div>
                   <div className="billing-details">
