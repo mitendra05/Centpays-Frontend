@@ -1201,7 +1201,7 @@ class CreateSettlement extends Component {
                 </div>
 
                 <div className="create-settelments-horizontal-line"></div>
-                <div className="create-settelment-userNote  ">
+                <div className="create-settelment-userNote  usernote-div">
                   <p>Note:</p>
                   <div className="preview-userNote">
                     <p>{this.state.textArea}</p>
@@ -1529,7 +1529,7 @@ class CreateSettlement extends Component {
                 </div>
 
                 <div className="create-settelments-horizontal-line"></div>
-                <div className="create-settelment-userNote  ">
+                <div className="create-settelment-userNote usernote-div">
                   <p>Note:</p>
                   <div className="preview-userNote">
                     <p>{this.state.textArea}</p>

@@ -328,11 +328,11 @@ p {
 			rgba(255, 255, 255, 0.5));
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	border-radius: 5px;
-	margin-left: 12px;
+	margin-left: 13px;
 }
 
 .scrolled .header-right {
-	margin-right: -10px !important;
+	margin-right: -6px !important;
 }
 
 nav {
@@ -387,7 +387,8 @@ nav {
 .header-right {
 	display: flex;
 	align-items: center;
-	margin-right: -40px;
+	margin-right: -38px;
+	gap: 5px;
 }
 
 .header-right img {
@@ -675,7 +676,7 @@ nav {
 	right: 20px;
 	bottom: 10px;
 }
-
+  
 /* -----------------------------Custom Select----------------------------- */
 
 .custom-select-wrapper {
@@ -2026,6 +2027,11 @@ td {
 	margin-top: 1rem;
 }
 
+.usernote-div{
+   display: flex;
+   align-items: center;
+}
+
 .textarea-container {
 	max-height: 100px;
 	min-height: 50px;
@@ -2050,6 +2056,7 @@ td {
 	font-size: 1rem;
 	font-weight: 600;
 	border: none;
+	outline: none;
 	background-color: var(--secondary);
 }
 
@@ -2158,13 +2165,14 @@ td {
 	text-align: center;
 	margin: 10px 0;
 	outline: 1px solid var(--black);
+	border: none !important;
 	width: 100%;
 }
 
 .prewive-list-table table th {
 	font-size: 0.8rem;
 	font-weight: 600;
-	border: none;
+	/* border: none; */
 	background-color: var(--secondary);
 }
 
@@ -3280,15 +3288,16 @@ border-bottom: none !important;
 	}
 
 	.prewive-list-table table th {
-		border: none;
 		background-color: var(--secondary);
+		
 	}
 
 	.prewive-list-table table {
 		border-collapse: collapse;
 		text-align: center;
 		margin: 10px 0;
-		border: 1px solid var(--black);
+		border: none !important;
+		outline:1px solid var(--black) !important;
 		width: 100%;
 	}
 
@@ -3380,6 +3389,10 @@ border-bottom: none !important;
 
 	.second-container-right {
 		margin-right: 50px !important;
+	}
+
+	.create-settelment-userNote{
+		margin-top: -1.1rem !important;
 	}
 }
 
@@ -3483,12 +3496,13 @@ border-bottom: none !important;
 .usershorcut-modal {
 	right: 2%;
 	top: 10%;
-	width: 350px;
+	width: 320px;
 	position: fixed;
 	background-color: #fff;
 	border-radius: 8px;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	z-index: 99;
+	height: 380px;
 }
 
 .modal-container-header {
@@ -3692,6 +3706,8 @@ hr {
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	z-index: 999;
 }
+
+
 
 /* ..........................................search window ............................................................. */
 .search-window-overlay {

@@ -14,7 +14,7 @@ class Modal extends Component {
   componentDidMount() {
     document.addEventListener("mousedown", this.handleClickOutside);
     if (this.props.stopScroll) {
-      document.body.style.overflow = "hidden"; 
+      document.body.style.overflow = "hidden";
     }
   }
 
@@ -33,16 +33,16 @@ class Modal extends Component {
 
   handleMouseDown = (e) => {
     if (this.props.enableDragging) {
-		this.setState({
-		  isDragging: true,
-		  offset: {
-			x: e.clientX - this.modalRef.current.getBoundingClientRect().left,
-			y: e.clientY - this.modalRef.current.getBoundingClientRect().top,
-		  },
-		});
-		document.addEventListener("mousemove", this.handleMouseMove);
-		document.addEventListener("mouseup", this.handleMouseUp);
-	  }
+      this.setState({
+        isDragging: true,
+        offset: {
+          x: e.clientX - this.modalRef.current.getBoundingClientRect().left,
+          y: e.clientY - this.modalRef.current.getBoundingClientRect().top,
+        },
+      });
+      document.addEventListener("mousemove", this.handleMouseMove);
+      document.addEventListener("mouseup", this.handleMouseUp);
+    }
   };
 
   handleMouseMove = (e) => {
@@ -61,6 +61,9 @@ class Modal extends Component {
   };
 
   render() {
+    const { enableDragging } = this.props;
+    const cursorStyle = enableDragging ? 'move' : 'auto';
+
     return (
       <>
         <div className="modal">
@@ -68,6 +71,7 @@ class Modal extends Component {
             className="modal-container"
             ref={this.modalRef}
             onMouseDown={this.handleMouseDown}
+            style={{ cursor: cursorStyle }}
           >
             <header className="modal-container-header">
               <h4 className="modal-container-title">

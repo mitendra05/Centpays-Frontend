@@ -586,6 +586,7 @@ class TransactionMonitoring extends Component {
                           id="merchant"
                           value={merchant}
                           onChange={this.handleCompanySelect}
+                          onKeyDown={this.handleKeyDown}
                         >
                           <option value="">Select Merchant</option>
                           {this.state.companyList.map((company) => (
@@ -660,6 +661,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("Today")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           Today
                         </button>
@@ -671,6 +673,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("Yesterday")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           Yesterday
                         </button>
@@ -682,6 +685,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("This Week")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           This Week
                         </button>
@@ -693,6 +697,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("Last Week")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           Last Week
                         </button>
@@ -704,6 +709,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("This Month")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           This Month
                         </button>
@@ -715,6 +721,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("Last Month")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           Last Month
                         </button>
@@ -726,6 +733,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("This Year")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           This Year
                         </button>
@@ -962,6 +970,7 @@ class TransactionMonitoring extends Component {
                           id="merchant"
                           value={merchant}
                           onChange={this.handleCompanySelect}
+                          onKeyDown={this.handleKeyDown}
                         >
                           <option value="">Select Merchant</option>
                           {this.state.companyList.map((company) => (
@@ -1036,6 +1045,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("Today")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           Today
                         </button>
@@ -1047,6 +1057,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("Yesterday")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           Yesterday
                         </button>
@@ -1058,6 +1069,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("This Week")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           This Week
                         </button>
@@ -1069,6 +1081,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("Last Week")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           Last Week
                         </button>
@@ -1080,6 +1093,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("This Month")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           This Month
                         </button>
@@ -1091,6 +1105,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("Last Month")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           Last Month
                         </button>
@@ -1102,6 +1117,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("This Year")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           This Year
                         </button>
@@ -1110,6 +1126,7 @@ class TransactionMonitoring extends Component {
                       <div
                         className="show-more"
                         onClick={() => this.handleShowMore()}
+                        onKeyDown={this.handleKeyDown}
                       >
                         <DownSign className="primary-color-icon" />
                         <p className="p1">Show more options</p>
@@ -1347,6 +1364,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("Today")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           Today
                         </button>
@@ -1358,6 +1376,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("Yesterday")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           Yesterday
                         </button>
@@ -1369,6 +1388,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("This Week")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           This Week
                         </button>
@@ -1380,6 +1400,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("Last Week")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           Last Week
                         </button>
@@ -1391,6 +1412,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("This Month")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           This Month
                         </button>
@@ -1402,6 +1424,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("Last Month")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           Last Month
                         </button>
@@ -1413,6 +1436,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("This Year")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           This Year
                         </button>
@@ -1694,6 +1718,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("Today")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           Today
                         </button>
@@ -1705,6 +1730,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("Yesterday")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           Yesterday
                         </button>
@@ -1716,6 +1742,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("This Week")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           This Week
                         </button>
@@ -1727,6 +1754,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("Last Week")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           Last Week
                         </button>
@@ -1738,6 +1766,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("This Month")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           This Month
                         </button>
@@ -1749,6 +1778,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("Last Month")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           Last Month
                         </button>
@@ -1760,6 +1790,7 @@ class TransactionMonitoring extends Component {
                               : "quick-search-btn"
                           }
                           onClick={() => this.handleQuickSearch("This Year")}
+                          onKeyDown={this.handleKeyDown}
                         >
                           This Year
                         </button>

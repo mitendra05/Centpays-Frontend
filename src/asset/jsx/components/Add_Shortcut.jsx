@@ -34,7 +34,7 @@ class SearchWindow extends Component {
   };
 
   handleOptionClick = (option) => {
-    this.setState({ showModal: true, selectedOption: option, newOptionName: "", isBlankWindowOpen: false });
+    this.setState({ showModal: true, selectedOption: option, newOptionName: " ", isBlankWindowOpen: false });
   };
 
   handleModalInputChange = (event) => {
@@ -103,30 +103,32 @@ class SearchWindow extends Component {
     }
   };
 
-  handleRemoveShortcut = async (index) => {
+  handleRemoveShortcut = async (shortcut) => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
-    const { token } = this.state;
+    const { token, shortcutList } = this.state;
     try {
       const response = await fetch(
-        `${backendURL}/deleteshortcut"`,
+        `${backendURL}/deleteshortcut`,
         {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ index }),
+          body: JSON.stringify({ shortcut: shortcut.shortcut, edited_name: shortcut.edited_name }),
         }
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-      const updatedList = this.state.shortcutList.filter((_, idx) => idx !== index);
+      const updatedList = shortcutList.filter(
+        (item) => item.shortcut !== shortcut.shortcut || item.edited_name !== shortcut.edited_name
+      );
       this.setState({ shortcutList: updatedList });
     } catch (error) {
       console.error("Error deleting shortcut:", error);
     }
-  };
+  };  
 
   addShortcut = (newOption) => {
     this.setState((prevState) => ({
@@ -171,7 +173,7 @@ class SearchWindow extends Component {
                       className="remove-option"
                       onClick={(e) => {
                         e.stopPropagation();
-                        this.handleRemoveShortcut(index);
+                        this.handleRemoveShortcut(shortcut);
                       }}
                     >
                       &times;
