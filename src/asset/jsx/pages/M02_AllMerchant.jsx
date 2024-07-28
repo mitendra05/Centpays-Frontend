@@ -5,7 +5,6 @@ import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import MerchantTable from "../components/Merchant_Table"
 import MessageBox from "../components/Message_box";
-import ScrollToTopButton from "../components/ScrollToTop";
 
 //SVG Icons
 import { TotalUserIcon, ActiveUserIcon, InactiveUserIcon, PendingUserIcon } from "../../media/icon/SVGicons";
@@ -198,7 +197,6 @@ class ListSettlement extends Component {
                 loading={this.state.loading}
               />
             </div>
-            <ScrollToTopButton/>
           </div>
         </div>
       </>

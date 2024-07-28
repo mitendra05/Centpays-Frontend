@@ -367,7 +367,6 @@ class Table extends Component {
               acceptbtnname={"Update"}
               showFotter={true}
               stopScroll={true}
-              enableDragging={true}
               modalHeading={"Edit Status 📝"}
               modalBody={
                 <div className="edit-status">

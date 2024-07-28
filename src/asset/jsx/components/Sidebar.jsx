@@ -224,7 +224,8 @@ class Sidebar extends Component {
                       </div>
                     </div>
                   </li>
-                  <li className="menuitem-disable">
+                  
+                  <li>
                     <div
                       className={`menu-item ${
                         menuOpen.manageUser ? "sidebaractive" : ""
