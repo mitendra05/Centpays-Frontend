@@ -195,6 +195,7 @@ class ListSettlement extends Component {
                 apiData={apiData}
                 showMerchants={showMerchants}
                 loading={this.state.loading}
+                buttonname={"Add New Merchant"}
               />
             </div>
           </div>

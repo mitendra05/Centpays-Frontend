@@ -7,8 +7,6 @@ import Sidebar from "../components/Sidebar";
 import Table from "../components/Table";
 import Loader from "../components/Loder";
 
-import CustomSelect from "../components/Custom-select";
-
 //SVG Icons
 import { Search, Oops, DownSign, UpSign, Eye } from "../../media/icon/SVGicons";
 
