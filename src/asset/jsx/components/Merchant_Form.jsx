@@ -110,26 +110,6 @@ class MerchantForm extends Component {
     }
   };
 
-//   generateSignedToken = (clientId, role) => {
-//     const payload = { clientId, role };
-//     console.log(payload)
-//     const payloadString = JSON.stringify(payload);
-//     console.log(payloadString)
-//     const token = CryptoJS.AES.encrypt(payloadString, process.env.REACT_APP_KEY_SECRET).toString();
-//     return token;
-// };
-
-// decodeSignedToken = (token) => {
-//   try {
-//       const bytes = CryptoJS.AES.decrypt(token, process.env.REACT_APP_KEY_SECRET);
-//       const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-//       return decryptedData;
-//   } catch (error) {
-//       console.error("Error decoding token:", error.message);
-//       return null;
-//   }
-// };
-
 generateSignedToken = (clientId, role) => {
   const payload = { clientId, role };
   const payloadString = JSON.stringify(payload);

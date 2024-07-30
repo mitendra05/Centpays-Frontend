@@ -17,7 +17,7 @@ import {
   UpSign,
   DownSign,
   ExportIcon,
-  Bin,
+  Delete,
   Eye,
   More,
 } from "../../media/icon/SVGicons";
@@ -272,9 +272,9 @@ class Table extends Component {
                   onChange={this.handleInputChange}
                 >
                   <option value="">Select Role</option>
-                  <option value="Success">Admin</option>
-                  <option value="Failed">Merchant</option>
-                  <option value="Incompleted">Employee</option>
+                  <option value="Success">Centpays</option>
+                  <option value="Failed">Merchant Agent</option>
+                  <option value="Incompleted">Centpays Employee</option>
                 </select>
               </div>
               <div className="search-select-div input-user">
@@ -408,7 +408,7 @@ class Table extends Component {
                                 this.getStatusText(row[collabel.label])
                               ) : collabel.id === 7 && forAllUser ? (
                                 <div>
-                                  <Bin className="icon2" />
+                                  <Delete className="icon2" />
                                   <Link
                                     to={`/viewmerchant/${row.company_name}`}
                                   >

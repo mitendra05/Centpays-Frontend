@@ -5,23 +5,34 @@ class ScrollUpAndDown extends Component {
   state = {
     isTop: true, 
     isScrollable: false,
+    isVisible: false,
   };
 
   resizeObserver = null;
 
   componentDidMount() {
-    this.initializeTableBody();
+    const { showScrollToTopButton } = this.props;
+    if (showScrollToTopButton) {
+      window.addEventListener('scroll', this.handleScrollForTopButton);
+    } else {
+      this.initializeTableBody();
+    }
   }
 
   componentWillUnmount() {
-    this.cleanupTableBody();
+    const { showScrollToTopButton } = this.props;
+    if (showScrollToTopButton) {
+      window.removeEventListener('scroll', this.handleScrollForTopButton);
+    } else {
+      this.cleanupTableBody();
+    }
   }
 
   initializeTableBody = () => {
     let tableBody = document.querySelector('.table-Body') || document.querySelector('.txn-search-table-Body');
     
     if (tableBody) {
-      tableBody.addEventListener('scroll', this.handleScroll);
+      tableBody.addEventListener('scroll', this.handleScrollForTableBody);
       this.checkScrollVisibility(tableBody.scrollTop, tableBody.scrollHeight, tableBody.clientHeight);
 
       this.resizeObserver = new ResizeObserver(() => {
@@ -36,16 +47,29 @@ class ScrollUpAndDown extends Component {
     let tableBody = document.querySelector('.table-Body') || document.querySelector('.txn-search-table-Body');
     
     if (tableBody) {
-      tableBody.removeEventListener('scroll', this.handleScroll);
+      tableBody.removeEventListener('scroll', this.handleScrollForTableBody);
       if (this.resizeObserver) {
         this.resizeObserver.unobserve(tableBody);
       }
     }
   };
 
-  handleScroll = (event) => {
+  handleScrollForTableBody = (event) => {
     const { scrollTop, scrollHeight, clientHeight } = event.target;
     this.checkScrollVisibility(scrollTop, scrollHeight, clientHeight);
+  };
+
+  handleScrollForTopButton = () => {
+    const scrollY = window.scrollY;
+    const isVisible = scrollY > 100; 
+    this.setState({ isVisible });
+  };
+
+  scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth' 
+    });
   };
 
   checkScrollVisibility = (scrollTop, scrollHeight, clientHeight) => {
@@ -78,19 +102,33 @@ class ScrollUpAndDown extends Component {
   };
 
   render() {
-    const { isTop, isScrollable } = this.state;
+    const { showScrollToTopButton } = this.props;
+    const { isTop, isScrollable, isVisible } = this.state;
 
-    if (!isScrollable) {
+    if (!isScrollable && !showScrollToTopButton) {
       return null;
     }
 
     return (
-      <button
-        onClick={this.scrollToTopOrBottom}
-        className="scroll-top-and-bottom-button scroll-top-and-bottom-btn-div"
-      >
-        {isTop ? <DownDoubleArrow className='white-icon scrollupdown-icon'/> : <UpDoubleArrow className='white-icon scrollupdown-icon'/>}
-      </button>
+      <div>
+        {!showScrollToTopButton && (
+          <button
+            onClick={this.scrollToTopOrBottom}
+            className="scroll-top-and-bottom-button scroll-top-and-bottom-btn-div"
+          >
+            {isTop ? <DownDoubleArrow className='white-icon scrollupdown-icon'/> : <UpDoubleArrow className='white-icon scrollupdown-icon'/>}
+          </button>
+        )}
+
+        {showScrollToTopButton && (
+          <button
+            onClick={this.scrollToTop}
+            className={`scroll-top-and-bottom-button scroll-to-top-button ${isVisible ? 'show' : 'hide'}`}
+          >
+            <UpDoubleArrow className='white-icon scrollupdown-icon'/>
+          </button>
+        )}
+      </div>
     );
   }
 }
