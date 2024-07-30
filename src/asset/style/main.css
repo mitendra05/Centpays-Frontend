@@ -1560,6 +1560,23 @@ td {
 	background-color: var(--secondary-dark);
 }
 
+.user-table-header{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 20px;
+	padding: 0 20px;
+	margin-top: 25px;
+	border-bottom:1px solid #ddd;;
+}
+
+.input-user{
+	width: 320px !important;
+}
+
+.foralluser-text{
+	margin-left: 45%;
+}
 /* ----------------------------- Check Settlements  ----------------------------- */
 
 .settlement-first-row {
@@ -2768,6 +2785,10 @@ border-bottom: none !important;
   .sort-div{
 	display: flex;
 	align-items: center;
+  }
+
+  .icon-alluser{
+	cursor: pointer;
   }
 
 /* ..........................................search window ............................................................. */
@@ -5545,3 +5566,8 @@ hr {
 	.loader-container{
 		margin-top: 120px;
 	}
+
+
+
+
+	
