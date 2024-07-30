@@ -164,7 +164,7 @@ export class QPay extends Component {
       merchantID: "1044",
       apiKey: api_key,
       apiSecret: secret_key,
-      mid: mid === "No MID" ? "No MID" : mid,
+      mid: mid === "No MID" ? "" : mid,
       name: cardHolderName,
       email: billingEmail,
       phone: billingPhoneNumber,
