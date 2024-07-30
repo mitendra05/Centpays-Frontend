@@ -74,7 +74,8 @@ class Login extends Component {
 					document.cookie = `email=${data.user.email};path=/`;
 					document.cookie = `name=${data.user.name};path=/`;
 					document.cookie = `company_name=${data.user.company_name};path=/`;
-
+					localStorage.setItem('lastLogin', data.user.lastLogin);
+					
 					this.setState({
 						userEmail: "",
 						userPassword: "",
