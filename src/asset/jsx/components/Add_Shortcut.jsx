@@ -1,26 +1,26 @@
 import React, { Component } from "react";
-import { Search, PlusSymbol} from "../../media/icon/SVGicons";
+import { Search, PlusSymbol } from "../../media/icon/SVGicons";
 
 class SearchWindow extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      token: this.getCookie('token'),
+      token: this.getCookie("token"),
       searchText: "",
       showModal: false,
       selectedOption: null,
       newOptionName: "",
       isBlankWindowOpen: true,
-      shortcutList: [] 
+      shortcutList: [],
     };
   }
 
   getCookie = (name) => {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
+    if (parts.length === 2) return parts.pop().split(";").shift();
     return null;
-  }
+  };
   componentDidMount() {
     this.fetchShortcuts();
   }
@@ -34,7 +34,12 @@ class SearchWindow extends Component {
   };
 
   handleOptionClick = (option) => {
-    this.setState({ showModal: true, selectedOption: option, newOptionName: " ", isBlankWindowOpen: false });
+    this.setState({
+      showModal: true,
+      selectedOption: option,
+      newOptionName: " ",
+      isBlankWindowOpen: false,
+    });
   };
 
   handleModalInputChange = (event) => {
@@ -71,8 +76,11 @@ class SearchWindow extends Component {
       })
       .then((data) => {
         console.log("Data posted successfully:", data);
-        this.setState({ showModal: false,isBlankWindowOpen:true});
-        this.addShortcut({ shortcut: originalName, edited_name: newOptionName });
+        this.setState({ showModal: false, isBlankWindowOpen: true });
+        this.addShortcut({
+          shortcut: originalName,
+          edited_name: newOptionName,
+        });
       })
       .catch((error) => {
         console.error("Error posting data:", error);
@@ -83,16 +91,13 @@ class SearchWindow extends Component {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
     const { token } = this.state;
     try {
-      const response = await fetch(
-        `${backendURL}/getshortcuts`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${backendURL}/getshortcuts`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -107,28 +112,30 @@ class SearchWindow extends Component {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
     const { token, shortcutList } = this.state;
     try {
-      const response = await fetch(
-        `${backendURL}/deleteshortcut`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ shortcut: shortcut.shortcut, edited_name: shortcut.edited_name }),
-        }
-      );
+      const response = await fetch(`${backendURL}/deleteshortcut`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          shortcut: shortcut.shortcut,
+          edited_name: shortcut.edited_name,
+        }),
+      });
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
       const updatedList = shortcutList.filter(
-        (item) => item.shortcut !== shortcut.shortcut || item.edited_name !== shortcut.edited_name
+        (item) =>
+          item.shortcut !== shortcut.shortcut ||
+          item.edited_name !== shortcut.edited_name
       );
       this.setState({ shortcutList: updatedList });
     } catch (error) {
       console.error("Error deleting shortcut:", error);
     }
-  };  
+  };
 
   addShortcut = (newOption) => {
     this.setState((prevState) => ({
@@ -137,8 +144,15 @@ class SearchWindow extends Component {
   };
 
   render() {
-    const { options, onClose} = this.props;
-    const { searchText, showModal, selectedOption, newOptionName, isBlankWindowOpen, shortcutList } = this.state;
+    const { options, onClose } = this.props;
+    const {
+      searchText,
+      showModal,
+      selectedOption,
+      newOptionName,
+      isBlankWindowOpen,
+      shortcutList,
+    } = this.state;
 
     const filteredOptions = options.filter((option) =>
       option.name.toLowerCase().includes(searchText.toLowerCase())
@@ -149,42 +163,50 @@ class SearchWindow extends Component {
         {isBlankWindowOpen && (
           <div className="search-window usershorcut-modal">
             <header className="modal-container-header">
-            <h4>Add New Shortcut</h4>
-            <PlusSymbol
-              className="icon"
-              onClick={() => this.setState({ isBlankWindowOpen: false })}
-            />
-            <span className="close" onClick={onClose}>
-              &times;
-            </span>
+              <h4>Add New Shortcut</h4>
+              <PlusSymbol
+                className="icon"
+                onClick={() => this.setState({ isBlankWindowOpen: false })}
+              />
+              <span className="close" onClick={onClose}>
+                &times;
+              </span>
             </header>
             <div className="Shortcut-options">
-              {shortcutList.slice(0, 6).map((shortcut, index) => {
-                const matchedOptions = options.filter(option => option.name === shortcut.shortcut);
-                return matchedOptions.map((matchedOption, i) => (
-                  <div className="shortcut-item" key={`${index}-${i}`}>
-                    <img
-                      src={matchedOption.icon}
-                      className="icon"
-                      alt={matchedOption.name}
-                      onClick={() => this.openShortcutLink(matchedOption.path)}
-                    />
-                    <span
-                      className="remove-option"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        this.handleRemoveShortcut(shortcut);
-                      }}
-                    >
-                      &times;
-                    </span>
-                    <div className="neweditedname">
-                      <p> {shortcut.shortcut}</p>
-                      <p className="p2"> {shortcut.edited_name}</p>
+              {shortcutList.length === 0 ? (
+                <h4 className="centered-message">Add Shortcut</h4>
+              ) : (
+                shortcutList.slice(0, 6).map((shortcut, index) => {
+                  const matchedOptions = options.filter(
+                    (option) => option.name === shortcut.shortcut
+                  );
+                  return matchedOptions.map((matchedOption, i) => (
+                    <div className="shortcut-item" key={`${index}-${i}`}>
+                      <img
+                        src={matchedOption.icon}
+                        className="icon"
+                        alt={matchedOption.name}
+                        onClick={() =>
+                          this.openShortcutLink(matchedOption.path)
+                        }
+                      />
+                      <span
+                        className="remove-option"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          this.handleRemoveShortcut(shortcut);
+                        }}
+                      >
+                        &times;
+                      </span>
+                      <div className="neweditedname">
+                        <p>{shortcut.shortcut}</p>
+                        <p className="p2">{shortcut.edited_name}</p>
+                      </div>
                     </div>
-                  </div>
-                ));
-              })}
+                  ));
+                })
+              )}
             </div>
           </div>
         )}

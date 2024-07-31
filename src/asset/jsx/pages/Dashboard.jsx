@@ -136,22 +136,12 @@ class Dashboard extends Component {
 
 	  fetchTableData = async () => {
 		const backendURL = process.env.REACT_APP_BACKEND_URL;
-		const { userRole, merchant, currency } = this.state;
-	  
+		const { userRole, merchantName, currency, merchant } = this.state;
 		let url = `${backendURL}/latest100`;
+		if (userRole === "merchant") {
+		  url += `?merchant=${merchantName}`;
+		}
 	
-		const queryParams = [];
-		if (userRole === "merchant" && merchant) {
-		  queryParams.push(`merchant=${merchant}`);
-		}
-		if (currency) {
-		  queryParams.push(`currency=${currency}`);
-		}
-	  
-		if (queryParams.length > 0) {
-		  url += `?${queryParams.join('&')}`;
-		}
-	  
 		try {
 		  const response = await fetch(url);
 		  if (!response.ok) {
@@ -159,18 +149,16 @@ class Dashboard extends Component {
 		  }
 		  const data = await response.json();
 		  const filteredData = data.filter(item => {
-			const matchesMerchant = !merchant || item.merchant === merchant;
+			const matchesMerchant = userRole === "merchant" ? item.merchant === merchantName : !merchant || item.merchant === merchant;
 			const matchesCurrency = !currency || item.currency === currency;
-	  
 			return matchesMerchant && matchesCurrency;
 		  });
-	  
 		  this.setState({ tableData: filteredData });
 		} catch (error) {
 		  this.setState({ error: error.message });
 		}
 	  };
-	  
+	
 
 	handleCurrencyChange = (selectedCurrency) => {
 		this.setState({ currency: selectedCurrency },()=> {

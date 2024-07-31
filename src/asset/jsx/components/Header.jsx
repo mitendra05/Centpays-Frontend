@@ -122,13 +122,33 @@ class Header extends Component {
         console.log("selected currency", selectedCurrency)
         this.setState({ currency, selectedCurrency })
         this.handleCurrencyChange(selectedCurrency)
+        document.addEventListener("mousedown", this.handleClickOutside);
     }
 
     componentWillUnmount() {
         localStorage.setItem("Header_ScrollY", window.scrollY);
         window.removeEventListener("scroll", this.handleScroll);
+        document.removeEventListener("mousedown", this.handleClickOutside);
     }
 
+    handleClickOutside = (event) => {
+        const modalElements = [
+            document.querySelector('.search-window'),
+            document.querySelector('.user-modal'),
+        ];
+    
+        const isClickInsideModal = modalElements.some((modal) =>
+            modal && modal.contains(event.target)
+        );
+    
+        if (!isClickInsideModal) {
+            this.setState({
+                searchOpen: false,
+                showUserProfileModal: false,
+            });
+        }
+    };
+    
     handleMerchantChange = (merchant) => {
         if (merchant === "Select Merchant") {
             this.setState({
@@ -170,25 +190,23 @@ class Header extends Component {
     };
 
     toggleSearch = () => {
-        if (!this.state.showInnerModal) {
-            this.setState((prevState) => ({
-                searchOpen: !prevState.searchOpen,
-                showInnerModal: false,
-            }));
-        } else {
-            this.setState({
-                showInnerModal: false,
-            });
-        }
+        this.setState((prevState) => ({
+            searchOpen: !prevState.searchOpen,
+            showUserProfileModal: false,
+            shortcutModal: false,
+            showInnerModal: false,
+        }));
     };
-
+    
     toggleUserProfileModal = () => {
         this.setState((prevState) => ({
             showUserProfileModal: !prevState.showUserProfileModal,
             searchOpen: false,
+            shortcutModal: false,
+            showInnerModal: false,
         }));
     };
-
+    
     handleSearch = (event) => {
         const searchText = event.target.value.toLowerCase();
         const { options } = this.state;
@@ -230,6 +248,8 @@ class Header extends Component {
         this.setState((prevState) => ({
             shortcutModal: !prevState.shortcutModal,
             searchOpen: false,
+            showUserProfileModal: false,
+            showInnerModal: false,
         }));
     };
 

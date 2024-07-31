@@ -1561,21 +1561,26 @@ td {
 }
 
 .user-table-header{
+	position: relative;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	gap: 20px;
 	padding: 0 20px;
-	margin-top: 25px;
 	border-bottom:1px solid #ddd;;
 }
 
 .input-user{
 	width: 320px !important;
+	margin-top: 20px;
 }
 
 .foralluser-text{
 	margin-left: 45%;
+}
+
+.table-Body tr{
+	margin-left: -20px;
 }
 /* ----------------------------- Check Settlements  ----------------------------- */
 
@@ -2700,11 +2705,23 @@ td {
 }
   
 .txn-amount-blank{
-border-bottom: none !important;
+   border-bottom: none !important;
 }
 
+.no-border-bottom {
+	border-bottom: none !important;
+}
+
+ .coloumn-width{
+	display: flex;
+	align-items: center;
+	text-align: center;
+	margin-left: 45%;
+	width: 70px;
+ }
+
  .txn-amount-head {
-	/* font-weight: 530; */
+	
 	text-align: left !important;
   }
 
@@ -3703,6 +3720,14 @@ hr {
 	gap: 20px;
 }
 
+.centered-message{
+	text-align: center;
+    position: relative;
+	top: 80px;
+	left: 15%;
+	color: #ddd;
+}
+
 .shortcut-item {
 	display: flex;
 	align-items: center;
@@ -4570,41 +4595,6 @@ hr {
 	top: 50%;
 	right: -18px;
 }
-/* --------------------- Scroll to Bottom ----------------------- */
-
-.scroll-to-bottom-button {
-	position: relative;
-	top: 40%;
-	right: 5%;
-	left: 0%;
-	width: 35px;
-	height: 35px;
-	padding: 5px;
-	font-size: 16px;
-	background-color: var(--primary);
-	color: #fff;
-	border: none;
-	border-radius: 50%;
-	cursor: pointer;
-	opacity: 0;
-	z-index: 9999999999;
-	transition: opacity 0.3s;
-}
-
-.bottom-icon {
-	width: 25px;
-	height: 25px;
-	align-items: center;
-	transition: all 0.2s ease-in-out;
-}
-
-.scroll-to-bottom-button:hover {
-	background-color: var(--primary-dark);
-}
-
-.scroll-to-bottom-button.show {
-	opacity: 1;
-}
 
 /* -----------------Scroll Table to Top ----------------------- */
 
@@ -4626,16 +4616,6 @@ hr {
 
 /* AQ Test */
 
-#paymentscreen {
-	height: 85vh;
-	width: 99%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background-color: #d8d8d8;
-	border-radius: 10px;
-}
-
 #paymentscreen-result{
     height: 100vh;
 	width: 99%;
@@ -4644,18 +4624,6 @@ hr {
 	justify-content: center;
 	background-color: #d8d8d8;
 	border-radius: 10px;
-}
-
-.paymentscreen {
-	height: 100%;
-	width: 100%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.paymentscreen .p1 {
-	color: #bdbec1;
 }
 
 .max-billingdetails {
@@ -4698,18 +4666,6 @@ hr {
 
 .currencyToggel p:hover {
 	cursor: pointer;
-}
-
-.selectedCurrency {
-	height: 70%;
-	width: 50%;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	border-radius: 10px;
-	background-color: #ffffff;
-	font-weight: 700;
-	transition: ease-in .2s;
 }
 
 .nocolor {

@@ -47,7 +47,7 @@ class AllUser extends Component {
         const { token } = this.state;
         this.setState({ loading: true });
         try {
-            const response = await fetch(`${backendURL}/signup`, {
+            const response = await fetch(`${backendURL}/getuserdetails`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${token}`,

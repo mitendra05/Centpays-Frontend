@@ -97,12 +97,14 @@ class Modal extends Component {
                       {this.props.showDeclinebtn}
                     </button>
                   )}
+                  {this.props.acceptbtnname && (
                   <button
                     className="btn-primary"
                     onClick={this.props.onAccept}
                   >
                     {this.props.acceptbtnname}
                   </button>
+                  )}
                 </div>
               </footer>
             )}
