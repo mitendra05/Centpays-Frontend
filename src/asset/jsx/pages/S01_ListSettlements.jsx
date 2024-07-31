@@ -5,7 +5,6 @@ import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import SettlementTable from "../components/Settlement_Table";
 import MessageBox from "../components/Message_box";
-import ScrollToTopButton from "../components/ScrollToTop";
 
 // images
 
@@ -196,7 +195,6 @@ class ListSettlement extends Component {
 								loading={loading}
 							/>
 						</div>
-						<ScrollToTopButton/>
 					</div>
 				</div>
 			</>

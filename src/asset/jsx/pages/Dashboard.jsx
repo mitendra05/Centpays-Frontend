@@ -4,13 +4,11 @@ import React, { Component } from "react";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import Card7chart from "../components/Card7_piechart";
-import Card4Bargraph from "../components/Card4_bargraph";
-import Card5Bargraph from "../components/Card5_bargraph";
+import Bargraphs from "../components/BarGraphs";
 import Card10chart from "../components/Card10_linechart";
-import Card8Bargraph from "../components/Card8_bargraph";
 import MessageBox from "../components/Message_box";
 import CustomTooltip from "../components/Custom-tooltip";
-import ScrollToTopButton from "../components/ScrollToTop";
+import ScrollUpAndDown from "../components/ScrollUpAndDown";
 import Table from "../components/Table";
 
 //SVG Icons
@@ -138,22 +136,12 @@ class Dashboard extends Component {
 
 	  fetchTableData = async () => {
 		const backendURL = process.env.REACT_APP_BACKEND_URL;
-		const { userRole, merchant, currency } = this.state;
-	  
+		const { userRole, merchantName, currency, merchant } = this.state;
 		let url = `${backendURL}/latest100`;
+		if (userRole === "merchant") {
+		  url += `?merchant=${merchantName}`;
+		}
 	
-		const queryParams = [];
-		if (userRole === "merchant" && merchant) {
-		  queryParams.push(`merchant=${merchant}`);
-		}
-		if (currency) {
-		  queryParams.push(`currency=${currency}`);
-		}
-	  
-		if (queryParams.length > 0) {
-		  url += `?${queryParams.join('&')}`;
-		}
-	  
 		try {
 		  const response = await fetch(url);
 		  if (!response.ok) {
@@ -161,18 +149,16 @@ class Dashboard extends Component {
 		  }
 		  const data = await response.json();
 		  const filteredData = data.filter(item => {
-			const matchesMerchant = !merchant || item.merchant === merchant;
+			const matchesMerchant = userRole === "merchant" ? item.merchant === merchantName : !merchant || item.merchant === merchant;
 			const matchesCurrency = !currency || item.currency === currency;
-	  
 			return matchesMerchant && matchesCurrency;
 		  });
-	  
 		  this.setState({ tableData: filteredData });
 		} catch (error) {
 		  this.setState({ error: error.message });
 		}
 	  };
-	  
+	
 
 	handleCurrencyChange = (selectedCurrency) => {
 		this.setState({ currency: selectedCurrency },()=> {
@@ -572,7 +558,7 @@ class Dashboard extends Component {
 
 									<h4>Weekly Overview</h4>
 
-									<Card4Bargraph data={this.state.Card4_bargraph} />
+									<Bargraphs data={this.state.Card4_bargraph} type="bargraph4"/>
 								</div>
 								<div className="vertical-line-card1"></div>
 								<div className="second-row-card1-right">
@@ -714,7 +700,7 @@ class Dashboard extends Component {
 										</CustomTooltip>
 									</div>
 								</div>
-								<Card5Bargraph data={this.state.Card5_bargraph} />
+								<Bargraphs type="bargraph5" data={this.state.Card5_bargraph} />
 
 								<div className="second-row-card2-totaltraffic">
 									{" "}
@@ -886,7 +872,7 @@ class Dashboard extends Component {
 										<Infoicon className="icon2" />
 									</CustomTooltip>
 								</div>
-								<Card8Bargraph data={this.state.Card8_bargraph} />
+								<Bargraphs data={this.state.Card8_bargraph} type="bargraph7"/>
 								<div className="third-row-card3-data">
 									<h3>{percentageChange.toFixed(1)}%</h3>
 									<p className="p2">
@@ -1018,7 +1004,7 @@ class Dashboard extends Component {
 									onViewClick={this.handleViewClick}
 								/>
 							</div>
-							<ScrollToTopButton />
+							<ScrollUpAndDown showScrollToTopButton={true} />
 						</div>
 					</div>
 				</>
@@ -1117,7 +1103,7 @@ class Dashboard extends Component {
 								<div class="second-row-card1-left">
 									<h4>Weekly Overview</h4>
 
-									<Card4Bargraph data={this.state.Card4_bargraph} />
+									<Bargraphs data={this.state.Card4_bargraph} type="bargraph4"/>
 								</div>
 								<div className="vertical-line-card1"></div>
 								<div className="second-row-card1-right">
@@ -1258,7 +1244,7 @@ class Dashboard extends Component {
 										</CustomTooltip>
 									</div>
 								</div>
-								<Card5Bargraph data={this.state.Card5_bargraph} />
+								<Bargraphs data={this.state.Card5_bargraph} type="bargraph5"/>
 
 								<div className="second-row-card2-totaltraffic">
 									{" "}
@@ -1430,7 +1416,7 @@ class Dashboard extends Component {
 										<Infoicon className="icon2" />
 									</CustomTooltip>
 								</div>
-								<Card8Bargraph data={this.state.Card8_bargraph} />
+								<Bargraphs data={this.state.Card8_bargraph} type="bargraph7"/>
 								<div className="third-row-card3-data">
 									<h3>{percentageChange.toFixed(1)}%</h3>
 									<p className="p2">
@@ -1561,7 +1547,7 @@ class Dashboard extends Component {
 									onViewClick={this.handleViewClick}
 								/>
 							</div>
-							<ScrollToTopButton />
+							<ScrollUpAndDown showScrollToTopButton={true} />
 						</div>
 						</div>
 				</>

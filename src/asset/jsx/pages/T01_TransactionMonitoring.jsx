@@ -231,6 +231,7 @@ class TransactionMonitoring extends Component {
         cardnumber: "",
         searchedResult: null,
         activeQuickSearchbtn: "",
+        showIdsArray:false,
       },
       () => {
         this.fetchMidList();

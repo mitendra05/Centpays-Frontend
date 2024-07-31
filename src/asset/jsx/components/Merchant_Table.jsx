@@ -17,7 +17,7 @@ import {
   UpSign,
   DownSign,
   ExportIcon,
-  Bin,
+  Delete,
   Eye,
   More,
 } from "../../media/icon/SVGicons";
@@ -216,15 +216,51 @@ class Table extends Component {
 
   getPaginatedData = () => {
     const { highlightedOptions, currentPage, rowsPerPage } = this.state;
-    const dataToRender = highlightedOptions.length > 0 ? highlightedOptions : this.props.apiData;
+    const dataToRender =
+      highlightedOptions.length > 0 ? highlightedOptions : this.props.apiData;
     const startIndex = (currentPage - 1) * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
     const paginatedData = dataToRender.slice(startIndex, endIndex);
     return { paginatedData, startIndex };
   };
 
+  exportData = () => {
+    const { apiData, headerLabels } = this.props;
+    const { highlightedOptions } = this.state;
 
-  exportData = () => {};
+    const columnToExclude = "Action";
+
+    const dataToExport =
+      highlightedOptions.length > 0 ? highlightedOptions : apiData;
+    const formattedData = dataToExport.map((row) =>
+      headerLabels.reduce((acc, label) => {
+        if (label.heading !== columnToExclude) {
+          acc[label.heading] = row[label.label];
+        }
+        return acc;
+      }, {})
+    );
+
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+    XLSX.writeFile(workbook, "exported_data.xlsx");
+  };
+
+  deleteRow = (index) => {
+    const { highlightedOptions, apiData } = this.state;
+    let dataToRender = highlightedOptions.length > 0 ? highlightedOptions : apiData;
+
+    if (dataToRender && dataToRender.length > index) {
+      dataToRender.splice(index, 1);
+      this.setState({
+        highlightedOptions: highlightedOptions.length > 0 ? [...dataToRender] : [],
+        apiData: highlightedOptions.length === 0 ? [...dataToRender] : apiData,
+      });
+    } else {
+      console.error("Data to render is undefined or index out of bounds");
+    }
+  };
 
   render() {
     const { headerLabels, showMerchants, loading, buttonname, forAllUser } =
@@ -272,9 +308,9 @@ class Table extends Component {
                   onChange={this.handleInputChange}
                 >
                   <option value="">Select Role</option>
-                  <option value="Success">Admin</option>
-                  <option value="Failed">Merchant</option>
-                  <option value="Incompleted">Employee</option>
+                  <option value="Success">Centpays</option>
+                  <option value="Failed">Merchant Agent</option>
+                  <option value="Incompleted">Centpays Employee</option>
                 </select>
               </div>
               <div className="search-select-div input-user">
@@ -370,6 +406,7 @@ class Table extends Component {
                       ))}
                       <th></th>
                       {showMerchants && !forAllUser && <th></th>}
+                      {forAllUser && <th></th>}
                     </tr>
                   </thead>
                 )}
@@ -380,14 +417,16 @@ class Table extends Component {
                         <tr className="p2">
                           {forAllUser && (
                             <td
-                              onClick={() => this.toggleRow(startIndex + index)}
-                            >
-                              {expandedRows.includes(startIndex + index) ? (
-                                <UpSign className="icon2" />
-                              ) : (
-                                <DownSign className="icon2" />
-                              )}
-                            </td>
+                            onClick={() => this.toggleRow(startIndex + index)}
+                            className={expandedRows.includes(startIndex + index) ? 'no-border-bottom' : ''}
+                          >
+                            {expandedRows.includes(startIndex + index) ? (
+                              <UpSign className="icon2" />
+                            ) : (
+                              <DownSign className="icon2" />
+                            )}
+                          </td>
+                          
                           )}
                           {forAllUser && (
                             <td>
@@ -408,15 +447,16 @@ class Table extends Component {
                                 this.getStatusText(row[collabel.label])
                               ) : collabel.id === 7 && forAllUser ? (
                                 <div>
-                                  <Bin className="icon2" />
+                                  <Delete className="icon2" onClick={() => this.deleteRow(index)} />
                                   <Link
                                     to={`/viewmerchant/${row.company_name}`}
                                   >
-                                    {" "}
                                     <Eye className="icon2" />
                                   </Link>
                                   <More className="icon2" />
                                 </div>
+                              ) : collabel.id === 6 && forAllUser ? (
+                                "0"
                               ) : (
                                 row[collabel.label]
                               )}
@@ -432,18 +472,22 @@ class Table extends Component {
                               </Link>
                             </td>
                           )}
+                          <td className={expandedRows.includes(startIndex + index) ? 'no-border-bottom' : ''}></td>
+                          {forAllUser && <td className={expandedRows.includes(startIndex + index) ? 'no-border-bottom' : ''}></td>}
                         </tr>
                         {forAllUser &&
                           expandedRows.includes(startIndex + index) && (
-                            <tr className="expanded-row">
+                            <>
                               <td
                                 colSpan={
-                                  headerLabels.length + (showMerchants ? 3 : 2)
+                                  headerLabels.length + (showMerchants ? 5 : 3)
                                 }
                               >
-                                Agent User {row.company_name}
+                                <div className="coloumn-width">
+                                  No Sub-User Found{" "}
+                                </div>
                               </td>
-                            </tr>
+                            </>
                           )}
                       </React.Fragment>
                     ))}
