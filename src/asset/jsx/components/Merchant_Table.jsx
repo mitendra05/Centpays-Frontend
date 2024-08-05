@@ -449,7 +449,7 @@ class Table extends Component {
                                 <div>
                                   <Delete className="icon2" onClick={() => this.deleteRow(index)} />
                                   <Link
-                                    to={`/viewmerchant/${row.company_name}`}
+                                    to={`/viewuser/${row.company_name}`}
                                   >
                                     <Eye className="icon2" />
                                   </Link>

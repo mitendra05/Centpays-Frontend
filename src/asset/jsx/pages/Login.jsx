@@ -193,7 +193,7 @@ class Login extends Component {
 				const data = await response.json();
 				if (data.success) {
 					this.handlenewpasswordModalToggle("close");
-					window.alert("Password Reset Successfully");
+					this.setState({ errorMessage: "Password Reset Successfully", messageType: "Success" });
 				} else {
 					console.log("Something happened wrong");
 				}
