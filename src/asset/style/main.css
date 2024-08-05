@@ -44,13 +44,18 @@ body {
 	-moz-osx-font-smoothing: grayscale;
 	-webkit-font-smoothing: antialiased;
 	overflow-x: hidden;
+	-webkit-user-select: none; /* Chrome, Safari, Opera */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none;
+	
 }
 
 *::-webkit-scrollbar {
 	width: 5px !important;
 	height: 5px;
 	position: absolute;
-	right: 2rem;
+	right: 2px;
 }
 
 *::-webkit-scrollbar-thumb {
@@ -58,7 +63,6 @@ body {
 	background-color: #e0e0e0;
 	border: 2px solid #ffffff00;
 }
-
 
 .menuitem-disable {
 	color: var(--secondary) !important;
@@ -348,7 +352,14 @@ nav {
 	display: flex;
 	align-items: center;
 	cursor: pointer;
-	padding: 2px 5px;
+	gap: 10px;
+	
+}
+
+.Search-div{
+	display: flex;
+	align-items: center;
+	padding: 5px 5px;
 	border-radius: 10px;
 }
 
@@ -691,15 +702,21 @@ nav {
 .custom-select-selected {
 	cursor: pointer;
 	padding: 9px;
-	width: 170px;
+	width: 180px;
 	border: 2px solid var(--border-gray);
 	border-radius: 0.25rem;
 	background-color: #fff;
-	white-space: nowrap;
 	display: flex;
 	align-items: center;
-	text-overflow: ellipsis;
+	justify-content: space-between;
 }
+
+.custom-select-selected span {
+	max-width: 130px; 
+	overflow: hidden; 
+	text-overflow: ellipsis;
+	white-space: nowrap; 
+  }
 
 .custom-select-options {
 	position: absolute;
@@ -749,6 +766,7 @@ nav {
 	right: 10px;
 	top: 50%;
 	transform: translateY(-50%);
+	margin-left: 8px;
 }
 
 input[type="checkbox"] {
@@ -865,9 +883,8 @@ input[type="checkbox"] {
 
 .auth-btn {
 	width: 100%;
-	margin: 40px 0 30px 0;
+	margin: 20px 0 20px 0;
 }
-
 
 .bottom-line a {
 	padding: 0 5px;
@@ -1202,7 +1219,8 @@ input[type="checkbox"] {
 }
 
 .animate-region {
-	animation: scrollText 5s infinite linear;
+	display: inline-block;
+	animation: scrollText 5s linear infinite;
 }
 
 @keyframes scrollText {
@@ -1461,6 +1479,7 @@ input[type="checkbox"] {
 	max-height: 60vh;
 	overflow-y: auto;
 }
+
 
 .Table-container table {
 	width: 100%;
@@ -2632,7 +2651,7 @@ td {
 .txn-search-table-Body th {
 	background-color: var(--secondary);
 	text-wrap: nowrap;
-	padding: 15px 10px;
+	padding: 15px 8px;
 	text-align: center;
 	text-transform: uppercase;
 	font-weight: 550 !important;
@@ -2644,7 +2663,7 @@ td {
 
 .txn-search-table-Body td {
 	text-wrap: wrap;
-	padding: 15px 10px;
+	padding: 15px 8px;
 	text-align: center;
 	border-bottom: 1px solid #ddd;
 	color: var(--light-text);
@@ -2709,8 +2728,8 @@ td {
 }
 
 .no-border-bottom {
-	border-bottom: none !important;
-}
+	border-bottom: none;
+  }
 
  .coloumn-width{
 	display: flex;
@@ -2808,6 +2827,12 @@ td {
 	cursor: pointer;
   }
 
+  .word-wrap {
+	white-space: normal; 
+	word-break: break-word; 
+	overflow-wrap: break-word;
+  }
+  
 /* ..........................................search window ............................................................. */
 /* .search-window-overlay {
 	position: fixed;
@@ -4086,15 +4111,15 @@ hr {
 	overflow: hidden;
 
 }
-
-
 .approval-div-section {
 	display: flex;
 	align-items: center;
 	width: 70%;
 	height: 100%;
 	margin-left: 50px;
-	animation: scrollAnimation 5s linear;
+	animation: scrollAnimation 5s linear infinite;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 @keyframes scrollAnimation {
@@ -5048,7 +5073,6 @@ hr {
 .preview-table {
 	height: 100%;
 	overflow-y: auto;
-	
 }
 
 .compare-line {
@@ -5135,7 +5159,6 @@ hr {
 	 overflow-y: auto;
 }
 	
-
 .preview-table table {
 	width: 100%;
 	font-size: 13px;
@@ -5150,7 +5173,7 @@ hr {
 	justify-content: space-between;
 	width: 100% !important;
 	border-bottom-left-radius: 10px;
-	border-bottom-right-radius: 10px;
+	border-bottom-right-radius: 10px;	
 }
 
 .preview-totals div {
