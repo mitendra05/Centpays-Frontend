@@ -241,7 +241,27 @@ class TransactionMonitoring extends Component {
 
   handleSearch = async () => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
-    const { token, userRole, merchantName } = this.state;
+    const { token, userRole, merchantName, cardnumber } = this.state;
+  
+    let formattedCardNumber = this.state.cardnumber;
+  let searchQuery = {};
+
+  if (formattedCardNumber.length === 16) {
+    searchQuery.cardnumber = formattedCardNumber;
+  } else if (formattedCardNumber.length === 10) {
+    const first6 = formattedCardNumber.substring(0, 6);
+    const last4 = formattedCardNumber.substring(6, 10);
+    searchQuery.cardnumber = `${first6}******${last4}`;
+  } else if (formattedCardNumber.length === 8) {
+    const first4 = formattedCardNumber.substring(0, 4);
+    const last4 = formattedCardNumber.substring(4, 8);
+    searchQuery = {
+      cardnumber: {
+        $regex: `${first4}??******${last4}`
+      }
+    };
+  }
+ 
     const searchedData = {
       searchIds: this.state.searchIds,
       status: this.state.status,
@@ -253,9 +273,9 @@ class TransactionMonitoring extends Component {
       currency: this.state.currency,
       country: this.state.country,
       cardtype: this.state.cardtype,
-      cardnumber: this.state.cardnumber,
+      cardnumber: searchQuery.cardnumber,
     };
-
+  
     this.setState({ loading: true });
     try {
       const response = await fetch(`${backendURL}/transactionreport`, {
@@ -268,7 +288,6 @@ class TransactionMonitoring extends Component {
       });
       if (response.ok) {
         const data = await response.json();
-        // Update searchedResult and then calculate showTotalAmount
         this.setState({ searchedResult: data, loading: false }, () => {
           this.calculateShowTotalAmount();
         });
