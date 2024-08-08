@@ -32,42 +32,15 @@ class Signup extends Component {
   }
 
   handleInputChange = (event) => {
-    this.setState({ [event.target.id]: event.target.value });
+    const { id, value } = event.target;
+    this.setState({ [id]: value });
   };
 
-  decodeSignedToken = (token) => {
-    try {
-      let decryptedString;
-  
-      if (/^[A-Za-z0-9_-]+$/.test(token)) {
-        let base64Token = token.replace(/-/g, '+').replace(/_/g, '/');
-        while (base64Token.length % 4 !== 0) {
-          base64Token += '=';
-        }
-  
-        const encryptedString = atob(base64Token);
-        const bytes = CryptoJS.AES.decrypt(encryptedString, process.env.REACT_APP_KEY_SECRET);
-        decryptedString = bytes.toString(CryptoJS.enc.Utf8);
-      } else {
-        const bytes = CryptoJS.AES.decrypt(token, process.env.REACT_APP_KEY_SECRET);
-        decryptedString = bytes.toString(CryptoJS.enc.Utf8);
-      }
-  
-      if (!decryptedString) {
-        console.error("Decrypted string is empty or undefined.");
-        console.log("Token:", token);
-        return null;
-      }
-      try {
-        const decryptedData = JSON.parse(decryptedString);
-        return decryptedData;
-      } catch (jsonError) {
-        console.error("Error parsing decrypted string as JSON:", jsonError.message);
-        return null;
-      }
-    } catch (error) {
-      console.error("General error decoding token:", error.message);
-      return null;
+  handleSignupSuccessModalToggle = (action) => {
+    if (action === "open") {
+      this.setState({ isSignupSuccessful: true });
+    } else {
+      this.setState({ isSignupSuccessful: false });
     }
   };
 
@@ -85,7 +58,7 @@ class Signup extends Component {
       userPassword,
       userConfirm_password,
     } = this.state;
-  
+
     if (userPassword !== userConfirm_password) {
       this.setState({
         errorMessage: "Passwords do not match. Please try again.",
@@ -94,6 +67,7 @@ class Signup extends Component {
       console.log("Passwords do not match.");
       return;
     }
+
     // Validate password format
     if (userPassword.length < 8) {
       this.setState({
@@ -127,7 +101,7 @@ class Signup extends Component {
       console.log("Password must contain at least one special character.");
       return;
     }
-  
+
     const requestBody = {
       name: userName,
       email: userEmail,
@@ -135,11 +109,13 @@ class Signup extends Component {
       country: userCountry,
       password: userPassword,
       confirm_password: userConfirm_password,
-      company_name:userCompany_name,
-      company_URL:userCompany_URL,
-      skype_id:userSocial_id
+      company_name: userCompany_name,
+      company_url: userCompany_URL,
+      chatId: userSocial_id,
     };
-  
+
+    console.log("Request Body:", requestBody); 
+
     try {
       const response = await fetch(`${backendURL}/signup`, {
         method: "POST",
@@ -148,8 +124,7 @@ class Signup extends Component {
         },
         body: JSON.stringify(requestBody),
       });
-  
-      // Handle response
+
       if (response.ok) {
         document.cookie = `signupEmail=${userEmail};path=/`;
         this.setState({
@@ -157,33 +132,30 @@ class Signup extends Component {
           userEmail: "",
           userMobile_no: "",
           userCountry: "",
-          userCompany_name:"",
-          userCompany_URL:"",
-          userSocial_id:"",
+          userCompany_name: "",
+          userCompany_URL: "",
+          userSocial_id: "",
           userPassword: "",
           userConfirm_password: "",
           errorMessage: "",
           messageType: "",
+          isSignupSuccessful: true,
         });
-        this.handleSignupSuccessModalToggle("open");
       } else {
-        const errorData = await response.json(); 
+        const errorData = await response.json();
+        console.log("Error Data:", errorData); 
         this.setState({
           errorMessage: errorData.message || "Error creating user. Please try again later.",
           messageType: "Failed",
         });
       }
     } catch (error) {
+      console.error("Error:", error); 
       this.setState({
         errorMessage: "An unexpected error occurred. Please try again later.",
         messageType: "Failed",
       });
     }
-  };
-  
-
-  handleSignupSuccessModalToggle = (action) => {
-    this.setState({ isSignupSuccessful: action === "open" ? true : false });
   };
 
   render() {
@@ -303,26 +275,26 @@ class Signup extends Component {
                     <div className="input-group">
                       <input
                         type="text"
-                        id="company_name"
+                        id="userCompany_name"
                         className="inputFeild auth-input"
                         required
                         value={this.state.userCompany_name}
                         onChange={this.handleInputChange}
                       />
-                      <label htmlFor="mobile_no" className="inputLabel">
+                      <label htmlFor="company_name" className="inputLabel">
                        Company Name
                       </label>
                     </div>
                     <div className="input-group">
                     <input
                       type="text"
-                      id="companyurl"
+                      id="userCompany_URL"
                       className="inputFeild auth-input"
                       required
                       value={this.state.userCompany_URL}
                       onChange={this.handleInputChange}
                     />
-                    <label htmlFor="country" className="inputLabel">
+                    <label htmlFor="companyurl" className="inputLabel">
                       Company URL
                     </label>
                   </div>
@@ -331,7 +303,7 @@ class Signup extends Component {
                   <div className="input-group">
                     <input
                       type="text"
-                      id="userSocialid"
+                      id="userSocial_id"
                       className="inputFeild auth-input"
                       required
                       value={this.state.userSocial_id}

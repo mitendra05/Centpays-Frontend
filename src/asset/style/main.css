@@ -3949,6 +3949,7 @@ hr {
 .merchant-card {
 	width: 25%;
 	padding: 15px 20px;
+	cursor: pointer;
 }
 
 .merchant-card-top {
