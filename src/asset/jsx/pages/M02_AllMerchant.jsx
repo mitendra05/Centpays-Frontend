@@ -25,11 +25,13 @@ class ListSettlement extends Component {
       errorMessage: "",
       messageType: "",
       loading: false,
+      notifications: [],
     };
   }
 
   componentDidMount() {
     this.fetchData();
+    this.handleQueryParams();
   }
 
   getCookie = (name) => {
@@ -43,6 +45,7 @@ class ListSettlement extends Component {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
     const { token } = this.state;
     this.setState({ loading: true });
+  
     try {
       const response = await fetch(`${backendURL}/clients`, {
         method: "GET",
@@ -51,14 +54,49 @@ class ListSettlement extends Component {
           "Content-Type": "application/json",
         },
       });
-
+  
       if (response.ok) {
         let data = await response.json();
-        this.setState({ apiData: data, loading: false }, this.checkNewPendingMerchants);
+        const { apiData } = this.state;
+  
+        // Filter for merchants with "Pending" status
+        const pendingMerchants = data.filter(item => item.status === "Pending");
+        const pendingCount = pendingMerchants.length;
+  
+        let notifications = [];
+  
+        // If there are any pending merchants, add a notification
+        if (pendingCount > 0) {
+          notifications.push({
+            message: `There are ${pendingCount} merchants with status Pending`,
+            type: "warning",
+          });
+          sessionStorage.setItem("pendingMerchants", JSON.stringify(pendingMerchants));
+        }
+  
+        // Check if client count has increased
+        const previousClientCount = apiData.length;
+        const currentClientCount = data.length;
+  
+        if (currentClientCount > previousClientCount) {
+          notifications.push({
+            message: `Client count has increased to ${currentClientCount}`,
+            type: "info",
+          });
+        }
+  
+        // Store notifications in session storage
+        sessionStorage.setItem("notifications", JSON.stringify(notifications));
+  
+        // Update the state with the fetched data
+        this.setState({
+          apiData: data,
+          loading: false,
+        });
       } else {
         console.error("Error fetching data:", response.statusText);
         this.setState({
-          errorMessage: "Error in Fetching data. Please try again later.",
+          errorMessage: "Error in fetching data. Please try again later.",
           messageType: "fail",
           loading: false,
         });
@@ -72,27 +110,23 @@ class ListSettlement extends Component {
       });
     }
   };
-
-  checkNewPendingMerchants = () => {
-    const { apiData } = this.state;
-    const pendingMerchants = apiData.filter(item => item.status === "Pending");
-
-    const storedPendingMerchants = JSON.parse(localStorage.getItem("pendingMerchants")) || [];
-    const newPendingMerchants = pendingMerchants.filter(pm => !storedPendingMerchants.some(spm => spm.id === pm.id));
-
-    if (newPendingMerchants.length > 0) {
-      this.setState({ errorMessage: "A new merchant has been added with status Pending", messageType: "warning" });
-      localStorage.setItem("pendingMerchants", JSON.stringify(pendingMerchants));
-      localStorage.setItem('newMerchantAdded', 'true');
-    }
-  };
-
+  
+  
   handleTabClick = (status) => {
     this.setState({ showMerchants: status });
   };
 
+  handleQueryParams = () => {
+    const query = new URLSearchParams(window.location.search);
+    const showPending = query.get('showPending');
+    
+    if (showPending === 'true') {
+      this.setState({ showMerchants: 'Pending' });
+    }
+  };
+
   render() {
-    const { headerLabels, apiData, showMerchants, errorMessage, messageType } = this.state;
+    const { headerLabels, apiData, showMerchants, errorMessage, messageType,notifications } = this.state;
 
     const filteredData = showMerchants === "all"
       ? apiData
