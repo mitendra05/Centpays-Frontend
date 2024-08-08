@@ -71,6 +71,8 @@ class Login extends Component {
 				if (data) {
 					document.cookie = `token=${data.token};path=/`;
 					document.cookie = `role=${data.user.role};path=/`;
+					document.cookie = `behavior=${data.user.behavior};path=/`;
+					document.cookie = `status=${data.user.status};path=/`;
 					document.cookie = `email=${data.user.email};path=/`;
 					document.cookie = `name=${data.user.name};path=/`;
 					document.cookie = `company_name=${data.user.company_name};path=/`;
@@ -207,6 +209,7 @@ class Login extends Component {
 
 	render() {
 		const { 
+			data,
 			errorMessage, 
 			isModal, 
 			userLogged, 
@@ -216,6 +219,7 @@ class Login extends Component {
 
 		if (userLogged) {
 			return <Navigate to="/dashboard" />;
+			
 		}
 
 		return (
