@@ -668,7 +668,9 @@ class ViewMerchant extends Component {
     }
   };
 
-  approveMerchant = () => {};
+  approveMerchant = (idforEdit) => {
+    this.updateMerchantStatus("Active", idforEdit)
+  };
 
   render() {
     const {
@@ -696,7 +698,7 @@ class ViewMerchant extends Component {
       isActive,
     } = this.state;
     const currentSlide = slides[slideIndex];
-
+console.log(overviewData)
     if (userRole === "admin") {
       return (
         <>
@@ -927,10 +929,10 @@ class ViewMerchant extends Component {
                   {statusText === "Pending" && (
                     <button
                       className="btn-primary"
-                      onClick={this.approveMerchant}
-                      disabled={
-                        isActive === "Active" || isActive === "Inactive"
-                      }
+                      onClick={this.approveMerchant(overviewData._id)}
+                      // disabled={
+                      //   isActive === "Active" || isActive === "Inactive"
+                      // }
                     >
                       Approve
                     </button>

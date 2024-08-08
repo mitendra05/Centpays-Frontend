@@ -32,6 +32,8 @@ class Dashboard extends Component {
 			merchantName: this.getCookie('company_name'),
 			token: this.getCookie("token"),
 			userRole: this.getCookie("role"),
+			userBehavior: this.getCookie("behavior"),
+			userStatus: this.getCookie("status"),
 			card1_data: {},
 			card2_data: {},
 			card9_Data: {},
@@ -86,13 +88,14 @@ class Dashboard extends Component {
     }
 
 	componentDidMount = async () => {
-		
+		const { userStatus } =this.state;
+		if (userStatus == "Active") {}
 		this.dataInterval = setInterval(() => {
 			this.fetchData();
 			this.fetchDatacard10();
-		}, 300000);
+		}, 900000);
 		this.fetchTableData();
-		this.interval = setInterval(this.fetchTableData, 2000);
+		this.interval = setInterval(this.fetchTableData, 20000);
 		document.addEventListener('mousedown', this.handleClickOutside);
 	}
 
@@ -450,6 +453,7 @@ class Dashboard extends Component {
 			headerLabels,
 			tableData,
 			userRole,
+			userStatus,
 			behaviour
 		} = this.state;
 		const { showCalendar, startDate, endDate } = this.state;
@@ -465,7 +469,26 @@ class Dashboard extends Component {
 			return validCurrencyCodes.includes(currency) ? currency : "USD";
 		};
 
-		if (userRole === "admin") {
+		if (userStatus == "Pending"){
+			return (
+				<>
+{/* <div className="overlay"></div> */}
+				
+					<div
+						className={`main-screen ${this.state.sidebaropen
+							? "collapsed-main-screen"
+							: "expanded-main-screen"
+							}  `}
+					>
+						
+							<h2 style={{ width: '80%',textAlign:'center' }}>Your Account is currently in pending state. We appreciate you patience while we review it.</h2>
+						
+					</div>
+				</>
+			);
+			
+		}
+		else{if (userRole === "admin") {
 			return (
 				<>
 					{errorMessage && (
@@ -1555,582 +1578,582 @@ class Dashboard extends Component {
 			);
 		}
 
-		else if(behaviour === true) {
-			return (
-				<>
-				  {errorMessage && (
-					<MessageBox
-					  message={errorMessage}
-					  messageType={messageType}
-					  onClose={() => this.setState({ errorMessage: "" })}
-					/>
-				  )}
-				  <div style={{ filter: 'blur(10px)',position:'relative' }}>
-				  <Header
-					onCurrencyChange={this.handleCurrencyChange}
-					onMerchantChange={this.handleMerchantChange}
-				  />
-				  </div>
-				  <div style={{ filter: 'blur(10px)',position:'fixed' }}>
-				  <Sidebar/>
-				  </div>
-				  <div
-					className={`main-screen ${
-					  this.state.sidebaropen
-						? "collapsed-main-screen"
-						: "expanded-main-screen"
-					}  `}
-					style={{ filter: 'blur(10px)' }}
-				  >
-					<div className="main-screen-rows first-row">
-					  <div className="row-cards first-row-card1">
-						<div className="first-row-card1-head">
-						  <h4>
-							Congratulations{" "}
-							<span style={{ fontWeight: "600" }}>{merchantName}</span>!🎉
-						  </h4>
-						  <p className="p2">
-							You have done {card1_data.successPercentage}% sales today 😎
-						  </p>
-						</div>
-						<img
-						  className="first-row-card1-image"
-						  src={boyimg}
-						  alt="Boy icon"
-						/>
-					  </div>
-					  <div className="row-cards first-row-card2">
-						<div className="card-head-with-view-more">
-						  <div className="card2-div card2-icon1">
-							<DollarCircle className="creditcard-img green-icon" />
-						  </div>
-						  <CustomTooltip details="This card displays the total amount of successful transactions that have occurred today.">
-							<Infoicon className="icon2" />
-						  </CustomTooltip>
-						</div>
+		// else if(behaviour === true) {
+		// 	return (
+		// 		<>
+		// 		  {errorMessage && (
+		// 			<MessageBox
+		// 			  message={errorMessage}
+		// 			  messageType={messageType}
+		// 			  onClose={() => this.setState({ errorMessage: "" })}
+		// 			/>
+		// 		  )}
+		// 		  <div style={{ filter: 'blur(10px)',position:'relative' }}>
+		// 		  <Header
+		// 			onCurrencyChange={this.handleCurrencyChange}
+		// 			onMerchantChange={this.handleMerchantChange}
+		// 		  />
+		// 		  </div>
+		// 		  <div style={{ filter: 'blur(10px)',position:'fixed' }}>
+		// 		  <Sidebar/>
+		// 		  </div>
+		// 		  <div
+		// 			className={`main-screen ${
+		// 			  this.state.sidebaropen
+		// 				? "collapsed-main-screen"
+		// 				: "expanded-main-screen"
+		// 			}  `}
+		// 			style={{ filter: 'blur(10px)' }}
+		// 		  >
+		// 			<div className="main-screen-rows first-row">
+		// 			  <div className="row-cards first-row-card1">
+		// 				<div className="first-row-card1-head">
+		// 				  <h4>
+		// 					Congratulations{" "}
+		// 					<span style={{ fontWeight: "600" }}>{merchantName}</span>!🎉
+		// 				  </h4>
+		// 				  <p className="p2">
+		// 					You have done {card1_data.successPercentage}% sales today 😎
+		// 				  </p>
+		// 				</div>
+		// 				<img
+		// 				  className="first-row-card1-image"
+		// 				  src={boyimg}
+		// 				  alt="Boy icon"
+		// 				/>
+		// 			  </div>
+		// 			  <div className="row-cards first-row-card2">
+		// 				<div className="card-head-with-view-more">
+		// 				  <div className="card2-div card2-icon1">
+		// 					<DollarCircle className="creditcard-img green-icon" />
+		// 				  </div>
+		// 				  <CustomTooltip details="This card displays the total amount of successful transactions that have occurred today.">
+		// 					<Infoicon className="icon2" />
+		// 				  </CustomTooltip>
+		// 				</div>
 		  
-						<div className="first-row-card2-details">
-						  <p>Sales</p>
-						  <h3 className="first-row-card2-details-amount">
-							{parseFloat(card1_data.successAmount).toLocaleString(
-							  "en-US",
-							  {
-								style: "currency",
-								currency: validateCurrency(currency),
-								minimumFractionDigits: 0,
-								maximumFractionDigits: 0,
-							  }
-							)}
-						  </h3>
-						  <p>Today's Sale</p>
-						</div>
-					  </div>
+		// 				<div className="first-row-card2-details">
+		// 				  <p>Sales</p>
+		// 				  <h3 className="first-row-card2-details-amount">
+		// 					{parseFloat(card1_data.successAmount).toLocaleString(
+		// 					  "en-US",
+		// 					  {
+		// 						style: "currency",
+		// 						currency: validateCurrency(currency),
+		// 						minimumFractionDigits: 0,
+		// 						maximumFractionDigits: 0,
+		// 					  }
+		// 					)}
+		// 				  </h3>
+		// 				  <p>Today's Sale</p>
+		// 				</div>
+		// 			  </div>
 		  
-					  <div className="row-cards first-row-card2">
-						<div className="card-head-with-view-more">
-						  <div className="card2-div card2-icon2">
-							<CreaditCard className="creditcard-img grey-icon" />
-						  </div>
-						  <CustomTooltip
-							details={
-							  <p>
-								This card tracks the total number of transactions for
-								today
-							  </p>
-							}
-						  >
-							<Infoicon className="icon2" />
-						  </CustomTooltip>
-						</div>
-						<div className="first-row-card2-details">
-						  <p>Total</p>
-						  <h3 className="first-row-card2-details-amount">
-							{this.formatValue(card1_data.totalTransactions)}
-						  </h3>
-						  <p>Today's Transactions</p>
-						</div>
-					  </div>
-					</div>
-					<div className="main-screen-rows second-row">
-					  <div className="row-cards second-row-card1">
-						<div className="second-row-card1-left">
-						  <h4>Weekly Overview</h4>
+		// 			  <div className="row-cards first-row-card2">
+		// 				<div className="card-head-with-view-more">
+		// 				  <div className="card2-div card2-icon2">
+		// 					<CreaditCard className="creditcard-img grey-icon" />
+		// 				  </div>
+		// 				  <CustomTooltip
+		// 					details={
+		// 					  <p>
+		// 						This card tracks the total number of transactions for
+		// 						today
+		// 					  </p>
+		// 					}
+		// 				  >
+		// 					<Infoicon className="icon2" />
+		// 				  </CustomTooltip>
+		// 				</div>
+		// 				<div className="first-row-card2-details">
+		// 				  <p>Total</p>
+		// 				  <h3 className="first-row-card2-details-amount">
+		// 					{this.formatValue(card1_data.totalTransactions)}
+		// 				  </h3>
+		// 				  <p>Today's Transactions</p>
+		// 				</div>
+		// 			  </div>
+		// 			</div>
+		// 			<div className="main-screen-rows second-row">
+		// 			  <div className="row-cards second-row-card1">
+		// 				<div className="second-row-card1-left">
+		// 				  <h4>Weekly Overview</h4>
 		  
-						  <Bargraphs data={this.state.Card4_bargraph} type="bargraph4" />
-						</div>
-						<div className="vertical-line-card1"></div>
-						<div className="second-row-card1-right">
-						  <div className="second-row-card1-view-date">
-							<div
-							  className="card2-div card3-icon"
-							  onClick={this.handleToggleOptions}
-							>
-							  <Calendar className="creditcard-img grey-icon" />
-							</div>
-							<CustomTooltip
-							  maxWidth={250}
-							  leftMargin={-5}
-							  details={
-								<ul>
-								  <li>
-									Left part of the card provides a breakdown of number
-									of transactions (successful, failed, incomplete) for
-									this week.
-								  </li>
-								  <li>
-									The right side shows amount of successful
-									transactions, amount of failed transactions and the
-									total mount of transactions for the complete week.
-								  </li>
-								</ul>
-							  }
-							>
-							  <Infoicon className="icon2" />
-							</CustomTooltip>
+		// 				  <Bargraphs data={this.state.Card4_bargraph} type="bargraph4" />
+		// 				</div>
+		// 				<div className="vertical-line-card1"></div>
+		// 				<div className="second-row-card1-right">
+		// 				  <div className="second-row-card1-view-date">
+		// 					<div
+		// 					  className="card2-div card3-icon"
+		// 					  onClick={this.handleToggleOptions}
+		// 					>
+		// 					  <Calendar className="creditcard-img grey-icon" />
+		// 					</div>
+		// 					<CustomTooltip
+		// 					  maxWidth={250}
+		// 					  leftMargin={-5}
+		// 					  details={
+		// 						<ul>
+		// 						  <li>
+		// 							Left part of the card provides a breakdown of number
+		// 							of transactions (successful, failed, incomplete) for
+		// 							this week.
+		// 						  </li>
+		// 						  <li>
+		// 							The right side shows amount of successful
+		// 							transactions, amount of failed transactions and the
+		// 							total mount of transactions for the complete week.
+		// 						  </li>
+		// 						</ul>
+		// 					  }
+		// 					>
+		// 					  <Infoicon className="icon2" />
+		// 					</CustomTooltip>
 		  
-							{showCalendar && (
-							  <div className="options-container" ref={this.calendarRef}>
-								<div className="option dates">
-								  <span>{this.formatDateRange(startDate, endDate)}</span>
-								  <div className="arrows">
-									<UpSign
-									  className="arrowup"
-									  onClick={() => this.handleDateShift(+1)}
-									/>
-									<DownSign
-									  className="arrowdown"
-									  onClick={() => this.handleDateShift(-1)}
-									/>
-								  </div>
-								</div>
-								<div className="option">
-								  <input
-									type="date"
-									className="input-calender"
-									onChange={this.handleDateChange}
-									value={
-									  this.state.selectedDate.toISOString().split("T")[0]
-									}
-								  />
-								</div>
-							  </div>
-							)}
-						  </div>
+		// 					{showCalendar && (
+		// 					  <div className="options-container" ref={this.calendarRef}>
+		// 						<div className="option dates">
+		// 						  <span>{this.formatDateRange(startDate, endDate)}</span>
+		// 						  <div className="arrows">
+		// 							<UpSign
+		// 							  className="arrowup"
+		// 							  onClick={() => this.handleDateShift(+1)}
+		// 							/>
+		// 							<DownSign
+		// 							  className="arrowdown"
+		// 							  onClick={() => this.handleDateShift(-1)}
+		// 							/>
+		// 						  </div>
+		// 						</div>
+		// 						<div className="option">
+		// 						  <input
+		// 							type="date"
+		// 							className="input-calender"
+		// 							onChange={this.handleDateChange}
+		// 							value={
+		// 							  this.state.selectedDate.toISOString().split("T")[0]
+		// 							}
+		// 						  />
+		// 						</div>
+		// 					  </div>
+		// 					)}
+		// 				  </div>
 		  
-						  <div className="second-row-card1-details">
-							<div className="creditcard-div card4-icon">
-							  <DollarCircle className="creditcard-img green-icon" />
-							</div>
-							<div className="second-row-card1-div">
-							  <p>
-								{parseFloat(card2_data.successThisWeek).toLocaleString(
-								  "en-US",
-								  {
-									style: "currency",
-									currency: validateCurrency(currency),
-									minimumFractionDigits: 0,
-									maximumFractionDigits: 0,
-								  }
-								)}
-							  </p>
-							  <p>Success</p>
-							</div>
-						  </div>
-						  <div className="second-row-card1-details">
-							<div className="creditcard-div card4-icon">
-							  <PieChart className="creditcard-img primary-color-icon"></PieChart>
-							</div>
-							<div className="second-row-card1-div">
-							  <p>
-								{parseFloat(card2_data.failedThisWeek).toLocaleString(
-								  "en-US",
-								  {
-									style: "currency",
-									currency: validateCurrency(currency),
-									minimumFractionDigits: 0,
-									maximumFractionDigits: 0,
-								  }
-								)}
-							  </p>
-							  <p>Fail</p>
-							</div>
-						  </div>
-						  <div className="second-row-card1-details">
-							<div className="creditcard-div card4-icon">
-							  <CreaditCard className="creditcard-img grey-icon" />
-							</div>
-							<div className="second-row-card1-div">
-							  <p>
-								{parseFloat(card2_data.totalThisWeek).toLocaleString(
-								  "en-US",
-								  {
-									style: "currency",
-									currency: validateCurrency(currency),
-									minimumFractionDigits: 0,
-									maximumFractionDigits: 0,
-								  }
-								)}
-							  </p>
-							  <p>Total</p>
-							</div>
-						  </div>
-						  <button className="btn-primary second-card1-btn">
-							View Report
-						  </button>
-						</div>
-					  </div>
-					  <div className="row-cards second-row-card2">
-						<div className="card-head-with-view-more">
-						  <div className="card2-div-traffic-status">
-							<div className="card2-div card4-icon">
-							  <Traffic className="creditcard-img grey-icon" />
-							</div>
-							<h4>Traffic Status</h4>
-						  </div>
-						  <div className="card4-viewmore">
-							<CustomTooltip
-							  details={
-								<p>
-								  This card summarizes the total number of transactions
-								  this week."
-								</p>
-							  }
-							>
-							  <Infoicon className="icon2" />
-							</CustomTooltip>
-						  </div>
-						</div>
-						<Bargraphs type="bargraph5" data={this.state.Card5_bargraph} />
+		// 				  <div className="second-row-card1-details">
+		// 					<div className="creditcard-div card4-icon">
+		// 					  <DollarCircle className="creditcard-img green-icon" />
+		// 					</div>
+		// 					<div className="second-row-card1-div">
+		// 					  <p>
+		// 						{parseFloat(card2_data.successThisWeek).toLocaleString(
+		// 						  "en-US",
+		// 						  {
+		// 							style: "currency",
+		// 							currency: validateCurrency(currency),
+		// 							minimumFractionDigits: 0,
+		// 							maximumFractionDigits: 0,
+		// 						  }
+		// 						)}
+		// 					  </p>
+		// 					  <p>Success</p>
+		// 					</div>
+		// 				  </div>
+		// 				  <div className="second-row-card1-details">
+		// 					<div className="creditcard-div card4-icon">
+		// 					  <PieChart className="creditcard-img primary-color-icon"></PieChart>
+		// 					</div>
+		// 					<div className="second-row-card1-div">
+		// 					  <p>
+		// 						{parseFloat(card2_data.failedThisWeek).toLocaleString(
+		// 						  "en-US",
+		// 						  {
+		// 							style: "currency",
+		// 							currency: validateCurrency(currency),
+		// 							minimumFractionDigits: 0,
+		// 							maximumFractionDigits: 0,
+		// 						  }
+		// 						)}
+		// 					  </p>
+		// 					  <p>Fail</p>
+		// 					</div>
+		// 				  </div>
+		// 				  <div className="second-row-card1-details">
+		// 					<div className="creditcard-div card4-icon">
+		// 					  <CreaditCard className="creditcard-img grey-icon" />
+		// 					</div>
+		// 					<div className="second-row-card1-div">
+		// 					  <p>
+		// 						{parseFloat(card2_data.totalThisWeek).toLocaleString(
+		// 						  "en-US",
+		// 						  {
+		// 							style: "currency",
+		// 							currency: validateCurrency(currency),
+		// 							minimumFractionDigits: 0,
+		// 							maximumFractionDigits: 0,
+		// 						  }
+		// 						)}
+		// 					  </p>
+		// 					  <p>Total</p>
+		// 					</div>
+		// 				  </div>
+		// 				  <button className="btn-primary second-card1-btn">
+		// 					View Report
+		// 				  </button>
+		// 				</div>
+		// 			  </div>
+		// 			  <div className="row-cards second-row-card2">
+		// 				<div className="card-head-with-view-more">
+		// 				  <div className="card2-div-traffic-status">
+		// 					<div className="card2-div card4-icon">
+		// 					  <Traffic className="creditcard-img grey-icon" />
+		// 					</div>
+		// 					<h4>Traffic Status</h4>
+		// 				  </div>
+		// 				  <div className="card4-viewmore">
+		// 					<CustomTooltip
+		// 					  details={
+		// 						<p>
+		// 						  This card summarizes the total number of transactions
+		// 						  this week."
+		// 						</p>
+		// 					  }
+		// 					>
+		// 					  <Infoicon className="icon2" />
+		// 					</CustomTooltip>
+		// 				  </div>
+		// 				</div>
+		// 				<Bargraphs type="bargraph5" data={this.state.Card5_bargraph} />
 		  
-						<div className="second-row-card2-totaltraffic">
-						  {" "}
-						  <h3>
-							{this.formatValue(card2_data.totalNumTxn)}
-							{"  "}
-							<span className="p2">Total Traffic This Week</span>
-						  </h3>
-						</div>
-					  </div>
-					</div>
+		// 				<div className="second-row-card2-totaltraffic">
+		// 				  {" "}
+		// 				  <h3>
+		// 					{this.formatValue(card2_data.totalNumTxn)}
+		// 					{"  "}
+		// 					<span className="p2">Total Traffic This Week</span>
+		// 				  </h3>
+		// 				</div>
+		// 			  </div>
+		// 			</div>
 		  
-					<div className="main-screen-rows third-row">
-					  <div className="row-cards third-row-card1">
-						<div className="card-head-with-view-more">
-						  <h4>Transactions</h4>
-						  <CustomTooltip
-							details={
-							  <p>
-								This card compares the difference between amounts of
-								transactions segregated by cards (VISA and Mastercard) of
-								this week and the previous week
-							  </p>
-							}
-						  >
-							<Infoicon className="icon2" />
-						  </CustomTooltip>
-						</div>
-						<div className="creditcard-content">
-						  <div className="creditcard">
-							<div className="creditcard-div visa">
-							  <img className="creditcard-img" src={visa} alt=""></img>
-							</div>
-							<div>
-							  <h5>{card6_data[0].card}</h5>
+		// 			<div className="main-screen-rows third-row">
+		// 			  <div className="row-cards third-row-card1">
+		// 				<div className="card-head-with-view-more">
+		// 				  <h4>Transactions</h4>
+		// 				  <CustomTooltip
+		// 					details={
+		// 					  <p>
+		// 						This card compares the difference between amounts of
+		// 						transactions segregated by cards (VISA and Mastercard) of
+		// 						this week and the previous week
+		// 					  </p>
+		// 					}
+		// 				  >
+		// 					<Infoicon className="icon2" />
+		// 				  </CustomTooltip>
+		// 				</div>
+		// 				<div className="creditcard-content">
+		// 				  <div className="creditcard">
+		// 					<div className="creditcard-div visa">
+		// 					  <img className="creditcard-img" src={visa} alt=""></img>
+		// 					</div>
+		// 					<div>
+		// 					  <h5>{card6_data[0].card}</h5>
 		  
-							  <p className="p2">
-								{parseFloat(card6_data[0]["amount"]).toLocaleString(
-								  "en-IN",
-								  {
-									style: "currency",
-									currency: validateCurrency(currency),
-									minimumFractionDigits: 0,
-									maximumFractionDigits: 0,
-								  }
-								)}
-							  </p>
-							</div>
-							{parseFloat(card6_data[0].amount) > 0 ? (
-							  <div className="amount-container">
-								<UpSign className="arrow green-icon" />
-							  </div>
-							) : (
-							  <div className="amount-container">
-								<DownSign className="arrow red-icon" />
-							  </div>
-							)}
-						  </div>
+		// 					  <p className="p2">
+		// 						{parseFloat(card6_data[0]["amount"]).toLocaleString(
+		// 						  "en-IN",
+		// 						  {
+		// 							style: "currency",
+		// 							currency: validateCurrency(currency),
+		// 							minimumFractionDigits: 0,
+		// 							maximumFractionDigits: 0,
+		// 						  }
+		// 						)}
+		// 					  </p>
+		// 					</div>
+		// 					{parseFloat(card6_data[0].amount) > 0 ? (
+		// 					  <div className="amount-container">
+		// 						<UpSign className="arrow green-icon" />
+		// 					  </div>
+		// 					) : (
+		// 					  <div className="amount-container">
+		// 						<DownSign className="arrow red-icon" />
+		// 					  </div>
+		// 					)}
+		// 				  </div>
 		  
-						  <div className="creditcard">
-							<div className="creditcard-div visa">
-							  <img
-								className="creditcard-img"
-								src={mastercard}
-								alt="mastercard"
-							  ></img>
-							</div>
-							<div>
-							  <h5>{card6_data[1].card}</h5>
-							  <p className="p2">
-								{parseFloat(card6_data[1]["amount"]).toLocaleString(
-								  "en-IN",
-								  {
-									style: "currency",
-									currency: validateCurrency(currency),
-									minimumFractionDigits: 0,
-									maximumFractionDigits: 0,
-								  }
-								)}
-							  </p>
-							</div>
-							{parseFloat(card6_data[1].amount) > 0 ? (
-							  <div className="amount-container">
-								<UpSign className="arrow green-icon" />
-							  </div>
-							) : (
-							  <div className="amount-container">
-								<DownSign className="arrow red-icon" />
-							  </div>
-							)}
-						  </div>
-						</div>
-					  </div>
-					  <div className="row-cards third-row-card2">
-						<div className="card-head-with-view-more">
-						  <h4>Weekly Country-wise Overview</h4>
-						  <CustomTooltip
-							maxWidth={300}
-							leftMargin={-15}
-							details={
-							  <ul>
-								<li>
-								  Left part of the card provides a breakdown of number of
-								  transactions (successful, failed, incomplete) for this
-								  week.
-								</li>
-								<li>
-								  The right side shows amount of successful transactions,
-								  amount of failed transactions and the total mount of
-								  transactions for the complete week.
-								</li>
-							  </ul>
-							}
-						  >
-							<Infoicon className="icon2" />
-						  </CustomTooltip>
-						</div>
+		// 				  <div className="creditcard">
+		// 					<div className="creditcard-div visa">
+		// 					  <img
+		// 						className="creditcard-img"
+		// 						src={mastercard}
+		// 						alt="mastercard"
+		// 					  ></img>
+		// 					</div>
+		// 					<div>
+		// 					  <h5>{card6_data[1].card}</h5>
+		// 					  <p className="p2">
+		// 						{parseFloat(card6_data[1]["amount"]).toLocaleString(
+		// 						  "en-IN",
+		// 						  {
+		// 							style: "currency",
+		// 							currency: validateCurrency(currency),
+		// 							minimumFractionDigits: 0,
+		// 							maximumFractionDigits: 0,
+		// 						  }
+		// 						)}
+		// 					  </p>
+		// 					</div>
+		// 					{parseFloat(card6_data[1].amount) > 0 ? (
+		// 					  <div className="amount-container">
+		// 						<UpSign className="arrow green-icon" />
+		// 					  </div>
+		// 					) : (
+		// 					  <div className="amount-container">
+		// 						<DownSign className="arrow red-icon" />
+		// 					  </div>
+		// 					)}
+		// 				  </div>
+		// 				</div>
+		// 			  </div>
+		// 			  <div className="row-cards third-row-card2">
+		// 				<div className="card-head-with-view-more">
+		// 				  <h4>Weekly Country-wise Overview</h4>
+		// 				  <CustomTooltip
+		// 					maxWidth={300}
+		// 					leftMargin={-15}
+		// 					details={
+		// 					  <ul>
+		// 						<li>
+		// 						  Left part of the card provides a breakdown of number of
+		// 						  transactions (successful, failed, incomplete) for this
+		// 						  week.
+		// 						</li>
+		// 						<li>
+		// 						  The right side shows amount of successful transactions,
+		// 						  amount of failed transactions and the total mount of
+		// 						  transactions for the complete week.
+		// 						</li>
+		// 					  </ul>
+		// 					}
+		// 				  >
+		// 					<Infoicon className="icon2" />
+		// 				  </CustomTooltip>
+		// 				</div>
 		  
-						<Card7chart card7_data={card7_data} />
-						<div className="card7-content">
-						  <div className="card7-head">
-							<div>
-							  <div className="creditcard-div card7-icon">
-								<Wallet className="creditcard-img blue-icon"></Wallet>
-							  </div>
-							</div>
-							<div>
-							  <p className="p2">Number of Sales</p>
-							  <h5>
-								{parseFloat(card7_sumOfAmount).toLocaleString("en-US", {
-								  style: "currency",
-								  currency: validateCurrency(currency),
-								  minimumFractionDigits: 0,
-								  maximumFractionDigits: 0,
-								})}
-							  </h5>
-							</div>
-						  </div>
-						  <div className="ruler"></div>
-						  <div className="card7-content-grid">
-							{card7_data.map((item) => (
-							  <div className="card7-grid-item p2">
-								<div className="grid-item-head">
-								  <div></div>
-								  <span className="region-container">
-									<p
-									  className={`region-names ${
-										item.region.length > 9 ? "animate-region" : ""
-									  }`}
-									>
-									  {item.region}
-									</p>
-								  </span>
-								</div>
-								<p className="region-amounts">
-								  {parseFloat(item["amount"]).toLocaleString("en-US", {
-									style: "currency",
-									currency: validateCurrency(currency),
-									minimumFractionDigits: 0,
-									maximumFractionDigits: 0,
-								  })}
-								</p>
-							  </div>
-							))}{" "}
-						  </div>
-						</div>
-					  </div>{" "}
-					  <div className="row-cards third-row-card3">
-						<div className="card-head-with-view-more">
-						  <h4>Weekly Successful Transactions</h4>
-						  <CustomTooltip
-							details={
-							  <p>
-								This card shows number of successful transactions for this
-								week.
-							  </p>
-							}
-						  >
-							<Infoicon className="icon2" />
-						  </CustomTooltip>
-						</div>
-						<Bargraphs data={this.state.Card8_bargraph} type="bargraph7" />
-						<div className="third-row-card3-data">
-						  <h3>{percentageChange.toFixed(1)}%</h3>
-						  <p className="p2">
-							Your sales performance is {percentageChange.toFixed(1)}%{" "}
-							compared to last week.
-						  </p>
-						</div>
-					  </div>
-					</div>
-					<div className="main-screen-rows fourth-row">
-					  <div className="row-cards fourth-row-card1">
-						<div className="card-head-with-view-more">
-						  <h4>Performance This Month</h4>
-						  <CustomTooltip
-							maxWidth={350}
-							leftMargin={-15}
-							details={
-							  <p>
-								This card shows key metrics for transactions in the last
-								month total number of transactions, total volume of
-								transactions, number of successful transactions, volume of
-								successful transactions
-							  </p>
-							}
-						  >
-							<Infoicon className="icon2" />
-						  </CustomTooltip>
-						</div>
-						<p className="card9-subhead">
-						  Your performance this month is{" "}
-						  {String(card9_Data.growthPercentage).slice(0, 5)}% in comparison
-						  to previous month
-						  <span className="p2"></span>
-						</p>
-						<div className="card9-content">
-						  <div className="card7-head">
-							<div>
-							  <div className="creditcard-div card9-icon1">
-								<PieChart className="creditcard-img white-icon"></PieChart>
-							  </div>
-							</div>
-							<div className="card9-text">
-							  <p className="p2"># {card9_data[0].head}</p>
-							  <h5>{this.formatValue(card9_Data.numTransactions)}</h5>
-							</div>
-						  </div>
+		// 				<Card7chart card7_data={card7_data} />
+		// 				<div className="card7-content">
+		// 				  <div className="card7-head">
+		// 					<div>
+		// 					  <div className="creditcard-div card7-icon">
+		// 						<Wallet className="creditcard-img blue-icon"></Wallet>
+		// 					  </div>
+		// 					</div>
+		// 					<div>
+		// 					  <p className="p2">Number of Sales</p>
+		// 					  <h5>
+		// 						{parseFloat(card7_sumOfAmount).toLocaleString("en-US", {
+		// 						  style: "currency",
+		// 						  currency: validateCurrency(currency),
+		// 						  minimumFractionDigits: 0,
+		// 						  maximumFractionDigits: 0,
+		// 						})}
+		// 					  </h5>
+		// 					</div>
+		// 				  </div>
+		// 				  <div className="ruler"></div>
+		// 				  <div className="card7-content-grid">
+		// 					{card7_data.map((item) => (
+		// 					  <div className="card7-grid-item p2">
+		// 						<div className="grid-item-head">
+		// 						  <div></div>
+		// 						  <span className="region-container">
+		// 							<p
+		// 							  className={`region-names ${
+		// 								item.region.length > 9 ? "animate-region" : ""
+		// 							  }`}
+		// 							>
+		// 							  {item.region}
+		// 							</p>
+		// 						  </span>
+		// 						</div>
+		// 						<p className="region-amounts">
+		// 						  {parseFloat(item["amount"]).toLocaleString("en-US", {
+		// 							style: "currency",
+		// 							currency: validateCurrency(currency),
+		// 							minimumFractionDigits: 0,
+		// 							maximumFractionDigits: 0,
+		// 						  })}
+		// 						</p>
+		// 					  </div>
+		// 					))}{" "}
+		// 				  </div>
+		// 				</div>
+		// 			  </div>{" "}
+		// 			  <div className="row-cards third-row-card3">
+		// 				<div className="card-head-with-view-more">
+		// 				  <h4>Weekly Successful Transactions</h4>
+		// 				  <CustomTooltip
+		// 					details={
+		// 					  <p>
+		// 						This card shows number of successful transactions for this
+		// 						week.
+		// 					  </p>
+		// 					}
+		// 				  >
+		// 					<Infoicon className="icon2" />
+		// 				  </CustomTooltip>
+		// 				</div>
+		// 				<Bargraphs data={this.state.Card8_bargraph} type="bargraph7" />
+		// 				<div className="third-row-card3-data">
+		// 				  <h3>{percentageChange.toFixed(1)}%</h3>
+		// 				  <p className="p2">
+		// 					Your sales performance is {percentageChange.toFixed(1)}%{" "}
+		// 					compared to last week.
+		// 				  </p>
+		// 				</div>
+		// 			  </div>
+		// 			</div>
+		// 			<div className="main-screen-rows fourth-row">
+		// 			  <div className="row-cards fourth-row-card1">
+		// 				<div className="card-head-with-view-more">
+		// 				  <h4>Performance This Month</h4>
+		// 				  <CustomTooltip
+		// 					maxWidth={350}
+		// 					leftMargin={-15}
+		// 					details={
+		// 					  <p>
+		// 						This card shows key metrics for transactions in the last
+		// 						month total number of transactions, total volume of
+		// 						transactions, number of successful transactions, volume of
+		// 						successful transactions
+		// 					  </p>
+		// 					}
+		// 				  >
+		// 					<Infoicon className="icon2" />
+		// 				  </CustomTooltip>
+		// 				</div>
+		// 				<p className="card9-subhead">
+		// 				  Your performance this month is{" "}
+		// 				  {String(card9_Data.growthPercentage).slice(0, 5)}% in comparison
+		// 				  to previous month
+		// 				  <span className="p2"></span>
+		// 				</p>
+		// 				<div className="card9-content">
+		// 				  <div className="card7-head">
+		// 					<div>
+		// 					  <div className="creditcard-div card9-icon1">
+		// 						<PieChart className="creditcard-img white-icon"></PieChart>
+		// 					  </div>
+		// 					</div>
+		// 					<div className="card9-text">
+		// 					  <p className="p2"># {card9_data[0].head}</p>
+		// 					  <h5>{this.formatValue(card9_Data.numTransactions)}</h5>
+		// 					</div>
+		// 				  </div>
 		  
-						  <div className="card7-head">
-							<div>
-							  <div className="creditcard-div card9-icon2">
-								<CreaditCard className="creditcard-img white-icon" />
-							  </div>
-							</div>
-							<div className="card9-text">
-							  <p className="p2">$ {card9_data[0].head}</p>
-							  <h5>
-								{parseFloat(
-								  card9_Data.totalAmountTransactions
-								).toLocaleString("en-US", {
-								  style: "currency",
-								  currency: validateCurrency(currency),
-								  minimumFractionDigits: 0,
-								  maximumFractionDigits: 0,
-								})}
-							  </h5>
-							</div>
-						  </div>
+		// 				  <div className="card7-head">
+		// 					<div>
+		// 					  <div className="creditcard-div card9-icon2">
+		// 						<CreaditCard className="creditcard-img white-icon" />
+		// 					  </div>
+		// 					</div>
+		// 					<div className="card9-text">
+		// 					  <p className="p2">$ {card9_data[0].head}</p>
+		// 					  <h5>
+		// 						{parseFloat(
+		// 						  card9_Data.totalAmountTransactions
+		// 						).toLocaleString("en-US", {
+		// 						  style: "currency",
+		// 						  currency: validateCurrency(currency),
+		// 						  minimumFractionDigits: 0,
+		// 						  maximumFractionDigits: 0,
+		// 						})}
+		// 					  </h5>
+		// 					</div>
+		// 				  </div>
 		  
-						  <div className="card7-head">
-							<div>
-							  <div className="creditcard-div card9-icon3">
-								<BarChart className="creditcard-img white-icon" />
-							  </div>
-							</div>
-							<div className="card9-text">
-							  <p className="p2"># {card9_data[1].head}</p>
-							  <h5>
-								{this.formatValue(card9_Data.numSuccessfulTransactions)}
-							  </h5>
-							</div>
-						  </div>
+		// 				  <div className="card7-head">
+		// 					<div>
+		// 					  <div className="creditcard-div card9-icon3">
+		// 						<BarChart className="creditcard-img white-icon" />
+		// 					  </div>
+		// 					</div>
+		// 					<div className="card9-text">
+		// 					  <p className="p2"># {card9_data[1].head}</p>
+		// 					  <h5>
+		// 						{this.formatValue(card9_Data.numSuccessfulTransactions)}
+		// 					  </h5>
+		// 					</div>
+		// 				  </div>
 		  
-						  <div className="card7-head">
-							<div>
-							  <div className="creditcard-div card9-icon4">
-								<DollarCircle className="creditcard-img white-icon" />
-							  </div>
-							</div>
-							<div className="card9-text">
-							  <p className="p2">$ {card9_data[1].head}</p>
-							  <h5>
-								{parseFloat(
-								  card9_Data.totalAmountSuccessfulTransactions
-								).toLocaleString("en-US", {
-								  style: "currency",
-								  currency: validateCurrency(currency),
-								  minimumFractionDigits: 0,
-								  maximumFractionDigits: 0,
-								})}
-							  </h5>
-							</div>
-						  </div>
-						</div>
-					  </div>
+		// 				  <div className="card7-head">
+		// 					<div>
+		// 					  <div className="creditcard-div card9-icon4">
+		// 						<DollarCircle className="creditcard-img white-icon" />
+		// 					  </div>
+		// 					</div>
+		// 					<div className="card9-text">
+		// 					  <p className="p2">$ {card9_data[1].head}</p>
+		// 					  <h5>
+		// 						{parseFloat(
+		// 						  card9_Data.totalAmountSuccessfulTransactions
+		// 						).toLocaleString("en-US", {
+		// 						  style: "currency",
+		// 						  currency: validateCurrency(currency),
+		// 						  minimumFractionDigits: 0,
+		// 						  maximumFractionDigits: 0,
+		// 						})}
+		// 					  </h5>
+		// 					</div>
+		// 				  </div>
+		// 				</div>
+		// 			  </div>
 		  
-					  <div className="row-cards fourth-row-card2">
-						<div className="card-head-with-view-more">
-						  {" "}
-						  <h4>
-							Total Sales{` `}
-							<span className="p2">
-							  {parseFloat(card10_data).toLocaleString("en-US", {
-								style: "currency",
-								currency: validateCurrency(currency),
-								minimumFractionDigits: 0,
-								maximumFractionDigits: 0,
-							  })}
-							</span>
-						  </h4>
-						  <CustomTooltip
-							details={
-							  <p>
-								This card visualizes the volume of successful transactions
-								of last 6 months.
-							  </p>
-							}
-						  >
-							<Infoicon className="icon2" />
-						  </CustomTooltip>
-						</div>
+		// 			  <div className="row-cards fourth-row-card2">
+		// 				<div className="card-head-with-view-more">
+		// 				  {" "}
+		// 				  <h4>
+		// 					Total Sales{` `}
+		// 					<span className="p2">
+		// 					  {parseFloat(card10_data).toLocaleString("en-US", {
+		// 						style: "currency",
+		// 						currency: validateCurrency(currency),
+		// 						minimumFractionDigits: 0,
+		// 						maximumFractionDigits: 0,
+		// 					  })}
+		// 					</span>
+		// 				  </h4>
+		// 				  <CustomTooltip
+		// 					details={
+		// 					  <p>
+		// 						This card visualizes the volume of successful transactions
+		// 						of last 6 months.
+		// 					  </p>
+		// 					}
+		// 				  >
+		// 					<Infoicon className="icon2" />
+		// 				  </CustomTooltip>
+		// 				</div>
 		  
-						<Card10chart salesByMonthData={this.state.card10_linechart} />
-					  </div>
-					</div>
-					<div className="main-screen-rows ">
-					  <div className="row-cards search-table">
-						<Table
-						  headerLabels={headerLabels}
-						  dataToRender={tableData || []}
-						  onViewClick={this.handleViewClick}
-						/>
-					  </div>
-					  <ScrollUpAndDown showScrollToTopButton={true} />
-					</div>
-				  </div>
-				</>
-			  );
-		}
+		// 				<Card10chart salesByMonthData={this.state.card10_linechart} />
+		// 			  </div>
+		// 			</div>
+		// 			<div className="main-screen-rows ">
+		// 			  <div className="row-cards search-table">
+		// 				<Table
+		// 				  headerLabels={headerLabels}
+		// 				  dataToRender={tableData || []}
+		// 				  onViewClick={this.handleViewClick}
+		// 				/>
+		// 			  </div>
+		// 			  <ScrollUpAndDown showScrollToTopButton={true} />
+		// 			</div>
+		// 		  </div>
+		// 		</>
+		// 	  );
+		// }
 		else if (userRole === "employee") {
 			return (
 				<>
@@ -2159,7 +2182,8 @@ class Dashboard extends Component {
 					</div>
 				</>
 			);
-		}
+		}}
+		
 	}
 }
 
