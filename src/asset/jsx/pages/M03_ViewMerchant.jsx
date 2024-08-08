@@ -33,7 +33,7 @@ import {
   Eye,
   Copy,
   EyeOff,
-  Infoicon
+  Infoicon,
 } from "../../media/icon/SVGicons";
 
 //Images and Icons
@@ -101,22 +101,25 @@ class ViewMerchant extends Component {
   extractENameFromURL = () => {
     return window.location.pathname.split("/viewmerchant/")[1];
   };
-  
+
   fetchClientId = async (company_name) => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
     try {
-      const response = await fetch(`${backendURL}/viewclient?company_name=${company_name}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${this.state.token}`, 
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        `${backendURL}/viewclient?company_name=${company_name}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${this.state.token}`,
+            "Content-Type": "application/json",
+          },
         }
-      });
-  
+      );
+
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
       }
-  
+
       const data = await response.json();
       return data.client_id;
     } catch (error) {
@@ -127,11 +130,11 @@ class ViewMerchant extends Component {
 
   fetchAndSetClientId = async () => {
     const company_name = this.extractENameFromURL();
-   
+
     const client_id = await this.fetchClientId(company_name);
-  
+
     if (client_id) {
-      console.log('Client ID:', client_id);
+      console.log("Client ID:", client_id);
       this.setState({ client_id });
     }
   };
@@ -146,12 +149,15 @@ class ViewMerchant extends Component {
     const companyName = this.extractENameFromURL();
     const backendURL = process.env.REACT_APP_BACKEND_URL;
     try {
-      const response = await fetch(`${backendURL}/logincredentials?company_name=${companyName}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${this.state.token}`,
-        },
-      });
+      const response = await fetch(
+        `${backendURL}/logincredentials?company_name=${companyName}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${this.state.token}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Network response was not ok: ${response.statusText}`);
@@ -163,66 +169,15 @@ class ViewMerchant extends Component {
         password: data.password,
       });
     } catch (error) {
-      console.error('Error fetching login credentials:', error);
+      console.error("Error fetching login credentials:", error);
       // this.setState({ errorMessage: 'Failed to fetch login credentials. Please check your token and try again.', messageType: 'fail' });
     }
   }
 
-  // handleSubmit = async () => {
-  //   const backendURL = process.env.REACT_APP_BACKEND_URL;
-  //   const { email, password } = this.state;
-
-  //   // Open a new window
-  //   const newWindow = window.open('', '_blank');
-
-  //   try {
-  //     const response = await fetch(`${backendURL}/login`, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         email,
-  //         password,
-  //       }),
-  //     });
-
-  //     if (response.ok) {
-  //       const data = await response.json();
-  //       if (data) {
-  //         newWindow.document.cookie = `token=${data.token};path=/`;
-  //         newWindow.document.cookie = `role=${data.user.role};path=/`;
-  //         newWindow.document.cookie = `email=${data.user.email};path=/`;
-  //         newWindow.document.cookie = `name=${data.user.name};path=/`;
-  //         newWindow.document.cookie = `company_name=${data.user.company_name};path=/`;
-
-  //         newWindow.location.href = `http://localhost:3001/dashboard`; 
-
-  //         this.setState({
-  //           email: "",
-  //           password: "",
-  //           userLogged: true,
-  //         });
-
-  //         const token = this.getCookie('token');
-  //         console.log("token in login", token);
-  //       } else {
-  //         this.setState({ errorMessage: "Token not generated", messageType: "fail" });
-  //       }
-  //     } else {
-  //       this.setState({ errorMessage: "Wrong Username & Password", messageType: "fail" });
-  //       newWindow.close(); // Close the new window if login fails
-  //     }
-  //   } catch (error) {
-  //     this.setState({ errorMessage: "There was a problem with your fetch operation:", messageType: "fail" });
-  //     newWindow.close(); // Close the new window if an error occurs
-  //   }
-  // };
-
   handleSubmit = () => {
     const { email, password } = this.state;
     const backendURL = process.env.REACT_APP_BACKEND_URL;
-    const newWindow = window.open('', '_blank');
+    const newWindow = window.open("", "_blank");
 
     const scriptContent = `
       window.addEventListener('message', async (event) => {
@@ -326,7 +281,6 @@ class ViewMerchant extends Component {
     this.interval = setInterval(() => {
       this.nextSlide();
     }, 5000);
-
   };
 
   nextSlide = () => {
@@ -381,7 +335,7 @@ class ViewMerchant extends Component {
       }
     );
   };
-  
+
   updateMerchantStatus = async (statusText, idforEdit) => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
     const { token } = this.state;
@@ -410,7 +364,6 @@ class ViewMerchant extends Component {
       });
     }
   };
-  
 
   fetchRatesData = async () => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
@@ -575,7 +528,6 @@ class ViewMerchant extends Component {
     this.nextSlide();
   };
 
-
   handleButtonClick = (buttonName) => {
     const newState = {
       overviewInfo: false,
@@ -583,9 +535,9 @@ class ViewMerchant extends Component {
       settlementInfo: false,
       secretsInfo: false,
     };
-  
+
     newState[buttonName] = true;
-  
+
     this.setState(newState, () => {
       if (buttonName === "ratesInfo") {
         this.fetchRatesData();
@@ -651,11 +603,14 @@ class ViewMerchant extends Component {
       payloadString,
       process.env.REACT_APP_KEY_SECRET
     ).toString();
-    
+
     const fullToken = encrypted;
-  
-    const truncatedToken = btoa(encrypted).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  
+
+    const truncatedToken = btoa(encrypted)
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "");
+
     return { fullToken, truncatedToken };
   };
 
@@ -667,48 +622,23 @@ class ViewMerchant extends Component {
     return key;
   };
 
-  // handleCopy = (key, keyType) => {
-  //   navigator.clipboard.writeText(key);
-  //   let message;
-  //   switch (keyType) {
-  //     case 'api':
-  //       message = 'API Key Copied!';
-  //       break;
-  //     case 'secret':
-  //       message = 'Secret Key Copied!';
-  //       break;
-  //     case 'root':
-  //       message = 'Account Creation Key Copied!';
-  //       break;
-  //     default:
-  //       message = 'Key Copied!';
-  //   }
-  //   this.setState({ errorMessage: message, messageType: 'success' });
-  //   this.setState((prevState) => ({
-  //     copied: {
-  //       ...prevState.copied,
-  //       [key]: true,
-  //     },
-  //   }));
-  // };
-
   handleCopy = (key, keyType, elementId) => {
     navigator.clipboard.writeText(key);
     let message;
     switch (keyType) {
-      case 'api':
-        message = 'API Key Copied!';
+      case "api":
+        message = "API Key Copied!";
         break;
-      case 'secret':
-        message = 'Secret Key Copied!';
+      case "secret":
+        message = "Secret Key Copied!";
         break;
-      case 'root':
-        message = 'Account Creation Key Copied!';
+      case "root":
+        message = "Account Creation Key Copied!";
         break;
       default:
-        message = 'Key Copied!';
+        message = "Key Copied!";
     }
-    this.setState({ errorMessage: message, messageType: 'success' });
+    this.setState({ errorMessage: message, messageType: "success" });
     this.setState((prevState) => ({
       copied: {
         ...prevState.copied,
@@ -717,9 +647,9 @@ class ViewMerchant extends Component {
     }));
 
     const element = document.getElementById(elementId);
-    element.classList.add('zoom-animation');
+    element.classList.add("zoom-animation");
     setTimeout(() => {
-      element.classList.remove('zoom-animation');
+      element.classList.remove("zoom-animation");
     }, 300);
   };
 
@@ -737,6 +667,8 @@ class ViewMerchant extends Component {
         return currencyCode;
     }
   };
+
+  approveMerchant = () => {};
 
   render() {
     const {
@@ -761,7 +693,7 @@ class ViewMerchant extends Component {
       volumeData,
       email,
       password,
-      showPassword
+      isActive,
     } = this.state;
     const currentSlide = slides[slideIndex];
 
@@ -778,10 +710,11 @@ class ViewMerchant extends Component {
           <Header />
           <Sidebar />
           <div
-            className={`main-screen ${this.state.sidebaropen
-              ? "collapsed-main-screen"
-              : "expanded-main-screen"
-              }  `}
+            className={`main-screen ${
+              this.state.sidebaropen
+                ? "collapsed-main-screen"
+                : "expanded-main-screen"
+            }  `}
           >
             <div className="view-merchant-container">
               <div className="row-cards left-section">
@@ -797,13 +730,17 @@ class ViewMerchant extends Component {
                     {this.state.company_name.split(/[^a-zA-Z\s]+/).join(" ")}
                   </h5>
                   <div
-                    className={`status-div ${statusText === "Active"
-                      ? "success-status"
-                      : "failed-status"
-                      }`}
+                    className={`status-div ${
+                      statusText === "Pending"
+                        ? "pending-status"
+                        : statusText === "Active"
+                        ? "success-status"
+                        : "failed-status"
+                    }`}
                   >
                     <p>{statusText}</p>
                   </div>
+
                   <div className="slideshow-container">
                     {currentSlide.type === "approvalRatio" && (
                       <div className="approve-volume-container">
@@ -898,7 +835,7 @@ class ViewMerchant extends Component {
                       </div>
                     )}
                   </div>
-                </div> 
+                </div>
                 <div className="left-section-middle">
                   <p>Details</p>
                   <div className="create-settelments-horizontal-line"></div>
@@ -966,6 +903,7 @@ class ViewMerchant extends Component {
                   </div>
                 </div>
                 <div className="left-section-bottom">
+                {statusText !== "Pending" && (
                   <button
                     className="btn-primary"
                     onClick={() => this.handleAddMerchant()}
@@ -973,13 +911,30 @@ class ViewMerchant extends Component {
                   >
                     Edit
                   </button>
-                  <button
-                    className={`btn-secondary ${statusText === "Active" ? "btn-suspend" : "btn-activate"
+                  )}
+                  {statusText !== "Pending" && (
+                    <button
+                      className={`btn-secondary ${
+                        statusText === "Active" ? "btn-suspend" : "btn-activate"
                       }`}
-                    onClick={this.handleStatusChange}
-                  >
-                    {buttonLabel}
-                  </button>
+                      onClick={this.handleStatusChange}
+                      disabled={statusText === "Pending"}
+                    >
+                      {buttonLabel}
+                    </button>
+                  )}
+
+                  {statusText === "Pending" && (
+                    <button
+                      className="btn-primary"
+                      onClick={this.approveMerchant}
+                      disabled={
+                        isActive === "Active" || isActive === "Inactive"
+                      }
+                    >
+                      Approve
+                    </button>
+                  )}
                 </div>
               </div>
               <div className="right-section">
@@ -1189,7 +1144,8 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.txn_app
+                                  `${
+                                    ratesData.txn_app
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -1213,7 +1169,8 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.txn_dec
+                                  `${
+                                    ratesData.txn_dec
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -1235,7 +1192,8 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.refund_fee
+                                  `${
+                                    ratesData.refund_fee
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -1257,7 +1215,8 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.chargeback_fee
+                                  `${
+                                    ratesData.chargeback_fee
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -1310,7 +1269,8 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.setup_fee
+                                  `${
+                                    ratesData.setup_fee
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -1399,7 +1359,8 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.annual_maintenance_fee
+                                  `${
+                                    ratesData.annual_maintenance_fee
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -1458,7 +1419,7 @@ class ViewMerchant extends Component {
                     </div>
                   )}
 
-                 {this.state.secretsInfo && (
+                  {this.state.secretsInfo && (
                     <div className="right-section-middle-body">
                       <div className="settlements-container">
                         <h4 className="head-head">API Key List & Access</h4>
@@ -1477,7 +1438,14 @@ class ViewMerchant extends Component {
                                 <p>Public Key</p>
                               </div>
                             </div>
-                            <CustomTooltip details={<p className="white-color">Essential for API access. Protect it like a password.</p>}>
+                            <CustomTooltip
+                              details={
+                                <p className="white-color">
+                                  Essential for API access. Protect it like a
+                                  password.
+                                </p>
+                              }
+                            >
                               <Infoicon className="icon2" />
                             </CustomTooltip>
                           </div>
@@ -1508,7 +1476,15 @@ class ViewMerchant extends Component {
                                 <p>Private Key</p>
                               </div>
                             </div>
-                            <CustomTooltip details={<p className="white-color"> Highest level of security for API authentication. Keep it confidential.</p>}>
+                            <CustomTooltip
+                              details={
+                                <p className="white-color">
+                                  {" "}
+                                  Highest level of security for API
+                                  authentication. Keep it confidential.
+                                </p>
+                              }
+                            >
                               <Infoicon className="icon2" />
                             </CustomTooltip>
                           </div>
@@ -1571,20 +1547,26 @@ class ViewMerchant extends Component {
                           </div>
                         ) : (
                           <div className="api-key-container">
-                          <div className="api-key-container-head-div">
-                            <div className="api-key-container-div">
-                              <h6 className="heading-text">
-                                Account Creation Key
-                              </h6>
+                            <div className="api-key-container-head-div">
+                              <div className="api-key-container-div">
+                                <h6 className="heading-text">
+                                  Account Creation Key
+                                </h6>
+                              </div>
+                              <CustomTooltip
+                                details={
+                                  <p className="white-color">
+                                    {" "}
+                                    Restricted key for account creation. Handle
+                                    with extreme care.
+                                  </p>
+                                }
+                              >
+                                <Infoicon className="icon2" />
+                              </CustomTooltip>
                             </div>
-                            <CustomTooltip details={<p className="white-color"> Restricted key for account creation. Handle with extreme care.</p>}>
-                              <Infoicon className="icon2" />
-                            </CustomTooltip>
-                          </div>
                             <div className="api-key-content">
-                              <p>
-                                {this.maskString(rootAccountKey)}
-                              </p>
+                              <p>{this.maskString(rootAccountKey)}</p>
                               <div
                                 className={`copy-icon-signupkey ${
                                   copied.rootAccountKey ? "disabled" : ""
@@ -1709,10 +1691,11 @@ class ViewMerchant extends Component {
           <Header />
           <Sidebar />
           <div
-            className={`main-screen ${this.state.sidebaropen
-              ? "collapsed-main-screen"
-              : "expanded-main-screen"
-              }  `}
+            className={`main-screen ${
+              this.state.sidebaropen
+                ? "collapsed-main-screen"
+                : "expanded-main-screen"
+            }  `}
           >
             <div className="view-merchant-container">
               <div className="row-cards left-section">
@@ -1722,10 +1705,11 @@ class ViewMerchant extends Component {
                   </div>
                   <h5>{this.state.company_name}</h5>
                   <div
-                    className={`status-div ${statusText === "Active"
-                      ? "success-status"
-                      : "failed-status"
-                      }`}
+                    className={`status-div ${
+                      statusText === "Active"
+                        ? "success-status"
+                        : "failed-status"
+                    }`}
                   >
                     <p>{statusText}</p>
                   </div>
@@ -1769,7 +1753,8 @@ class ViewMerchant extends Component {
                       <div className="approve-volume-container">
                         <LeftSign
                           className="icon2"
-                          onClick={this.handleBackArrowclick}/>
+                          onClick={this.handleBackArrowclick}
+                        />
                         <div className="scroll-animation">
                           <div className="approval-div-section">
                             <div>
@@ -1822,7 +1807,7 @@ class ViewMerchant extends Component {
                       </div>
                     )}
                   </div>
-                </div> 
+                </div>
 
                 <div className="left-section-middle">
                   <p>Details</p>
@@ -2111,7 +2096,8 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.txn_app
+                                  `${
+                                    ratesData.txn_app
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -2135,7 +2121,8 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.txn_dec
+                                  `${
+                                    ratesData.txn_dec
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -2157,7 +2144,8 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.refund_fee
+                                  `${
+                                    ratesData.refund_fee
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -2179,9 +2167,8 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-
-                                  `${ratesData.chargeback_fee
-
+                                  `${
+                                    ratesData.chargeback_fee
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -2234,7 +2221,8 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.setup_fee
+                                  `${
+                                    ratesData.setup_fee
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -2323,7 +2311,8 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${ratesData.annual_maintenance_fee
+                                  `${
+                                    ratesData.annual_maintenance_fee
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -2374,7 +2363,7 @@ class ViewMerchant extends Component {
                     </div>
                   )}
 
-                {this.state.secretsInfo && (
+                  {this.state.secretsInfo && (
                     <div className="right-section-middle-body">
                       <div className="settlements-container">
                         <h4 className="head-head">API Key List & Access</h4>
@@ -2393,7 +2382,14 @@ class ViewMerchant extends Component {
                                 <p>Public Key</p>
                               </div>
                             </div>
-                            <CustomTooltip details={<p className="white-color">Essential for API access. Protect it like a password.</p>}>
+                            <CustomTooltip
+                              details={
+                                <p className="white-color">
+                                  Essential for API access. Protect it like a
+                                  password.
+                                </p>
+                              }
+                            >
                               <Infoicon className="icon2" />
                             </CustomTooltip>
                           </div>
@@ -2411,9 +2407,9 @@ class ViewMerchant extends Component {
                               )}
                             </div>
                             <div className="accntkey">
-                            <p id="api-key">
-                              {showApiKey ? apiKey : this.maskString(apiKey)}
-                            </p>
+                              <p id="api-key">
+                                {showApiKey ? apiKey : this.maskString(apiKey)}
+                              </p>
                             </div>
                             <div
                               onClick={() =>
@@ -2436,7 +2432,15 @@ class ViewMerchant extends Component {
                                 <p>Private Key</p>
                               </div>
                             </div>
-                            <CustomTooltip details={<p className="white-color"> Highest level of security for API authentication. Keep it confidential.</p>}>
+                            <CustomTooltip
+                              details={
+                                <p className="white-color">
+                                  {" "}
+                                  Highest level of security for API
+                                  authentication. Keep it confidential.
+                                </p>
+                              }
+                            >
                               <Infoicon className="icon2" />
                             </CustomTooltip>
                           </div>
@@ -2454,11 +2458,11 @@ class ViewMerchant extends Component {
                               )}
                             </div>
                             <div className="accntkey">
-                            <p id="secret-key">
-                              {showSecretKey
-                                ? secretKey
-                                : this.maskString(secretKey)}
-                            </p>
+                              <p id="secret-key">
+                                {showSecretKey
+                                  ? secretKey
+                                  : this.maskString(secretKey)}
+                              </p>
                             </div>
                             <div
                               onClick={() =>
@@ -2486,8 +2490,14 @@ class ViewMerchant extends Component {
                               </div>
                             </div>
                             <div>
-                              <CustomTooltip details={<p className="white-color">This highly secure webhook URL for API authentication.
-                                </p>}>
+                              <CustomTooltip
+                                details={
+                                  <p className="white-color">
+                                    This highly secure webhook URL for API
+                                    authentication.
+                                  </p>
+                                }
+                              >
                                 <Infoicon className="icon2" />
                               </CustomTooltip>
                             </div>

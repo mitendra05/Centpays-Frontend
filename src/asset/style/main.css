@@ -5547,7 +5547,73 @@ hr {
 		margin-top: 120px;
 	}
 
+/* Modal Window */
+.notification-modal {
+    position: fixed;
+    top: 18%;
+    right: -3%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 200px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh; 
+}
 
+.modal-container-header h5 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
 
+.modal-container-header .close {
+    font-size: 24px;
+    color: #333;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.modal-container-header .close:hover {
+    color: #e74c3c;
+}
+
+/* Notification List */
+.notification-list {
+    padding: 16px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.notification-item {
+    border-bottom: 1px solid #ddd;
+    padding: 8px 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.notification-item p {
+    margin: 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.notification-item small {
+    color: #888;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* No Notifications */
+.notification-list p {
+    text-align: center;
+    color: #777;
+    font-size: 14px;
+}
 
 	

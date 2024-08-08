@@ -117,6 +117,8 @@ class Header extends Component {
       selectedMerchant: "Select Merchant",
       selectedCurrency: "",
       currentPage: "dashboard",
+      showNotification: false, 
+      notifications: [],
     };
   }
 
@@ -359,6 +361,11 @@ class Header extends Component {
     this.props.onStartFetchingData();
 }
   
+handleNotificationClick = () => {
+  this.setState((prevState) => ({
+    showNotificationModal: !prevState.showNotificationModal,
+  }));
+};
 
   render() {
     const {
@@ -374,7 +381,11 @@ class Header extends Component {
       showUserProfileModal,
       currentPage,
       userRole,
+      showNotificationModal,
+      notifications,
     } = this.state;
+
+    const hasNotifications = notifications.length > 0;
 
     return (
       <>
@@ -447,7 +458,10 @@ class Header extends Component {
                 ></ShortCut>
               </CustomTooltip>
               <CustomTooltip title="Notification">
-                <Notification className="icon"></Notification>
+              <div className="notification-icon-wrapper" onClick={this.handleNotificationClick}>
+                  <Notification className="icon" />
+                  {hasNotifications && <div className="notification-badge"></div>}
+                </div>
               </CustomTooltip>
               <div className="user-profile-div">
                 <CustomTooltip title="Your Profile" leftMargin={-25}>
@@ -514,6 +528,32 @@ class Header extends Component {
             </div>
           )}
         </div>
+
+        {showNotificationModal && (
+            <div className="notification-modal">
+              <header className="modal-container-header">
+                <h5>Notifications</h5>
+                <span
+                  className="close"
+                  onClick={this.handleNotificationClick}
+                >
+                  &times;
+                </span>
+              </header>
+              <div className="notification-list">
+                {notifications.length > 0 ? (
+                  notifications.map((notification, index) => (
+                    <div className="notification-item" key={index}>
+                      <p>{notification.message}</p>
+                      <small>{new Date(notification.timestamp).toLocaleString()}</small>
+                    </div>
+                  ))
+                ) : (
+                  <p>No notifications</p>
+                )}
+              </div>
+            </div>
+          )}
 
         {searchOpen && (
           <div className="search-window-overlay">

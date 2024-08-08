@@ -16,24 +16,31 @@ class Signup extends Component {
     super(props);
     this.state = {
       errorMessage: "",
-      messageType:"",
+      messageType: "",
       isSignupSuccessful: false,
       // api states
       userName: "",
       userEmail: "",
       userMobile_no: "",
       userCountry: "",
-      userCompany_name:"",
-      userCompany_URL:"",
-      userSocial_id:"",
+      userCompany_name: "",
+      userCompany_URL: "",
+      userSocial_id: "",
       userPassword: "",
       userConfirm_password: "",
+      role: "",
+      behavior: "",
+      isRootBehavior: false,
     };
   }
 
   handleInputChange = (event) => {
     const { id, value } = event.target;
     this.setState({ [id]: value });
+  };
+
+  handleRootBehaviorChange = (event) => {
+    this.setState({ isRootBehavior: event.target.checked });
   };
 
   handleSignupSuccessModalToggle = (action) => {
@@ -57,7 +64,16 @@ class Signup extends Component {
       userSocial_id,
       userPassword,
       userConfirm_password,
+      isRootBehavior,
     } = this.state;
+
+    let role = "merchant";
+    let behavior = "user";
+    if (userCompany_name.toLowerCase() === "centpays") {
+      role = "employee";
+    } else if (role === "merchant") {
+      behavior = isRootBehavior ? "root" : "user";
+    }
 
     if (userPassword !== userConfirm_password) {
       this.setState({
@@ -112,9 +128,11 @@ class Signup extends Component {
       company_name: userCompany_name,
       company_url: userCompany_URL,
       chatId: userSocial_id,
+      role,
+      behavior,
     };
 
-    console.log("Request Body:", requestBody); 
+    console.log("Request Body:", requestBody);
 
     try {
       const response = await fetch(`${backendURL}/signup`, {
@@ -140,17 +158,19 @@ class Signup extends Component {
           errorMessage: "",
           messageType: "",
           isSignupSuccessful: true,
+          isRootBehavior:false
         });
       } else {
         const errorData = await response.json();
-        console.log("Error Data:", errorData); 
+        console.log("Error Data:", errorData);
         this.setState({
-          errorMessage: errorData.message || "Error creating user. Please try again later.",
+          errorMessage:
+            errorData.message || "Error creating user. Please try again later.",
           messageType: "Failed",
         });
       }
     } catch (error) {
-      console.error("Error:", error); 
+      console.error("Error:", error);
       this.setState({
         errorMessage: "An unexpected error occurred. Please try again later.",
         messageType: "Failed",
@@ -159,16 +179,16 @@ class Signup extends Component {
   };
 
   render() {
-    const { isSignupSuccessful,errorMessage,messageType } = this.state;
+    const { isSignupSuccessful, errorMessage, messageType } = this.state;
     return (
       <>
-      {errorMessage && (
-						<MessageBox
-							message={errorMessage}
-							messageType={messageType}
-							onClose={() => this.setState({ errorMessage: "" })}
-						/>
-					)}
+        {errorMessage && (
+          <MessageBox
+            message={errorMessage}
+            messageType={messageType}
+            onClose={() => this.setState({ errorMessage: "" })}
+          />
+        )}
         {isSignupSuccessful && (
           <Modal onClose={() => this.setState({ isSignupSuccessful: false })} />
         )}
@@ -257,20 +277,20 @@ class Signup extends Component {
                       </label>
                     </div>
                     <div className="input-group">
-                    <input
-                      type="text"
-                      id="userCountry"
-                      className="inputFeild auth-input"
-                      required
-                      value={this.state.userCountry}
-                      onChange={this.handleInputChange}
-                    />
-                    <label htmlFor="country" className="inputLabel">
-                      Country
-                    </label>
+                      <input
+                        type="text"
+                        id="userCountry"
+                        className="inputFeild auth-input"
+                        required
+                        value={this.state.userCountry}
+                        onChange={this.handleInputChange}
+                      />
+                      <label htmlFor="country" className="inputLabel">
+                        Country
+                      </label>
+                    </div>
                   </div>
-                  </div>
-            
+
                   <div className="input-group-div">
                     <div className="input-group">
                       <input
@@ -282,22 +302,22 @@ class Signup extends Component {
                         onChange={this.handleInputChange}
                       />
                       <label htmlFor="company_name" className="inputLabel">
-                       Company Name
+                        Company Name
                       </label>
                     </div>
                     <div className="input-group">
-                    <input
-                      type="text"
-                      id="userCompany_URL"
-                      className="inputFeild auth-input"
-                      required
-                      value={this.state.userCompany_URL}
-                      onChange={this.handleInputChange}
-                    />
-                    <label htmlFor="companyurl" className="inputLabel">
-                      Company URL
-                    </label>
-                  </div>
+                      <input
+                        type="text"
+                        id="userCompany_URL"
+                        className="inputFeild auth-input"
+                        required
+                        value={this.state.userCompany_URL}
+                        onChange={this.handleInputChange}
+                      />
+                      <label htmlFor="companyurl" className="inputLabel">
+                        Company URL
+                      </label>
+                    </div>
                   </div>
 
                   <div className="input-group">
@@ -310,7 +330,7 @@ class Signup extends Component {
                       onChange={this.handleInputChange}
                     />
                     <label htmlFor="country" className="inputLabel">
-                     Skype/Telegram
+                      Skype/Telegram
                     </label>
                   </div>
 
@@ -343,7 +363,6 @@ class Signup extends Component {
                     </div>
                   </div>
 
-
                   <div className="checkbox-container">
                     <div>
                       <input type="checkbox" required></input>
@@ -355,6 +374,16 @@ class Signup extends Component {
                         >
                           privacy policy and terms
                         </Link>
+                      </label>
+                    </div>
+                    <div className="input-group-div">
+                      <label className="p2">
+                        <input
+                          type="checkbox"
+                          checked={this.state.isRootBehavior}
+                          onChange={this.handleRootBehaviorChange}
+                        />
+                        Root User
                       </label>
                     </div>
                   </div>
