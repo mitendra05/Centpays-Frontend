@@ -26,20 +26,20 @@ class LiveReport extends Component {
       messageType: "",
       headerLabels: [
         { id: 1, heading: "Txn ID", label: "txnid" },
-        { id: 2, heading: "Merchant Txn ID", label: "merchantTxnId" },
-        { id: 3, heading: "Merchant", label: "merchant" },
-        { id: 4, heading: "Payment Gateway", label: "paymentgateway" },
+        { id: 2, heading: "Merchant", label: "merchant" },
+        { id: 3, heading: "Payment Gateway", label: "paymentgateway" },
+        { id: 4, heading: "Amount", label: "amount" },
         { id: 5, heading: "Status", label: "Status" },
-        { id: 6, heading: "Message", label: "message" },
-        { id: 7, heading: "Transaction Date", label: "transactiondate" },
-        { id: 8, heading: "Order No", label: "orderNo" },
-        { id: 9, heading: "MID", label: "mid" },
-        { id: 10, heading: "Customer Name", label: "cname" },
-        { id: 11, heading: "Email", label: "email" },
-        { id: 12, heading: "Amount", label: "amount" },
-        { id: 13, heading: "Currency", label: "currency" },
-        { id: 14, heading: "Card Number", label: "cardnumber" },
-        { id: 15, heading: "Card Type", label: "cardtype" },
+        { id: 6, heading: "Currency", label: "currency" },
+        { id: 7, heading: "Is Bank Settle", label: "isBankSettled" },
+        { id: 8, heading: "Transaction Date", label: "transactiondate" },
+        { id: 9, heading: "Customer Name", label: "cname" },
+        { id: 10, heading: "Email", label: "email" },
+        { id: 11, heading: "Order No", label: "orderNo" },
+        { id: 12, heading: "Card Number", label: "cardnumber" },
+        { id: 13, heading: "Card Type", label: "cardtype" },
+        { id: 14, heading: "MID", label: "mid" },
+        { id: 15, heading: "Message", label: "message" },
         { id: 16, heading: "Country", label: "country" },
         { id: 17, heading: "Web URL", label: "web_url" },
       ],
@@ -185,7 +185,7 @@ class LiveReport extends Component {
     };
 
     try {
-      const response = await fetch(`${backendURL}/searchSettledTransactions`, {
+      const response = await fetch(`${backendURL}/transactionreport`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -404,6 +404,7 @@ class LiveReport extends Component {
       userRole,
       showIds,
       searchIds,
+      merchant
     } = this.state;
     const searchIdsArray = searchIds.split(/[\s,]+/);
     if (userRole === "admin" || userRole === "employee") {
@@ -422,7 +423,7 @@ class LiveReport extends Component {
               <div className="main-screen-rows transaction-monitoring-first-row">
                 {this.state.showMoreOptions ? (
                   <div className="row-cards search-card">
-                    <div className="id-search-row-div">
+                     <div className="id-search-row-div">
                       <div className="id-input-div">
                         <div>
                           <label
@@ -433,7 +434,7 @@ class LiveReport extends Component {
                           >
                             Id:
                           </label>
-                          {searchIdsArray.length > 1 && (
+                          {this.state.showIdsArray && (
                             <div
                               className="icon-container"
                               ref={(ref) => (this.iconContainerRef = ref)}
@@ -444,7 +445,7 @@ class LiveReport extends Component {
                         </div>
                         <div>
                           <input
-                            className="id-input "
+                            className="id-input id-input-mrchnt-div"
                             type="text"
                             id="searchIds"
                             value={searchIds}
@@ -453,27 +454,26 @@ class LiveReport extends Component {
                             onKeyDown={this.handleKeyDown}
                           />
                         </div>
-                        {showIds && (
-                          <div ref={(ref) => (this.modalRef = ref)} >
-                            {searchIdsArray.length > 0 && (
+                        {this.state.showIds &&
+                          this.state.searchIdsArray.length > 0 && (
+                            <div ref={(ref) => (this.modalRef = ref)}>
                               <select
                                 className="transaction-id-dropdown"
-                                
-                                size={
-                                  searchIdsArray.length > 10
-                                    ? 10
-                                    : searchIdsArray.length
-                                }
+                                size={Math.min(
+                                  this.state.searchIdsArray.length,
+                                  10
+                                )}
                               >
-                                {searchIdsArray.map((line, index) => (
-                                  <option key={index} value={line}>
-                                    {line}
-                                  </option>
-                                ))}
+                                {this.state.searchIdsArray.map(
+                                  (line, index) => (
+                                    <option key={index} value={line}>
+                                      {line}
+                                    </option>
+                                  )
+                                )}
                               </select>
-                            )}
-                          </div>
-                        )}
+                            </div>
+                          )}
                       </div>
                       <div className="search-select-div search-status-div">
                         <label
@@ -485,7 +485,7 @@ class LiveReport extends Component {
                           Status:
                         </label>
                         <select
-                          className="id-input "
+                          className="id-input"
                           id="status"
                           value={this.state.status}
                           onChange={this.handleInputChange}
@@ -497,11 +497,10 @@ class LiveReport extends Component {
                           <option value="Incompleted">Incompleted</option>
                         </select>
                       </div>
-                      <div className="search-select-div search-status-div" >
-                        <label
-                          className={`id-label ${
-                            this.state.merchant ? "filled-id-label" : ""
-                          } `}
+                      <div className="search-select-div search-status-div">
+                      <label
+                          className={`id-label ${this.state.merchant ? "filled-id-label" : ""
+                            } `}
                           htmlFor="merchant"
                         >
                           Merchant:
@@ -509,9 +508,8 @@ class LiveReport extends Component {
                         <select
                           className="id-input"
                           id="merchant"
-                          value={this.state.merchant}
-                          onChange={this.handleInputChange}
-                          onKeyDown={this.handleKeyDown}
+                          value={merchant}
+                          onChange={this.handleCompanySelect}
                         >
                           <option value="">Select Merchant</option>
                           {this.state.companyList.map((company) => (
@@ -574,12 +572,11 @@ class LiveReport extends Component {
                           onKeyDown={this.handleKeyDown}
                         ></input>
                       </div>
-          
                     </div>
 
                     <div className="quick-search-div">
                       <div>
-                      <p className="p2 date-label">Quick Search:</p>
+                        <p className="p2 date-label">Quick Search:</p>
                         <button
                           className={
                             activeQuickSearchbtn === "Today"
@@ -658,7 +655,7 @@ class LiveReport extends Component {
                         </button>
                       </div>
                     </div>
-                     
+
                     <div className="more-options-div">
                       <label
                         className={`id-label ${
@@ -726,8 +723,8 @@ class LiveReport extends Component {
                         <option value="">Select Currency</option>
                         <option value="USD">USD</option>
                         <option value="EUR">EUR</option>
-                        <option value="EUR">AUD</option>
-                        <option value="EUR">INR</option>
+                        <option value="AUD">AUD</option>
+                        <option value="INR">INR</option>
                       </select>
 
                       <label
@@ -812,7 +809,7 @@ class LiveReport extends Component {
                           >
                             Id:
                           </label>
-                          {searchIdsArray.length > 1 && (
+                          {this.state.showIdsArray && (
                             <div
                               className="icon-container"
                               ref={(ref) => (this.iconContainerRef = ref)}
@@ -823,7 +820,7 @@ class LiveReport extends Component {
                         </div>
                         <div>
                           <input
-                            className="id-input "
+                            className="id-input id-input-mrchnt-div"
                             type="text"
                             id="searchIds"
                             value={searchIds}
@@ -832,27 +829,26 @@ class LiveReport extends Component {
                             onKeyDown={this.handleKeyDown}
                           />
                         </div>
-                        {showIds && (
-                          <div ref={(ref) => (this.modalRef = ref)} >
-                            {searchIdsArray.length > 0 && (
+                        {this.state.showIds &&
+                          this.state.searchIdsArray.length > 0 && (
+                            <div ref={(ref) => (this.modalRef = ref)}>
                               <select
                                 className="transaction-id-dropdown"
-                                
-                                size={
-                                  searchIdsArray.length > 10
-                                    ? 10
-                                    : searchIdsArray.length
-                                }
+                                size={Math.min(
+                                  this.state.searchIdsArray.length,
+                                  10
+                                )}
                               >
-                                {searchIdsArray.map((line, index) => (
-                                  <option key={index} value={line}>
-                                    {line}
-                                  </option>
-                                ))}
+                                {this.state.searchIdsArray.map(
+                                  (line, index) => (
+                                    <option key={index} value={line}>
+                                      {line}
+                                    </option>
+                                  )
+                                )}
                               </select>
-                            )}
-                          </div>
-                        )}
+                            </div>
+                          )}
                       </div>
                       <div className="search-select-div search-status-div">
                         <label
@@ -876,11 +872,10 @@ class LiveReport extends Component {
                           <option value="Incompleted">Incompleted</option>
                         </select>
                       </div>
-                      <div className="search-select-div search-status-div" >
-                        <label
-                          className={`id-label ${
-                            this.state.merchant ? "filled-id-label" : ""
-                          } `}
+                      <div className="search-select-div search-status-div">
+                      <label
+                          className={`id-label ${this.state.merchant ? "filled-id-label" : ""
+                            } `}
                           htmlFor="merchant"
                         >
                           Merchant:
@@ -888,9 +883,8 @@ class LiveReport extends Component {
                         <select
                           className="id-input"
                           id="merchant"
-                          value={this.state.merchant}
-                          onChange={this.handleInputChange}
-                          onKeyDown={this.handleKeyDown}
+                          value={merchant}
+                          onChange={this.handleCompanySelect}
                         >
                           <option value="">Select Merchant</option>
                           {this.state.companyList.map((company) => (
@@ -956,7 +950,7 @@ class LiveReport extends Component {
                     </div>
                     <div className="quick-search-div">
                       <div>
-                      <p className="p2 date-label">Quick Search:</p>
+                        <p className="p2 date-label">Quick Search:</p>
                         <button
                           className={
                             activeQuickSearchbtn === "Today"
@@ -1034,7 +1028,7 @@ class LiveReport extends Component {
                           This Year
                         </button>
                       </div>
-              
+
                       <div
                         className="show-more"
                         onClick={() => this.handleShowMore()}
@@ -1125,7 +1119,7 @@ class LiveReport extends Component {
                           >
                             Id:
                           </label>
-                          {searchIdsArray.length > 1 && (
+                          {this.state.showIdsArray && (
                             <div
                               className="icon-container"
                               ref={(ref) => (this.iconContainerRef = ref)}
@@ -1145,27 +1139,26 @@ class LiveReport extends Component {
                             onKeyDown={this.handleKeyDown}
                           />
                         </div>
-                        {showIds && (
-                          <div ref={(ref) => (this.modalRef = ref)} >
-                            {searchIdsArray.length > 0 && (
+                        {this.state.showIds &&
+                          this.state.searchIdsArray.length > 0 && (
+                            <div ref={(ref) => (this.modalRef = ref)}>
                               <select
                                 className="transaction-id-dropdown"
-                                
-                                size={
-                                  searchIdsArray.length > 10
-                                    ? 10
-                                    : searchIdsArray.length
-                                }
+                                size={Math.min(
+                                  this.state.searchIdsArray.length,
+                                  10
+                                )}
                               >
-                                {searchIdsArray.map((line, index) => (
-                                  <option key={index} value={line}>
-                                    {line}
-                                  </option>
-                                ))}
+                                {this.state.searchIdsArray.map(
+                                  (line, index) => (
+                                    <option key={index} value={line}>
+                                      {line}
+                                    </option>
+                                  )
+                                )}
                               </select>
-                            )}
-                          </div>
-                        )}
+                            </div>
+                          )}
                       </div>
                       <div className="search-select-div search-status-div">
                         <label
@@ -1246,7 +1239,7 @@ class LiveReport extends Component {
                           onKeyDown={this.handleKeyDown}
                         ></input>
                       </div>
-                    
+
                       <div className="txn-monitoring-btn-div txn-monitoring-mrcnt-btn-div">
                         <button
                           className="btn-primary"
@@ -1264,7 +1257,7 @@ class LiveReport extends Component {
                     </div>
                     <div className="quick-search-div">
                       <div>
-                      <p className="p2 date-label">Quick Search:</p>
+                        <p className="p2 date-label">Quick Search:</p>
                         <button
                           className={
                             activeQuickSearchbtn === "Today"
@@ -1343,8 +1336,7 @@ class LiveReport extends Component {
                         </button>
                       </div>
                     </div>
-                  
-                    
+
                     <div className="more-options-div">
                       <label
                         className={`id-label ${
@@ -1406,8 +1398,8 @@ class LiveReport extends Component {
                         <option value="">Select Currency</option>
                         <option value="USD">USD</option>
                         <option value="EUR">EUR</option>
-                        <option value="EUR">AUD</option>
-                        <option value="EUR">INR</option>
+                        <option value="AUD">AUD</option>
+                        <option value="INR">INR</option>
                       </select>
 
                       <label
@@ -1492,7 +1484,7 @@ class LiveReport extends Component {
                           >
                             Id:
                           </label>
-                          {searchIdsArray.length > 1 && (
+                          {this.state.showIdsArray && (
                             <div
                               className="icon-container"
                               ref={(ref) => (this.iconContainerRef = ref)}
@@ -1512,26 +1504,26 @@ class LiveReport extends Component {
                             onKeyDown={this.handleKeyDown}
                           />
                         </div>
-                        {showIds && (
-                          <div ref={(ref) => (this.modalRef = ref)}>
-                            {searchIdsArray.length > 0 && (
+                        {this.state.showIds &&
+                          this.state.searchIdsArray.length > 0 && (
+                            <div ref={(ref) => (this.modalRef = ref)}>
                               <select
                                 className="transaction-id-dropdown"
-                                size={
-                                  searchIdsArray.length > 10
-                                    ? 10
-                                    : searchIdsArray.length
-                                }
+                                size={Math.min(
+                                  this.state.searchIdsArray.length,
+                                  10
+                                )}
                               >
-                                {searchIdsArray.map((line, index) => (
-                                  <option key={index} value={line}>
-                                    {line}
-                                  </option>
-                                ))}
+                                {this.state.searchIdsArray.map(
+                                  (line, index) => (
+                                    <option key={index} value={line}>
+                                      {line}
+                                    </option>
+                                  )
+                                )}
                               </select>
-                            )}
-                          </div>
-                        )}
+                            </div>
+                          )}
                       </div>
                       <div className="search-select-div search-status-div">
                         <label
@@ -1594,7 +1586,7 @@ class LiveReport extends Component {
                           onKeyDown={this.handleKeyDown}
                         ></input>
                       </div>
-          
+
                       <div className="txn-monitoring-btn-div txn-monitoring-mrcnt-btn-div">
                         <button
                           className="btn-primary"
@@ -1612,7 +1604,7 @@ class LiveReport extends Component {
                     </div>
                     <div className="quick-search-div">
                       <div>
-                      <p className="p2 date-label">Quick Search:</p>
+                        <p className="p2 date-label">Quick Search:</p>
                         <button
                           className={
                             activeQuickSearchbtn === "Today"
@@ -1690,7 +1682,7 @@ class LiveReport extends Component {
                           This Year
                         </button>
                       </div>
-                   
+
                       <div
                         className="show-more"
                         onClick={() => this.handleShowMore()}

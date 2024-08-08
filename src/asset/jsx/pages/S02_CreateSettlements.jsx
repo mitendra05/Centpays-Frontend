@@ -212,15 +212,27 @@ class CreateSettlement extends Component {
   };
 
   handleBack = () => {
-    if (!this.state.isPreview && !this.state.isEdited) {
-      window.history.back();
+    const { company_name, isEdited, isPreview } = this.state;
+    const currentPath = window.location.pathname + window.location.search;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryCompanyName = urlParams.get('company_name');
+
+    if (!isEdited && !isPreview) {
+        if (queryCompanyName && currentPath.startsWith("/createsettlement")) {
+            window.location.href = `/previewsettlement/${company_name}`;
+        } else if (currentPath === "/createsettlement") {
+            window.location.href = "/settlements";
+        } else {
+            window.history.back();
+        }
     } else {
-      this.setState({
-        isPreview: false,
-        isEdited: false,
-      });
+        this.setState({
+            isPreview: false,
+            isEdited: false,
+        });
     }
-  };  
+};
 
   handlePreview = async () => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
@@ -1189,7 +1201,7 @@ class CreateSettlement extends Component {
                 </div>
 
                 <div className="create-settelments-horizontal-line"></div>
-                <div className="create-settelment-userNote  ">
+                <div className="create-settelment-userNote  usernote-div">
                   <p>Note:</p>
                   <div className="preview-userNote">
                     <p>{this.state.textArea}</p>
@@ -1517,7 +1529,7 @@ class CreateSettlement extends Component {
                 </div>
 
                 <div className="create-settelments-horizontal-line"></div>
-                <div className="create-settelment-userNote  ">
+                <div className="create-settelment-userNote usernote-div">
                   <p>Note:</p>
                   <div className="preview-userNote">
                     <p>{this.state.textArea}</p>

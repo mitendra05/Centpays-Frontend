@@ -88,17 +88,18 @@ class PreviewReport extends Component {
 		}
 	  };
 	
-	
-
-	generatePDF = () => {
+	  generatePDF = () => {
 		const originalContents = document.body.innerHTML;
 		const pdfContent = document.getElementById('pdf-content').innerHTML;
 		document.body.innerHTML = pdfContent;
-
+	
 		window.print();
-
-		document.body.innerHTML = originalContents;
-	};
+	
+		setTimeout(() => {
+			document.body.innerHTML = originalContents;
+			window.location.reload();
+		}, 100);
+	};	
 
 	handleDeleteReport = async () => {
 		const backendURL = process.env.REACT_APP_BACKEND_URL;
@@ -125,9 +126,14 @@ class PreviewReport extends Component {
 	};
 
 	handleBack = () => {
-		window.history.back();
-	};
-
+		const { id,company_name} = this.state;
+		const currentPath = window.location.pathname;
+		if (currentPath === `/previewreport/${id}`) {
+		  window.location.href = `/previewsettlement/${company_name}`;
+		} else {
+		  window.history.back();
+		}
+	  };
 
 
 	render() {
@@ -163,7 +169,7 @@ class PreviewReport extends Component {
 				></div>
 				{reportData && (
 					<div id="pdf-content" className="previewReport">
-						<div className="row-cards create-settlement-left-container">
+						<div className="row-cards create-settlement-left-container ">
 							<div className="create-settlement-left-container-header">
 								<div className="settlement-header-left">
 									<img className="logo" src={companyLogo} alt="Centpays"></img>
@@ -322,7 +328,7 @@ class PreviewReport extends Component {
 								<p>{reportData.total_amount_in_usdt}</p>
 							</div>
 							<div className="create-settelments-horizontal-line"></div>
-							<div className="create-settelment-userNote  ">
+							<div className="create-settelment-userNote  usernote-div">
 								<p>Note:</p>
 								<div className="preview-userNote">
 									<p>{reportData.note}</p>

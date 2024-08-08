@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import CryptoJS from "crypto-js";
 
 // import component
-// import MessageBox from "../components/Message_box";
+import MessageBox from "../components/Message_box";
 import Modal from "../components/Modal";
 
 // import images
@@ -16,81 +16,115 @@ class Signup extends Component {
     super(props);
     this.state = {
       errorMessage: "",
+      messageType:"",
       isSignupSuccessful: false,
       // api states
       userName: "",
       userEmail: "",
       userMobile_no: "",
       userCountry: "",
+      userCompany_name:"",
+      userCompany_URL:"",
+      userSocial_id:"",
       userPassword: "",
       userConfirm_password: "",
-      userSignupKey: "",
     };
   }
 
   handleInputChange = (event) => {
-    this.setState({ [event.target.id]: event.target.value });
+    const { id, value } = event.target;
+    this.setState({ [id]: value });
   };
 
-  decodeSignedToken = (token) => {
-    try {
-      const bytes = CryptoJS.AES.decrypt(
-        token,
-        process.env.REACT_APP_KEY_SECRET
-      );
-      const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-      return decryptedData;
-    } catch (error) {
-      console.error("Error decoding token:", error.message);
-      return null;
+  handleSignupSuccessModalToggle = (action) => {
+    if (action === "open") {
+      this.setState({ isSignupSuccessful: true });
+    } else {
+      this.setState({ isSignupSuccessful: false });
     }
   };
 
   handleSubmit = async (e) => {
-    const backendURL = process.env.REACT_APP_BACKEND_URL;
     e.preventDefault();
+    const backendURL = process.env.REACT_APP_BACKEND_URL;
     const {
       userName,
       userEmail,
       userMobile_no,
       userCountry,
+      userCompany_name,
+      userCompany_URL,
+      userSocial_id,
       userPassword,
       userConfirm_password,
-      userSignupKey,
     } = this.state;
-    console.log("signup key", userSignupKey);
-    const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
 
-    if (!passwordRegex.test(userPassword)) {
+    if (userPassword !== userConfirm_password) {
       this.setState({
-        errorMessage:
-          "Password must be at least 8 characters long and contain at least one uppercase letter, one digit, and one special character.",
+        errorMessage: "Passwords do not match. Please try again.",
         messageType: "Failed",
       });
+      console.log("Passwords do not match.");
       return;
     }
-    const signupKey = this.decodeSignedToken(
-      userSignupKey,
-      process.env.REACT_APP_KEY_SECRET
-    );
-    console.log("decoded key", signupKey);
+
+    // Validate password format
+    if (userPassword.length < 8) {
+      this.setState({
+        errorMessage: "Password must be at least 8 characters long.",
+        messageType: "Failed",
+      });
+      console.log("Password must be at least 8 characters long.");
+      return;
+    }
+    if (!/[A-Z]/.test(userPassword)) {
+      this.setState({
+        errorMessage: "Password must contain at least one uppercase letter.",
+        messageType: "Failed",
+      });
+      console.log("Password must contain at least one uppercase letter.");
+      return;
+    }
+    if (!/[0-9]/.test(userPassword)) {
+      this.setState({
+        errorMessage: "Password must contain at least one digit.",
+        messageType: "Failed",
+      });
+      console.log("Password must contain at least one digit.");
+      return;
+    }
+    if (!/[!@#$%^&*]/.test(userPassword)) {
+      this.setState({
+        errorMessage: "Password must contain at least one special character.",
+        messageType: "Failed",
+      });
+      console.log("Password must contain at least one special character.");
+      return;
+    }
+
+    const requestBody = {
+      name: userName,
+      email: userEmail,
+      mobile_no: userMobile_no,
+      country: userCountry,
+      password: userPassword,
+      confirm_password: userConfirm_password,
+      company_name: userCompany_name,
+      company_url: userCompany_URL,
+      chatId: userSocial_id,
+    };
+
+    console.log("Request Body:", requestBody); 
+
     try {
       const response = await fetch(`${backendURL}/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          name: userName,
-          email: userEmail,
-          mobile_no: userMobile_no,
-          country: userCountry,
-          password: userPassword,
-          confirm_password: userConfirm_password,
-          client_id: signupKey.clientId,
-          role: signupKey.role,
-        }),
+        body: JSON.stringify(requestBody),
       });
+
       if (response.ok) {
         document.cookie = `signupEmail=${userEmail};path=/`;
         this.setState({
@@ -98,18 +132,25 @@ class Signup extends Component {
           userEmail: "",
           userMobile_no: "",
           userCountry: "",
+          userCompany_name: "",
+          userCompany_URL: "",
+          userSocial_id: "",
           userPassword: "",
           userConfirm_password: "",
-          userSignupKey: "",
+          errorMessage: "",
+          messageType: "",
+          isSignupSuccessful: true,
         });
-        this.handleSignupSuccessModalToggle("open");
       } else {
+        const errorData = await response.json();
+        console.log("Error Data:", errorData); 
         this.setState({
-          errorMessage: "Error creating user. Please try again later.",
+          errorMessage: errorData.message || "Error creating user. Please try again later.",
           messageType: "Failed",
         });
       }
     } catch (error) {
+      console.error("Error:", error); 
       this.setState({
         errorMessage: "An unexpected error occurred. Please try again later.",
         messageType: "Failed",
@@ -117,14 +158,17 @@ class Signup extends Component {
     }
   };
 
-  handleSignupSuccessModalToggle = (action) => {
-    this.setState({ isSignupSuccessful: action === "open" ? true : false });
-  };
-
   render() {
-    const { isSignupSuccessful } = this.state;
+    const { isSignupSuccessful,errorMessage,messageType } = this.state;
     return (
       <>
+      {errorMessage && (
+						<MessageBox
+							message={errorMessage}
+							messageType={messageType}
+							onClose={() => this.setState({ errorMessage: "" })}
+						/>
+					)}
         {isSignupSuccessful && (
           <Modal onClose={() => this.setState({ isSignupSuccessful: false })} />
         )}
@@ -142,7 +186,9 @@ class Signup extends Component {
                 </h5>
                 <button
                   className="btn-primary loginbutton-modal"
-                  onClick={() => (window.location.href = "/")}
+                  onClick={() => {
+                    window.location.href = "/";
+                  }}
                 >
                   Login
                 </button>
@@ -210,8 +256,7 @@ class Signup extends Component {
                         Mobile No
                       </label>
                     </div>
-                  </div>
-                  <div className="input-group">
+                    <div className="input-group">
                     <input
                       type="text"
                       id="userCountry"
@@ -222,6 +267,50 @@ class Signup extends Component {
                     />
                     <label htmlFor="country" className="inputLabel">
                       Country
+                    </label>
+                  </div>
+                  </div>
+            
+                  <div className="input-group-div">
+                    <div className="input-group">
+                      <input
+                        type="text"
+                        id="userCompany_name"
+                        className="inputFeild auth-input"
+                        required
+                        value={this.state.userCompany_name}
+                        onChange={this.handleInputChange}
+                      />
+                      <label htmlFor="company_name" className="inputLabel">
+                       Company Name
+                      </label>
+                    </div>
+                    <div className="input-group">
+                    <input
+                      type="text"
+                      id="userCompany_URL"
+                      className="inputFeild auth-input"
+                      required
+                      value={this.state.userCompany_URL}
+                      onChange={this.handleInputChange}
+                    />
+                    <label htmlFor="companyurl" className="inputLabel">
+                      Company URL
+                    </label>
+                  </div>
+                  </div>
+
+                  <div className="input-group">
+                    <input
+                      type="text"
+                      id="userSocial_id"
+                      className="inputFeild auth-input"
+                      required
+                      value={this.state.userSocial_id}
+                      onChange={this.handleInputChange}
+                    />
+                    <label htmlFor="country" className="inputLabel">
+                     Skype/Telegram
                     </label>
                   </div>
 
@@ -254,19 +343,6 @@ class Signup extends Component {
                     </div>
                   </div>
 
-                  <div className="input-group">
-                    <input
-                      type="password"
-                      id="userSignupKey"
-                      className="inputFeild auth-input"
-                      required
-                      value={this.state.userSignupKey}
-                      onChange={this.handleInputChange}
-                    />
-                    <label htmlFor="country" className="inputLabel">
-                      Sign-Up Key
-                    </label>
-                  </div>
 
                   <div className="checkbox-container">
                     <div>
@@ -282,7 +358,7 @@ class Signup extends Component {
                       </label>
                     </div>
                   </div>
-                  <button type="submit" className="btn-primary auth-btn-signup">
+                  <button type="submit" className="btn-primary auth-btn">
                     Sign Up
                   </button>
 

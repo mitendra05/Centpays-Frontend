@@ -74,7 +74,9 @@ class Login extends Component {
 					document.cookie = `email=${data.user.email};path=/`;
 					document.cookie = `name=${data.user.name};path=/`;
 					document.cookie = `company_name=${data.user.company_name};path=/`;
-
+	
+					localStorage.setItem('lastLogin', data.user.lastLogin);
+	
 					this.setState({
 						userEmail: "",
 						userPassword: "",
@@ -83,7 +85,7 @@ class Login extends Component {
 					console.log("token in login", token)
 					this.setState({ userLogged: true });
 				} else {
-					this.setState({ errorMessage: "Token not genrated", messageType: "fail" });
+					this.setState({ errorMessage: "Token not generated", messageType: "fail" });
 				}
 			} else {
 				this.setState({ errorMessage: "Wrong Username & Password", messageType: "fail" });
@@ -191,7 +193,7 @@ class Login extends Component {
 				const data = await response.json();
 				if (data.success) {
 					this.handlenewpasswordModalToggle("close");
-					window.alert("Password Reset Successfully");
+					this.setState({ errorMessage: "Password Reset Successfully", messageType: "Success" });
 				} else {
 					console.log("Something happened wrong");
 				}

@@ -8,7 +8,7 @@ import Modal from "../components/Modal";
 
 import { Folder, Excel, Import, Export, Bin } from "../../media/icon/SVGicons";
 
-class Compare extends Component {
+class BankSettlement extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -66,13 +66,16 @@ class Compare extends Component {
   };
 
   handleInputChange = (event) => {
-    const { id, value, files } = event.target;
+    const { id, files } = event.target;
 
     if (id === "attachment" && files.length > 0) {
       this.setState({ fileName: files[0].name, attachment: files[0] });
       this.readExcel(files[0]);
+
+      // Clear the file input to allow re-upload of the same file
+      event.target.value = null;
     } else {
-      this.setState({ [id]: value });
+      this.setState({ [id]: event.target.value });
     }
   };
 
@@ -800,4 +803,4 @@ class Compare extends Component {
   }
 }
 
-export default Compare;
+export default BankSettlement;

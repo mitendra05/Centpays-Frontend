@@ -27,7 +27,7 @@ export class setting extends Component {
     }
 
     render() {
-        const { company_name, userRole } = this.state;
+        const {  } = this.state;
         return (
             <>
                 <Header />

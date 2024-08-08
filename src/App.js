@@ -44,11 +44,15 @@ import Adduser from "./asset/jsx/pages/AddUser";
 import AllUser from "./asset/jsx/pages/AllUser";
 import MerchantSettings from "./asset/jsx/pages/Merchant_Settings";
 
-import AQTest from "./asset/jsx/pages/AQTest";
+import Qpay from "./asset/jsx/pages/QPay";
 import AQResult from "./asset/jsx/pages/AQResult";
 
 import Setting from "./asset/jsx/pages/setting";
-import RCompare from "./asset/jsx/pages/R06_Compare";
+
+import BankSettlement from "./asset/jsx/pages/Bank_Settlements";
+import LiveReport from "./asset/jsx/pages/LiveReport";
+import ViewUsers from "./asset/jsx/pages/ViewUsers";
+import DummyDash from "./asset/jsx/pages/Dummy_Dashboard";
 
 function App() {
   return (
@@ -62,6 +66,7 @@ function App() {
 
           {/* Dashboard Routes */}
           <Route path="/dashboard" element={<Dashboard />}></Route>
+          <Route path="/dummydashboard" element={<DummyDash />}></Route>
           <Route path="/livetransactiontable" element={<LiveTransactionTable />}></Route>
 
           {/* Settlement Routes */}
@@ -100,9 +105,13 @@ function App() {
           <Route path="/adduser" element={<Adduser />}></Route>
 
           <Route path="/settings" element={<Setting />}></Route>
-		      <Route path="/acquirertestingenv" element={<AQTest />}></Route>
+		      <Route path="/acquirertestingenv" element={<Qpay />}></Route>
 		      <Route path="/paymentresult/:orderNo" element={<AQResult />}></Route>
-          <Route path="/rcompare" element={<RCompare />}></Route>
+
+          <Route path="/banksettle" element={<BankSettlement />}></Route>
+          <Route path="/livereport" element={<LiveReport/>}></Route>
+          <Route path="/viewuser/:company_name"element={<ViewUsers />}></Route>
+
         </Routes>
       </BrowserRouter>
     </>

@@ -5,7 +5,6 @@ import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import SettlementTable from "../components/Settlement_Table";
 import MessageBox from "../components/Message_box";
-import ScrollToTopButton from "../components/ScrollToTop";
 
 // images
 
@@ -29,7 +28,7 @@ class ListSettlement extends Component {
 			listData: [],
 			showRates: true,
 			errorMessage: "",
-			
+			loading:false,
 		};
 	}
 
@@ -48,6 +47,7 @@ class ListSettlement extends Component {
 	fetchData = async () => {
 		const { token } = this.state;
 		const backendURL = process.env.REACT_APP_BACKEND_URL;
+		this.setState({loading:true})
 		try {
 			const response = await fetch(`${backendURL}/clients`, {
 				method: "GET",
@@ -64,12 +64,13 @@ class ListSettlement extends Component {
 					if (!b.last_settled_date) return -1;
 					return new Date(b.last_settled_date) - new Date(a.last_settled_date);
 				});
-				this.setState({ apiData: data });
+				this.setState({ apiData: data,loading:false });
 			} else {
 				console.error("Error fetching data:", response.statusText);
 				this.setState({
 					errorMessage: "Error in Fetching data. Please try again later.",
 					messageType: "fail",
+					loading:false
 				});
 			}
 		} catch (error) {
@@ -77,6 +78,7 @@ class ListSettlement extends Component {
 		  this.setState({
 			errorMessage: "An unexpected error occurred. Please try again later.",
 			messageType: "",
+			loading:false
 		  });
 		}
 	  };
@@ -112,7 +114,7 @@ class ListSettlement extends Component {
 	};
 
 	render() {
-		const { headerLabels, apiData, showRates, listData, errorMessage } = this.state;
+		const { headerLabels, apiData, showRates, listData, errorMessage,loading } = this.state;
 
 		return (
 			<>
@@ -190,9 +192,9 @@ class ListSettlement extends Component {
 								headerLabels={headerLabels}
 								apiData={apiData}
 								showRates={showRates}
+								loading={loading}
 							/>
 						</div>
-						<ScrollToTopButton/>
 					</div>
 				</div>
 			</>

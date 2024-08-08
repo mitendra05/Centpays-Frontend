@@ -41,7 +41,7 @@ import profile from "../../media/icon/user-profile.png";
 import settlemntimg from "../../media/image/siteWorking.jpg";
 // import calender from "../../media/icon/calender.png";
 
-class ViewMerchant extends Component {
+class ViewUser extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -99,7 +99,7 @@ class ViewMerchant extends Component {
   }
 
   extractENameFromURL = () => {
-    return window.location.pathname.split("/viewmerchant/")[1];
+    return window.location.pathname.split("/viewuser/")[1];
   };
   
   fetchClientId = async (company_name) => {
@@ -2680,4 +2680,4 @@ class ViewMerchant extends Component {
   }
 }
 
-export default ViewMerchant;
+export default ViewUser;

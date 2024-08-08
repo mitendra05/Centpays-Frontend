@@ -1,19 +1,21 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 
 class CustomSelect extends Component {
   state = {
-    selectedOptions: this.props.multiSelect ? [] : this.props.selectedValue || null,
+    selectedOptions: this.props.multiSelect
+      ? []
+      : this.props.selectedValue || null,
     isOpen: false,
-    searchValue: ''
+    searchValue: "",
   };
 
   componentDidMount() {
-    document.addEventListener('click', this.handleClickOutside);
+    document.addEventListener("click", this.handleClickOutside);
     this.setDefaultOption();
   }
 
   componentWillUnmount() {
-    document.removeEventListener('click', this.handleClickOutside);
+    document.removeEventListener("click", this.handleClickOutside);
   }
 
   handleClickOutside = (event) => {
@@ -30,7 +32,7 @@ class CustomSelect extends Component {
     this.setState((prevState) => {
       if (this.props.multiSelect) {
         const updatedOptions = prevState.selectedOptions.includes(option)
-          ? prevState.selectedOptions.filter(opt => opt !== option)
+          ? prevState.selectedOptions.filter((opt) => opt !== option)
           : [...prevState.selectedOptions, option];
         this.props.onChange(updatedOptions);
         return { selectedOptions: updatedOptions };
@@ -46,18 +48,26 @@ class CustomSelect extends Component {
   };
 
   setDefaultOption = () => {
-    const { options, defaultLabel } = this.props;
-    if (defaultLabel && options && options.length === 1) {
+    const { options, defaultLabel, selectedValue } = this.props;
+    if (!selectedValue && defaultLabel && options && options.length === 1) {
       this.setState({ selectedOptions: options[0] });
       this.props.onChange(options[0]);
     }
   };
 
   render() {
-    const { options = [], width = '170px', height = 'auto', showDropdownIcon = false, defaultLabel } = this.props;
+    const {
+      options = [],
+      width = "170px",
+      height = "auto",
+      showDropdownIcon = false,
+      defaultLabel,
+      selectedValue,
+    } = this.props;
+
     const { selectedOptions, isOpen, searchValue } = this.state;
 
-    const filteredOptions = options.filter(option =>
+    const filteredOptions = options.filter((option) =>
       option.toLowerCase().startsWith(searchValue.toLowerCase())
     );
 
@@ -65,21 +75,34 @@ class CustomSelect extends Component {
       filteredOptions.unshift(defaultLabel);
     }
 
-    const dropdownIcon = showDropdownIcon ? (isOpen ? '⮝' : '⮟') : (isOpen ? '👆' : '👇');
+    const dropdownIcon = showDropdownIcon
+      ? isOpen
+        ? "⮝"
+        : "⮟"
+      : isOpen
+      ? "👆"
+      : "👇";
 
     return (
       <div className="custom-select-wrapper" ref={this.setWrapperRef}>
         <div
           className="custom-select-selected"
-          onClick={() => this.setState({ isOpen: !isOpen })}
+          onClick={() => {
+            if (filteredOptions.length > 1) {
+              this.setState({ isOpen: !isOpen });
+            }
+          }}
           style={{ width, height }}
         >
-          {selectedOptions || defaultLabel || (options.length > 0 ? options[0] : 'No options available')}
-          <div className="select-icon">
-            {dropdownIcon}
-          </div>
+          <span>
+            {selectedValue ||
+              selectedOptions ||
+              defaultLabel ||
+              (options.length > 0 ? options[0] : "No options available")}
+          </span>
+          <div className="select-icon">{dropdownIcon}</div>
         </div>
-        {isOpen && (
+        {isOpen && filteredOptions.length > 1 && (
           <div className="custom-select-options">
             <input
               type="text"
@@ -92,9 +115,14 @@ class CustomSelect extends Component {
               <div
                 key={index}
                 onClick={() => this.handleOptionSelect(option)}
-                className={`custom-select-option ${this.props.multiSelect ?
-                  (selectedOptions.includes(option) ? 'selected' : '')
-                  : (selectedOptions === option ? 'selected' : '')
+                className={`custom-select-option ${
+                  this.props.multiSelect
+                    ? selectedOptions.includes(option)
+                      ? "selected"
+                      : ""
+                    : selectedValue === option
+                    ? "selected"
+                    : ""
                 }`}
               >
                 {this.props.multiSelect ? (
