@@ -117,9 +117,10 @@ class Header extends Component {
       selectedMerchant: "Select Merchant",
       selectedCurrency: "",
       currentPage: "dashboard",
-      showNotification: false, 
       notifications: [],
+      newNotifications: false,
     };
+    this.eventSource = null;
   }
 
   getCookie = (name) => {
@@ -130,8 +131,26 @@ class Header extends Component {
   };
 
   componentDidMount = async () => {
-    const savedScrollPosition = localStorage.getItem("Header_ScrollY");
     const userRole = this.getCookie("role");
+    // Initialize SSE connection
+    this.eventSource = new EventSource(`https://paylinkup.online/events?role=${userRole}`);
+
+    // Listen for messages from the server
+    this.eventSource.onmessage = (event) => {
+      console.log(event)
+      const data = JSON.parse(event.data);
+      
+      this.handleNewNotification(data.message);
+      console.log(data.message)
+    };
+
+    // Handle errors
+    this.eventSource.onerror = (error) => {
+      console.error("SSE Error:", error);
+      this.eventSource.close();
+    };
+
+    const savedScrollPosition = localStorage.getItem("Header_ScrollY");
 
     if (savedScrollPosition) {
       window.scrollTo(0, parseInt(savedScrollPosition, 10));
@@ -160,6 +179,11 @@ class Header extends Component {
   };
 
   componentWillUnmount() {
+     // Close SSE connection on component unmount
+     if (this.eventSource) {
+      this.eventSource.close();
+    }
+
     localStorage.setItem("Header_ScrollY", window.scrollY);
     window.removeEventListener("scroll", this.handleScroll);
     document.removeEventListener("mousedown", this.handleClickOutside);
@@ -361,9 +385,19 @@ class Header extends Component {
     this.props.onStartFetchingData();
 }
   
+handleNewNotification = (message) => {
+  // Update state with new notification
+  this.setState((prevState) => ({
+    notifications: [...prevState.notifications, message],
+    newNotifications: true, // Indicate there are new notifications
+  }));
+};
+
+
 handleNotificationClick = () => {
   this.setState((prevState) => ({
     showNotificationModal: !prevState.showNotificationModal,
+    newNotifications: prevState.showNotificationModal ? prevState.newNotifications : false, 
   }));
 };
 
@@ -386,7 +420,7 @@ handleNotificationClick = () => {
     } = this.state;
 
     const hasNotifications = notifications.length > 0;
-
+console.log("noti",notifications)
     return (
       <>
         {shortcutModal && (
@@ -531,7 +565,7 @@ handleNotificationClick = () => {
 
         {showNotificationModal && (
             <div className="notification-modal">
-              <header className="modal-container-header">
+              <div className="modal-container-header">
                 <h5>Notifications</h5>
                 <span
                   className="close"
@@ -539,7 +573,7 @@ handleNotificationClick = () => {
                 >
                   &times;
                 </span>
-              </header>
+              </div>
               <div className="notification-list">
                 {notifications.length > 0 ? (
                   notifications.map((notification, index) => (
