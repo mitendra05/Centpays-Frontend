@@ -437,7 +437,36 @@ nav {
 	padding: 0;
 }
 
+.notification-container {
+	position: relative;
+	display: inline-block;
+  }
+  
+  .notification-icon {
+	font-size: 24px;
+  }
+  
+  .notification-badge {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 12px;
+	height: 12px;
+	background-color:var(--white);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+  }
 
+  .notification-badge::before {
+	content: '';
+	width: 8px;  
+	height: 8px; 
+	background-color: var(--red-color);
+	border-radius: 50%;
+  }
+  
 /*  ------------------------------ Sidebar  ------------------------------  */
 .sidebar {
 	width: 250px;
@@ -5550,7 +5579,7 @@ hr {
 /* Modal Window */
 .notification-modal {
     position: fixed;
-    top: 18%;
+    top: 22%;
     right: -3%;
     transform: translate(-50%, -50%);
     width: 90%;
@@ -5583,7 +5612,6 @@ hr {
     color: #e74c3c;
 }
 
-/* Notification List */
 .notification-list {
     padding: 16px;
     overflow-y: auto;
@@ -5609,11 +5637,39 @@ hr {
     margin-top: 4px;
 }
 
-/* No Notifications */
 .notification-list p {
     text-align: center;
     color: #777;
     font-size: 14px;
 }
 
-	
+.notification-list {
+	padding: 10px;
+	max-height: 400px;
+	overflow-y: auto;
+	border-radius: 5px;
+	background-color: #f9f9f9;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .notification {
+	padding: 15px;
+	margin-bottom: 10px;
+	border-radius: 5px;
+	font-size: 14px;
+	line-height: 1.5;
+	display: flex;
+	align-items: center;
+	transition: background-color 0.3s ease;
+  }
+  
+  .notification.info {
+	background-color: #e7f3fe;
+	border-left: 5px solid #2196f3;
+	color: #0b75c9;
+  }
+  
+  .view-btn{
+	width: 150px;
+	margin-left: 15px;
+  }
