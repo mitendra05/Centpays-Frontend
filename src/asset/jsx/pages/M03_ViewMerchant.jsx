@@ -134,7 +134,6 @@ class ViewMerchant extends Component {
     const client_id = await this.fetchClientId(company_name);
 
     if (client_id) {
-      console.log("Client ID:", client_id);
       this.setState({ client_id });
     }
   };
@@ -668,9 +667,38 @@ class ViewMerchant extends Component {
     }
   };
 
-  approveMerchant = (idforEdit) => {
-    this.updateMerchantStatus("Active", idforEdit)
-  };
+  async approveMerchant(idforEdit) {
+    console.log("Entered");
+
+    const backendURL = process.env.REACT_APP_BACKEND_URL;
+    const { token } = this.state;
+
+    try {
+      const response = await fetch(`${backendURL}/approveclient`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ id: idforEdit }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok.");
+      }
+      this.setState({
+        errorMessage: "Client approved successfully",
+        messageType: "success",
+      });
+      this.refreshMerchantData()
+    } catch (error) {
+      console.error("Error approving merchant:", error);
+      this.setState({
+        errorMessage: "Client Not Approved",
+        messageType: "fail",
+      });
+    }
+  }
 
   render() {
     const {
@@ -698,7 +726,7 @@ class ViewMerchant extends Component {
       isActive,
     } = this.state;
     const currentSlide = slides[slideIndex];
-console.log(overviewData)
+
     if (userRole === "admin") {
       return (
         <>
@@ -926,17 +954,16 @@ console.log(overviewData)
                     </button>
                   )}
 
-                  {statusText === "Pending" && (
-                    <button
-                      className="btn-primary"
-                      onClick={this.approveMerchant(overviewData._id)}
-                      // disabled={
-                      //   isActive === "Active" || isActive === "Inactive"
-                      // }
-                    >
-                      Approve
-                    </button>
-                  )}
+{statusText === "Pending" && (
+          <button
+            className="btn-primary"
+            onClick={() => this.approveMerchant(overviewData._id)}
+            // Uncomment below line to disable button based on a condition
+            // disabled={isActive === "Active" || isActive === "Inactive"}
+          >
+            Approve
+          </button>
+        )}
                 </div>
               </div>
               <div className="right-section">

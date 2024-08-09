@@ -1,5 +1,5 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
+import React, {Component} from "react";
+
 //images
 import {
   Search,
@@ -117,9 +117,10 @@ class Header extends Component {
       selectedMerchant: "Select Merchant",
       selectedCurrency: "",
       currentPage: "dashboard",
-      showNotification: false,
       notifications: [],
+      newNotifications: false,
     };
+    this.eventSource = null;
   }
 
   getCookie = (name) => {
@@ -130,12 +131,26 @@ class Header extends Component {
   };
 
   componentDidMount = async () => {
-    const savedScrollPosition = localStorage.getItem("Header_ScrollY");
-    const notifications =
-      JSON.parse(sessionStorage.getItem("notifications")) || [];
-    this.setState({ notifications });
-
     const userRole = this.getCookie("role");
+    // Initialize SSE connection
+    this.eventSource = new EventSource(`https://paylinkup.online/events?role=${userRole}`);
+
+    // Listen for messages from the server
+    this.eventSource.onmessage = (event) => {
+      console.log(event)
+      const data = JSON.parse(event.data);
+      
+      this.handleNewNotification(data.message);
+      console.log(data.message)
+    };
+
+    // Handle errors
+    this.eventSource.onerror = (error) => {
+      console.error("SSE Error:", error);
+      this.eventSource.close();
+    };
+
+    const savedScrollPosition = localStorage.getItem("Header_ScrollY");
 
     if (savedScrollPosition) {
       window.scrollTo(0, parseInt(savedScrollPosition, 10));
@@ -161,11 +176,14 @@ class Header extends Component {
     this.setState({ currency, selectedCurrency });
     this.handleCurrencyChange(selectedCurrency);
     document.addEventListener("mousedown", this.handleClickOutside);
-
-    this.setState({ notifications });
   };
 
   componentWillUnmount() {
+     // Close SSE connection on component unmount
+     if (this.eventSource) {
+      this.eventSource.close();
+    }
+
     localStorage.setItem("Header_ScrollY", window.scrollY);
     window.removeEventListener("scroll", this.handleScroll);
     document.removeEventListener("mousedown", this.handleClickOutside);
@@ -365,13 +383,23 @@ class Header extends Component {
 
   handleButtonClick = () => {
     this.props.onStartFetchingData();
-  };
+}
+  
+handleNewNotification = (message) => {
+  // Update state with new notification
+  this.setState((prevState) => ({
+    notifications: [...prevState.notifications, message],
+    newNotifications: true, // Indicate there are new notifications
+  }));
+};
 
-  handleNotificationClick = () => {
-    this.setState((prevState) => ({
-      showNotificationModal: !prevState.showNotificationModal,
-    }));
-  };
+
+handleNotificationClick = () => {
+  this.setState((prevState) => ({
+    showNotificationModal: !prevState.showNotificationModal,
+    newNotifications: prevState.showNotificationModal ? prevState.newNotifications : false, 
+  }));
+};
 
   render() {
     const {
@@ -392,7 +420,7 @@ class Header extends Component {
     } = this.state;
 
     const hasNotifications = notifications.length > 0;
-
+console.log("noti",notifications)
     return (
       <>
         {shortcutModal && (
@@ -464,14 +492,9 @@ class Header extends Component {
                 ></ShortCut>
               </CustomTooltip>
               <CustomTooltip title="Notification">
-                <div
-                  className="notification-icon-wrapper"
-                  onClick={this.handleNotificationClick}
-                >
+              <div className="notification-icon-wrapper" onClick={this.handleNotificationClick}>
                   <Notification className="icon" />
-                  {hasNotifications && (
-                    <div className="notification-badge"></div>
-                  )}
+                  {hasNotifications && <div className="notification-badge"></div>}
                 </div>
               </CustomTooltip>
               <div className="user-profile-div">
@@ -541,38 +564,30 @@ class Header extends Component {
         </div>
 
         {showNotificationModal && (
-          <div className="notification-modal">
-            <header className="modal-container-header">
-              <h5>Notifications</h5>
-              <span className="close" onClick={this.handleNotificationClick}>
-                &times;
-              </span>
-            </header>
-            <div className="notification-list">
-              {notifications.length > 0 ? (
-                notifications.map((notification, index) => (
-                  <div
-                    key={index}
-                    className={`notification ${notification.type}`}
-                  >
-                    {notification.message}
-                  </div>
-                ))
-              ) : (
-                <div>No notifications available</div>
-              )}
-              <button
-              className="btn-primary view-btn"
-              onClick={() =>
-                (window.location.href = "/allmerchant?showPending=true")
-              }
-            >
-              View 
-            </button>
+            <div className="notification-modal">
+              <div className="modal-container-header">
+                <h5>Notifications</h5>
+                <span
+                  className="close"
+                  onClick={this.handleNotificationClick}
+                >
+                  &times;
+                </span>
+              </div>
+              <div className="notification-list">
+                {notifications.length > 0 ? (
+                  notifications.map((notification, index) => (
+                    <div className="notification-item" key={index}>
+                      <p>{notification.message}</p>
+                      <small>{new Date(notification.timestamp).toLocaleString()}</small>
+                    </div>
+                  ))
+                ) : (
+                  <p>No notifications</p>
+                )}
+              </div>
             </div>
-            
-          </div>
-        )}
+          )}
 
         {searchOpen && (
           <div className="search-window-overlay">
@@ -642,18 +657,5 @@ class Header extends Component {
     );
   }
 }
-
-Header.propTypes = {
-  notifications: PropTypes.arrayOf(
-    PropTypes.shape({
-      message: PropTypes.string.isRequired,
-      type: PropTypes.string,
-    })
-  ),
-};
-
-Header.defaultProps = {
-  notifications: [],
-};
 
 export default Header;
