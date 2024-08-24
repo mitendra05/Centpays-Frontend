@@ -84,7 +84,6 @@ class Login extends Component {
 						userPassword: "",
 					});
 					const token = this.getCookie('token');
-					console.log("token in login", token)
 					this.setState({ userLogged: true });
 				} else {
 					this.setState({ errorMessage: "Token not generated", messageType: "fail" });

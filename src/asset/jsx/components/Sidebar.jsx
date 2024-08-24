@@ -22,6 +22,8 @@ class Sidebar extends Component {
     this.state = {
       sidebaropen: true,
       userRole: this.getCookie("role"),
+      userStatus: this.getCookie("status"),
+
       companyName: this.getCookie("company_name"),
       menuOpen: {
         masterSetting: false,
@@ -136,7 +138,10 @@ class Sidebar extends Component {
   };
 
   render() {
-    const { sidebaropen, userRole, companyName } = this.state;
+    const { sidebaropen, userRole, companyName,userStatus} = this.state;
+    const isProfileVisible = userRole === 'Merchant' && userStatus === 'Pending';
+    const blurClass = isProfileVisible ? 'blur-effect' : '';
+
 
     const adminMenuItems = [
       {
@@ -240,7 +245,8 @@ class Sidebar extends Component {
             path: `/previewsettlement/${companyName}`,
             text: "Settlement Report",
           },
-          { path: "/banksettle", text: "Settlement Invoice" },
+          { path: "/settlements", text: "Settlement Invoice" },
+
         ],
       },
       {

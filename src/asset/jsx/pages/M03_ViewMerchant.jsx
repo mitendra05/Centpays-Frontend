@@ -101,7 +101,10 @@ class ViewMerchant extends Component {
   extractENameFromURL = () => {
     return window.location.pathname.split("/viewmerchant/")[1];
   };
-
+  extractIdFromURL = () => {
+    const searchParams = new URLSearchParams(window.location.search);
+    return searchParams.get('id');
+  };
   fetchClientId = async (company_name) => {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
     try {
@@ -230,6 +233,7 @@ class ViewMerchant extends Component {
   };
 
   componentDidMount() {
+    
     this.fetchAndSetClientId();
     this.loginCredentials();
 
@@ -304,9 +308,18 @@ class ViewMerchant extends Component {
       }
 
       const data = await response.json();
-      this.setState({ [dataVariable]: data }, () => {
-        if (callback) callback(data);
-      });
+
+      if (!data || Object.keys(data).length === 0) {
+        this.setState({
+          [dataVariable]: "N/A",
+          statusText: "Pending",
+          buttonLabel: "Approve",
+        });
+      } else {
+        this.setState({ [dataVariable]: data });
+      }
+
+      if (callback) callback(data);
     } catch (error) {
       this.setState({
         errorMessage: `Error fetching data: ${error.message}`,
@@ -314,6 +327,7 @@ class ViewMerchant extends Component {
       });
     }
   };
+
 
   refreshMerchantData = () => {
     const { company_name } = this.state;
@@ -666,31 +680,41 @@ class ViewMerchant extends Component {
         return currencyCode;
     }
   };
-
-  async approveMerchant(idforEdit) {
-    console.log("Entered");
-
+  async approveMerchant() {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
     const { token } = this.state;
-
+    const id = this.extractIdFromURL();
+    console.log("Approving merchant with ID:", id);
+  
+    if (!id) {
+      console.error("No ID found in URL. Cannot approve merchant.");
+      this.setState({
+        errorMessage: "No ID found in URL. Cannot approve merchant.",
+        messageType: "fail",
+      });
+      return;
+    }
+  
     try {
-      const response = await fetch(`${backendURL}/approveclient`, {
+      const response = await fetch(`${backendURL}/approveclient?id=${id}`, {
+
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ id: idforEdit }),
       });
-
+  
       if (!response.ok) {
         throw new Error("Network response was not ok.");
       }
+
       this.setState({
         errorMessage: "Client approved successfully",
         messageType: "success",
       });
-      this.refreshMerchantData()
+      this.refreshMerchantData();
+
     } catch (error) {
       console.error("Error approving merchant:", error);
       this.setState({
@@ -699,7 +723,6 @@ class ViewMerchant extends Component {
       });
     }
   }
-
   render() {
     const {
       isSuspended,
@@ -754,19 +777,19 @@ class ViewMerchant extends Component {
                 />
                 <div className="left-section-top">
                   <div className="profile-image">
-                    <img src={profile} alt="user profile"></img>
+                    <img src={profile} alt="user profile" />
                   </div>
                   <h5>
                     {this.state.company_name.split(/[^a-zA-Z\s]+/).join(" ")}
                   </h5>
                   <div
-                    className={`status-div ${
-                      statusText === "Pending"
-                        ? "pending-status"
-                        : statusText === "Active"
+                    className={`status-div ${statusText === "Pending"
+                      ? "pending-status"
+                      : statusText === "Active"
                         ? "success-status"
                         : "failed-status"
-                    }`}
+                      }`}
+
                   >
                     <p>{statusText}</p>
                   </div>
@@ -788,10 +811,10 @@ class ViewMerchant extends Component {
                             <div>
                               <h5>
                                 {approvalData &&
-                                approvalData.approvalRatio !== undefined
+                                  approvalData.approvalRatio !== undefined
                                   ? parseFloat(
-                                      approvalData.approvalRatio.toFixed(2)
-                                    )
+                                    approvalData.approvalRatio.toFixed(2)
+                                  )
                                   : "N/A"}
                                 %
                               </h5>
@@ -799,7 +822,6 @@ class ViewMerchant extends Component {
                             </div>
                           </div>
                         </div>
-
                         <RightSign
                           className="icon2"
                           onClick={this.handleNextArrowclick}
@@ -828,7 +850,6 @@ class ViewMerchant extends Component {
                             </div>
                           </div>
                         </div>
-
                         <RightSign
                           className="icon2"
                           onClick={this.handleNextArrowclick}
@@ -857,7 +878,6 @@ class ViewMerchant extends Component {
                             </div>
                           </div>
                         </div>
-
                         <RightSign
                           className="icon2"
                           onClick={this.handleNextArrowclick}
@@ -880,28 +900,28 @@ class ViewMerchant extends Component {
                             height="20"
                           />
                           Username:&nbsp;
-                          <p>{overviewData.username}</p>
+                          <p>{overviewData.username || "N/A"}</p>
                         </div>
                       </li>
                       <li>
                         <div className="p2 icons-div">
-                          <Id className="merchant-icon"></Id>
+                          <Id className="merchant-icon" />
                           Merchant ID:&nbsp;
-                          <p>{overviewData.merchant_id}</p>
+                          <p>{overviewData.merchant_id || "N/A"}</p>
                         </div>
                       </li>
                       <li>
                         <div className="p2 icons-div">
                           <URL className="merchant-icon" />
                           Website URL:&nbsp;
-                          <p>{overviewData.website_url}</p>
+                          <p>{overviewData.website_url || "N/A"}</p>
                         </div>
                       </li>
                       <li>
                         <div className="p2 icons-div">
                           <Industry className="merchant-icon" />
                           Industry:&nbsp;
-                          <p>{overviewData.industry}</p>
+                          <p>{overviewData.industry || "N/A"}</p>
                         </div>
                       </li>
                     </ul>
@@ -912,59 +932,53 @@ class ViewMerchant extends Component {
                         <div className="p2 icons-div">
                           <Phone className="merchant-icon" />
                           Phone No:&nbsp;
-                          <p>{overviewData.phone_number}</p>
+                          <p>{overviewData.phone_number || "N/A"}</p>
                         </div>
                       </li>
                       <li>
                         <div className="p2 icons-div">
                           <Email className="merchant-icon" />
                           Email:&nbsp;
-                          <p>{overviewData.email}</p>
+                          <p>{overviewData.email || "N/A"}</p>
                         </div>
                       </li>
                       <li>
                         <div className="p2 icons-div">
                           <Skype className="merchant-icon" />
                           Skype:&nbsp;
-                          <p>{overviewData.skype_id}</p>
+                          <p>{overviewData.skype_id || "N/A"}</p>
                         </div>
                       </li>
                     </ul>
                   </div>
                 </div>
                 <div className="left-section-bottom">
-                {statusText !== "Pending" && (
-                  <button
-                    className="btn-primary"
-                    onClick={() => this.handleAddMerchant()}
-                    disabled={isSuspended}
-                  >
-                    Edit
-                  </button>
-                  )}
-                  {statusText !== "Pending" && (
+                  {this.state.buttonLabel === "Approve" ? (
                     <button
-                      className={`btn-secondary ${
-                        statusText === "Active" ? "btn-suspend" : "btn-activate"
-                      }`}
-                      onClick={this.handleStatusChange}
-                      disabled={statusText === "Pending"}
+                      className="btn-primary"
+                      onClick={() => this.approveMerchant()}
                     >
-                      {buttonLabel}
+                      Approve
                     </button>
+                  ) : (
+                    <>
+                      <button
+                        className="btn-primary"
+                        onClick={() => this.handleAddMerchant()}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className={`btn-secondary ${this.state.statusText === "Active" ? "btn-suspend" : "btn-activate"}`}
+                        onClick={this.handleStatusChange}
+                        disabled={this.state.statusText === "Pending"}
+                      >
+                        {this.state.statusText === "Active" ? "Suspend" : "Activate"}
+                      </button>
+                    </>
                   )}
-
-{statusText === "Pending" && (
-          <button
-            className="btn-primary"
-            onClick={() => this.approveMerchant(overviewData._id)}
-            // Uncomment below line to disable button based on a condition
-            // disabled={isActive === "Active" || isActive === "Inactive"}
-          >
-            Approve
-          </button>
-        )}
                 </div>
+
               </div>
               <div className="right-section">
                 <div className="btn-container">{this.renderButtons()}</div>
@@ -981,19 +995,19 @@ class ViewMerchant extends Component {
                           <li>
                             <div className="p2 icons-div">
                               Country:&nbsp;
-                              <p>{overviewData.country}</p>
+                              <p>{overviewData.country || "N/A"}</p>
                             </div>
                           </li>
                           <li>
                             <div className="p2 icons-div">
                               City:&nbsp;
-                              <p>{overviewData.city}</p>
+                              <p>{overviewData.city || "N/A"}</p>
                             </div>
                           </li>
                           <li>
                             <div className="p2 icons-div">
                               Street Address1:&nbsp;
-                              <p>{overviewData.street_address}</p>
+                              <p>{overviewData.street_address || "N/A"}</p>
                             </div>
                           </li>
                         </ul>
@@ -1002,19 +1016,19 @@ class ViewMerchant extends Component {
                           <li>
                             <div className="p2 icons-div">
                               State:&nbsp;
-                              <p>{overviewData.state}</p>
+                              <p>{overviewData.state || "N/A"} </p>
                             </div>
                           </li>
                           <li>
                             <div className="p2 icons-div">
                               Postal Code:&nbsp;
-                              <p>{overviewData.postal_code}</p>
+                              <p>{overviewData.postal_code || "N/A"}</p>
                             </div>
                           </li>
                           <li>
                             <div className="p2 icons-div">
                               Street Address2:&nbsp;
-                              <p>{overviewData.street_address2}</p>
+                              <p>{overviewData.street_address2 || "N/A"}</p>
                             </div>
                           </li>
                         </ul>
@@ -1030,26 +1044,26 @@ class ViewMerchant extends Component {
                           <li>
                             <div className="p2 icons-div">
                               Type:&nbsp;
-                              <p>{overviewData.business_type}</p>
+                              <p>{overviewData.business_type || "N/A"}</p>
                             </div>
                           </li>
                           <li>
                             <div className="p2 icons-div">
                               Sub Category:&nbsp;
-                              <p>{overviewData.business_subcategory}</p>
+                              <p>{overviewData.business_subcategory || "N/A"}</p>
                             </div>
                           </li>
                           <li>
                             <div className="p2 icons-div">
                               Pay In:&nbsp;
-                              <p>{overviewData.merchant_pay_in}</p>
+                              <p>{overviewData.merchant_pay_in || "N/A"}</p>
                             </div>
                           </li>
 
                           <li>
                             <div className="p2 icons-div">
                               Settlement Charge:&nbsp;
-                              <p>{overviewData.settlement_charge}</p>
+                              <p>{overviewData.settlement_charge || "N/A"}</p>
                             </div>
                           </li>
 
@@ -1057,7 +1071,7 @@ class ViewMerchant extends Component {
                             <div className="p2 icons-div">
                               Expected Chargeback Percentage:&nbsp;
                               <p>
-                                {overviewData.expected_chargeback_percentage}
+                                {overviewData.expected_chargeback_percentage || "N/A"}
                               </p>
                             </div>
                           </li>
@@ -1066,34 +1080,34 @@ class ViewMerchant extends Component {
                           <li>
                             <div className="p2 icons-div">
                               Category:&nbsp;
-                              <p>{overviewData.business_category}</p>
+                              <p>{overviewData.business_category || "N/A"}</p>
                             </div>
                           </li>
 
                           <li>
                             <div className="p2 icons-div">
                               Registered On:&nbsp;
-                              <p>{overviewData.buiness_registered_on}</p>
+                              <p>{overviewData.buiness_registered_on || "N/A"}</p>
                             </div>
                           </li>
 
                           <li>
                             <div className="p2 icons-div">
                               Pay Out:&nbsp;
-                              <p>{overviewData.merchant_pay_out}</p>
+                              <p>{overviewData.merchant_pay_out || "N/A"}</p>
                             </div>
                           </li>
 
                           <li>
                             <div className="p2 icons-div">
                               Turnover:&nbsp;
-                              <p>{overviewData.turnover}</p>
+                              <p>{overviewData.turnover || "N/A"}</p>
                             </div>
                           </li>
                           <li>
                             <div className="p2 icons-div">
                               Industries ID:&nbsp;
-                              <p>{overviewData.industries_id}</p>
+                              <p>{overviewData.industries_id || "N/A"}</p>
                             </div>
                           </li>
                         </ul>
@@ -1109,7 +1123,7 @@ class ViewMerchant extends Component {
                           <li>
                             <div className="p2 icons-div">
                               First Name:&nbsp;
-                              <p>{overviewData.director_first_name}</p>
+                              <p>{overviewData.director_first_name || "N/A"}</p>
                             </div>
                           </li>
                         </ul>
@@ -1117,7 +1131,7 @@ class ViewMerchant extends Component {
                           <li>
                             <div className="p2 icons-div">
                               Last Name:&nbsp;
-                              <p>{overviewData.director_last_name}</p>
+                              <p>{overviewData.director_last_name || "N/A"}</p>
                             </div>
                           </li>
                         </ul>
@@ -1597,9 +1611,8 @@ class ViewMerchant extends Component {
                             <div className="api-key-content">
                               <p>{this.maskString(rootAccountKey)}</p>
                               <div
-                                className={`copy-icon-signupkey ${
-                                  copied.rootAccountKey ? "disabled" : ""
-                                }`}
+                                className={`copy-icon-signupkey ${copied.rootAccountKey ? "disabled" : ""
+                                  }`}
                                 onClick={() =>
                                   !copied.rootAccountKey &&
                                   this.handleCopy(
@@ -1650,6 +1663,7 @@ class ViewMerchant extends Component {
                         )} */}
                       </div>
                     </div>
+
                   )}
                   {this.state.isAddMerchantPanelOpen && (
                     <MerchantForm
@@ -1759,10 +1773,10 @@ class ViewMerchant extends Component {
                             <div>
                               <h5>
                                 {approvalData &&
-                                approvalData.approvalRatio !== undefined
+                                  approvalData.approvalRatio !== undefined
                                   ? parseFloat(
-                                      approvalData.approvalRatio.toFixed(2)
-                                    )
+                                    approvalData.approvalRatio.toFixed(2)
+                                  )
                                   : "N/A"}
                                 %
                               </h5>
@@ -2196,8 +2210,7 @@ class ViewMerchant extends Component {
                                     className="editable-input"
                                   />
                                 ) : (
-                                  `${
-                                    ratesData.chargeback_fee
+                                  `${ratesData.chargeback_fee
                                   } ${this.getCurrencySymbol(
                                     ratesData.currency
                                   )}`
@@ -2554,111 +2567,6 @@ class ViewMerchant extends Component {
                       </div>
                     </div>
                   )}
-
-                  {/* {this.state.secretsInfo && (
-                    <div className="right-section-middle-body">
-                      <div className="settlements-container">
-                        <div className="integration-Key">
-                          <h5>Integration Key</h5>
-                          <div className="secret-field">
-                            <p className="p2">API Key</p>
-                            <div className="input-container">
-                              <div
-                                className="icon-container copy-icon"
-                                onClick={() => this.handleCopy(apiKey)}
-                              >
-                                <Copy className="grey-icon" />
-                              </div>
-                              <input
-                                className="inputFeild secretkey-input"
-                                type="text"
-                                id="apiKey"
-                                value={
-                                  showApiKey ? apiKey : this.maskString(apiKey)
-                                }
-                                readOnly
-                              />
-                              <div
-                                className="icon-container eye-icon"
-                                onClick={() =>
-                                  this.toggleVisibility("showApiKey")
-                                }
-                              >
-                                {showApiKey ? (
-                                  <EyeOff className="grey-icon" />
-                                ) : (
-                                  <Eye className="grey-icon" />
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="secret-field">
-                            <p className="p2">Secret Key</p>
-                            <div className="input-container">
-                              <div
-                                className="icon-container copy-icon"
-                                onClick={() => this.handleCopy(secretKey)}
-                              >
-                                <Copy className="grey-icon" />
-                              </div>
-                              <input
-                                className="inputFeild secretkey-input"
-                                type="text"
-                                id="secretKey"
-                                value={
-                                  showSecretKey
-                                    ? secretKey
-                                    : this.maskString(secretKey)
-                                }
-                                readOnly
-                              />
-                              <div
-                                className="icon-container eye-icon"
-                                onClick={() =>
-                                  this.toggleVisibility("showSecretKey")
-                                }
-                              >
-                                {showSecretKey ? (
-                                  <EyeOff className="grey-icon" />
-                                ) : (
-                                  <Eye className="grey-icon" />
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <h5>Account Creation Key</h5>
-                        <div className="secret-field">
-                          <p className="p2">Root User Sign Up Key</p>
-                          <div className="input-container">
-                            <div
-                              className={`icon-container copy-icon ${
-                                copied.signupKey ? "disabled" : ""
-                              }`}
-                              onClick={() =>
-                                !copied.signupKey &&
-                                this.handleCopy("userSignUpKey", signupKey)
-                              }
-                            >
-                              <Copy className="grey-icon" />
-                            </div>
-                            <input
-                              className="inputFeild secretkey-input"
-                              type="text"
-                              id="signupKey"
-                              value={
-                                showUserSignUpKey
-                                  ? signupKey
-                                  : this.maskString(signupKey)
-                              }
-                              readOnly
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )} */}
                   {this.state.isAddMerchantPanelOpen && (
                     <MerchantForm
                       handleAddMerchant={this.handleAddMerchant}
@@ -2674,45 +2582,6 @@ class ViewMerchant extends Component {
               </div>
             </div>
           </div>
-          {/* <div className="icons-div">
-						<img
-						  src={calender}
-						  alt="calender"
-						  onClick={() => this.handleCalenderClick()}
-						></img>
-					  </div>
-					  {this.state.calendarVisible && (
-						<div className="dates-container">
-						  <div className="dates-div">
-							<label className="p2" htmlFor="fromDate">
-							  From:{" "}
-							</label>
-							<p className="p2">{this.state.fromDate}</p>
-							<input
-							  type="datetime-local"
-							  id="fromDate"
-							  className="inputFeild date-input"
-							  required
-							  onChange={this.handleInputChange}
-							  value={this.state.fromDate}
-							/>
-						  </div>
-						  <div className="dates-div">
-							<label className="p2" htmlFor="toDate">
-							  To:{" "}
-							</label>
-							<p className="p2">{this.state.toDate}</p>
-							<input
-							  type="datetime-local"
-							  id="toDate"
-							  className="inputFeild date-input"
-							  required
-							  onChange={this.handleInputChange}
-							  value={this.state.toDate}
-							/>
-						  </div>
-						</div>
-					  )} */}
         </>
       );
     }

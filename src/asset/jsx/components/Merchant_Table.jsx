@@ -464,7 +464,7 @@ class Table extends Component {
                           ))}
                           {showMerchants && !forAllUser && (
                             <td>
-                              <Link to={`/viewmerchant/${row.company_name}`}>
+                              <Link to={`/viewmerchant/${row.company_name}?id=${row._id}`}>
                                 <RightSign
                                   className="icon2"
                                   title="View More"

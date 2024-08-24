@@ -1,4 +1,6 @@
-import React, {Component} from "react";
+
+import React, { Component } from "react";
+
 
 //images
 import {
@@ -9,6 +11,8 @@ import {
   ShortCut,
   Close,
   Logout,
+  Infoicon,
+
 } from "../../media/icon/SVGicons";
 
 import user from "../../media/icon/user-profile.png";
@@ -47,6 +51,8 @@ class Header extends Component {
       email: this.getCookie("email"),
       userRole: this.getCookie("role"),
       companyName: this.getCookie("company_name"),
+      userStatus: this.getCookie("status"),
+
       token: this.getCookie("token"),
       theme: "light",
       scrolled: false,
@@ -120,7 +126,6 @@ class Header extends Component {
       notifications: [],
       newNotifications: false,
     };
-    this.eventSource = null;
   }
 
   getCookie = (name) => {
@@ -131,63 +136,63 @@ class Header extends Component {
   };
 
   componentDidMount = async () => {
+    this.setupEventSource();
+    
     const userRole = this.getCookie("role");
-    // Initialize SSE connection
-    this.eventSource = new EventSource(`https://paylinkup.online/events?role=${userRole}`);
-
-    // Listen for messages from the server
-    this.eventSource.onmessage = (event) => {
-      console.log(event)
-      const data = JSON.parse(event.data);
-      
-      this.handleNewNotification(data.message);
-      console.log(data.message)
-    };
-
-    // Handle errors
-    this.eventSource.onerror = (error) => {
-      console.error("SSE Error:", error);
-      this.eventSource.close();
-    };
-
     const savedScrollPosition = localStorage.getItem("Header_ScrollY");
-
+  
     if (savedScrollPosition) {
       window.scrollTo(0, parseInt(savedScrollPosition, 10));
     }
+    
     window.addEventListener("scroll", this.handleScroll);
     window.addEventListener("keydown", this.handleKeyDown);
-
+  
     const currentPage = window.location.pathname.split("/")[1];
     this.setState({ currentPage });
-
-    console.log("role user", userRole);
+  
     let currency = [];
     if (userRole === "admin") {
-      this.fetchCompanyList();
+      await this.fetchCompanyList();
       currency = ["USD", "EUR", "All Currencies"];
-    }
-    if (userRole === "merchant") {
+    } else if (userRole === "merchant") {
       currency = await this.fetchCurrencyList();
-      console.log("currency merchant", currency);
     }
-    const selectedCurrency = currency[0];
-    console.log("selected currency", selectedCurrency);
+  
+    const selectedCurrency = currency[0] || "";
     this.setState({ currency, selectedCurrency });
     this.handleCurrencyChange(selectedCurrency);
+  
     document.addEventListener("mousedown", this.handleClickOutside);
   };
-
+  
+  setupEventSource = () => {
+    const userRole = this.getCookie("role");
+    const backendURL = process.env.REACT_APP_BACKEND_URL;
+    this.eventSource = new EventSource(`${backendURL}/events?${userRole}`);
+  
+    this.eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      this.handleNewNotification(data.message);
+    };
+  
+    this.eventSource.onerror = (error) => {
+      console.error('SSE Error:', error);
+    };
+  };
+  
   componentWillUnmount() {
-     // Close SSE connection on component unmount
-     if (this.eventSource) {
+    if (this.eventSource) {
       this.eventSource.close();
     }
-
+  
     localStorage.setItem("Header_ScrollY", window.scrollY);
     window.removeEventListener("scroll", this.handleScroll);
+    window.removeEventListener("keydown", this.handleKeyDown);
     document.removeEventListener("mousedown", this.handleClickOutside);
   }
+  
+
 
   handleClickOutside = (event) => {
     const modalElements = [
@@ -203,6 +208,8 @@ class Header extends Component {
       this.setState({
         searchOpen: false,
         showUserProfileModal: false,
+        showNotificationModal: false,
+
       });
     }
   };
@@ -232,6 +239,9 @@ class Header extends Component {
         scrolled: true,
         showUserProfileModal: false,
         shortcutModal: false,
+
+        showNotificationModal: false,
+
       });
     } else {
       this.setState({
@@ -252,6 +262,9 @@ class Header extends Component {
       showUserProfileModal: false,
       shortcutModal: false,
       showInnerModal: false,
+
+      showNotificationModal: false,
+
     }));
   };
 
@@ -261,6 +274,9 @@ class Header extends Component {
       searchOpen: false,
       shortcutModal: false,
       showInnerModal: false,
+
+      showNotificationModal: false,
+
     }));
   };
 
@@ -383,23 +399,30 @@ class Header extends Component {
 
   handleButtonClick = () => {
     this.props.onStartFetchingData();
-}
-  
-handleNewNotification = (message) => {
-  // Update state with new notification
-  this.setState((prevState) => ({
-    notifications: [...prevState.notifications, message],
-    newNotifications: true, // Indicate there are new notifications
-  }));
-};
 
+  };
 
-handleNotificationClick = () => {
-  this.setState((prevState) => ({
-    showNotificationModal: !prevState.showNotificationModal,
-    newNotifications: prevState.showNotificationModal ? prevState.newNotifications : false, 
-  }));
-};
+  handleNewNotification = (message) => {
+    // Update state with new notification
+    this.setState((prevState) => ({
+      notifications: [...prevState.notifications, message],
+      newNotifications: true, // Indicate there are new notifications
+    }));
+  };
+
+  handleNotificationClick = () => {
+    this.setState((prevState) => ({
+      showNotificationModal: !prevState.showNotificationModal,
+      newNotifications: prevState.showNotificationModal
+        ? prevState.newNotifications
+        : false,
+    }));
+  };
+
+  handleViewClick = () => {
+    window.location.href = "/allmerchant?showPending=true";
+  };
+
 
   render() {
     const {
@@ -417,10 +440,17 @@ handleNotificationClick = () => {
       userRole,
       showNotificationModal,
       notifications,
+
+      userStatus
     } = this.state;
 
     const hasNotifications = notifications.length > 0;
-console.log("noti",notifications)
+    console.log("noti", notifications);
+
+    const isProfileVisible = userRole === 'merchant' && userStatus === 'Pending';
+    const blurClass = isProfileVisible ? 'blur-effect' : '';
+
+
     return (
       <>
         {shortcutModal && (
@@ -433,6 +463,9 @@ console.log("noti",notifications)
 
         <div id="header" className={scrolled ? "scrolled" : ""}>
           <nav>
+
+           <div className={blurClass}>
+
             <div className="header-left">
               <div className="Search-div" onClick={this.toggleSearch}>
                 <CustomTooltip title="Search Bar" leftMargin={25}>
@@ -452,7 +485,11 @@ console.log("noti",notifications)
               </div>
             </div>
 
+            </div>
+
             <div className="header-right">
+            <div className={blurClass}>
+
               {currentPage === "dashboard" && (
                 <div className="custom-select-div">
                   <CustomSelect
@@ -470,6 +507,10 @@ console.log("noti",notifications)
                   )}
                 </div>
               )}
+
+              </div>
+              <div className={blurClass}>
+
               {theme === "light" ? (
                 <CustomTooltip title="Light Mode">
                   <LightMode
@@ -485,6 +526,10 @@ console.log("noti",notifications)
                   ></DarkMode>
                 </CustomTooltip>
               )}
+
+              </div>
+               <div className={blurClass}>
+
               <CustomTooltip title="Add shortcut">
                 <ShortCut
                   className="icon"
@@ -492,11 +537,19 @@ console.log("noti",notifications)
                 ></ShortCut>
               </CustomTooltip>
               <CustomTooltip title="Notification">
-              <div className="notification-icon-wrapper" onClick={this.handleNotificationClick}>
+
+                <div
+                  className="notification-icon-wrapper"
+                  onClick={this.handleNotificationClick}
+                >
                   <Notification className="icon" />
-                  {hasNotifications && <div className="notification-badge"></div>}
+                  {hasNotifications && (
+                    <div className="notification-badge"></div>
+                  )}
                 </div>
               </CustomTooltip>
+              </div>
+
               <div className="user-profile-div">
                 <CustomTooltip title="Your Profile" leftMargin={-25}>
                   <img
@@ -515,7 +568,9 @@ console.log("noti",notifications)
 
           {showUserProfileModal && (
             <div className="search-window user-modal">
-              <header className="modal-container-header">
+
+              <div className="modal-container-header">
+
                 <img
                   className="icon user-profile"
                   src={user}
@@ -531,7 +586,9 @@ console.log("noti",notifications)
                 >
                   &times;
                 </span>
-              </header>
+
+              </div>
+
 
               <div className="user-setting-options">
                 <div className="esc-div user">
@@ -564,30 +621,21 @@ console.log("noti",notifications)
         </div>
 
         {showNotificationModal && (
-            <div className="notification-modal">
-              <div className="modal-container-header">
-                <h5>Notifications</h5>
-                <span
-                  className="close"
-                  onClick={this.handleNotificationClick}
-                >
-                  &times;
-                </span>
-              </div>
-              <div className="notification-list">
-                {notifications.length > 0 ? (
-                  notifications.map((notification, index) => (
-                    <div className="notification-item" key={index}>
-                      <p>{notification.message}</p>
-                      <small>{new Date(notification.timestamp).toLocaleString()}</small>
-                    </div>
-                  ))
-                ) : (
-                  <p>No notifications</p>
-                )}
-              </div>
+
+          <div className="search-window notification-modal">
+            <div className="modal-container-header">
+              <h5>Notifications</h5>
+              <span className="close" onClick={this.handleNotificationClick}>
+                &times;
+              </span>
             </div>
-          )}
+            <div className="notification-list">
+              {notifications.map((notification, index) => (
+                <li key={index}>{notification}</li>
+              ))}
+            </div>
+          </div>
+        )}
 
         {searchOpen && (
           <div className="search-window-overlay">
@@ -647,6 +695,7 @@ console.log("noti",notifications)
                           </div>
                         ))}
                     </div>
+
                   </div>
                 ))}
               </div>

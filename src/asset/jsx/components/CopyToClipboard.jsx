@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import '../../style/main.css'; 
 
 class CopyToClipboard extends Component {
   constructor(props) {

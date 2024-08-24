@@ -68,7 +68,7 @@ class CustomSelect extends Component {
     const { selectedOptions, isOpen, searchValue } = this.state;
 
     const filteredOptions = options.filter((option) =>
-      option.toLowerCase().startsWith(searchValue.toLowerCase())
+      option.toLowerCase().includes(searchValue.toLowerCase())
     );
 
     if (defaultLabel && !filteredOptions.includes(defaultLabel)) {
@@ -88,7 +88,7 @@ class CustomSelect extends Component {
         <div
           className="custom-select-selected"
           onClick={() => {
-            if (filteredOptions.length > 1) {
+            if (filteredOptions.length > 0) {
               this.setState({ isOpen: !isOpen });
             }
           }}
@@ -102,7 +102,7 @@ class CustomSelect extends Component {
           </span>
           <div className="select-icon">{dropdownIcon}</div>
         </div>
-        {isOpen && filteredOptions.length > 1 && (
+        {isOpen && filteredOptions.length > 0 && (
           <div className="custom-select-options">
             <input
               type="text"

@@ -28,9 +28,7 @@ class Signup extends Component {
       userSocial_id: "",
       userPassword: "",
       userConfirm_password: "",
-      role: "",
-      behavior: "",
-      isRootBehavior: false,
+
     };
   }
 
@@ -38,16 +36,15 @@ class Signup extends Component {
     const { id, value } = event.target;
     this.setState({ [id]: value });
   };
-
-  handleRootBehaviorChange = (event) => {
-    this.setState({ isRootBehavior: event.target.checked });
-  };
-
   handleSignupSuccessModalToggle = (action) => {
     if (action === "open") {
       this.setState({ isSignupSuccessful: true });
-    } else {
-      this.setState({ isSignupSuccessful: false });
+    } else if (action === "close") {
+      this.setState({ isSignupSuccessful: false }, () => {
+        if (this.state.redirectToLogin) {
+          this.props.history.push('/');
+        }
+      });
     }
   };
 
@@ -64,17 +61,7 @@ class Signup extends Component {
       userSocial_id,
       userPassword,
       userConfirm_password,
-      isRootBehavior,
     } = this.state;
-
-    let role = "merchant";
-    let behavior = "user";
-    if (userCompany_name.toLowerCase() === "centpays") {
-      role = "employee";
-    } else if (role === "merchant") {
-      behavior = isRootBehavior ? "root" : "user";
-    }
-
     if (userPassword !== userConfirm_password) {
       this.setState({
         errorMessage: "Passwords do not match. Please try again.",
@@ -124,12 +111,10 @@ class Signup extends Component {
       mobile_no: userMobile_no,
       country: userCountry,
       password: userPassword,
-      confirm_password: userConfirm_password,
+      confirmPassword: userConfirm_password,
       company_name: userCompany_name,
       company_url: userCompany_URL,
-      chatId: userSocial_id,
-      role,
-      behavior,
+      poc_id: userSocial_id,
     };
 
     console.log("Request Body:", requestBody);
@@ -158,7 +143,6 @@ class Signup extends Component {
           errorMessage: "",
           messageType: "",
           isSignupSuccessful: true,
-          isRootBehavior:false
         });
       } else {
         const errorData = await response.json();
@@ -188,9 +172,6 @@ class Signup extends Component {
             messageType={messageType}
             onClose={() => this.setState({ errorMessage: "" })}
           />
-        )}
-        {isSignupSuccessful && (
-          <Modal onClose={() => this.setState({ isSignupSuccessful: false })} />
         )}
         {isSignupSuccessful && (
           <Modal
