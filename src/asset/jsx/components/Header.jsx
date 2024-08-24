@@ -1,4 +1,6 @@
+
 import React, { Component } from "react";
+
 
 //images
 import {
@@ -10,6 +12,7 @@ import {
   Close,
   Logout,
   Infoicon,
+
 } from "../../media/icon/SVGicons";
 
 import user from "../../media/icon/user-profile.png";
@@ -49,6 +52,7 @@ class Header extends Component {
       userRole: this.getCookie("role"),
       companyName: this.getCookie("company_name"),
       userStatus: this.getCookie("status"),
+
       token: this.getCookie("token"),
       theme: "light",
       scrolled: false,
@@ -189,6 +193,7 @@ class Header extends Component {
   }
   
 
+
   handleClickOutside = (event) => {
     const modalElements = [
       document.querySelector(".search-window"),
@@ -204,6 +209,7 @@ class Header extends Component {
         searchOpen: false,
         showUserProfileModal: false,
         showNotificationModal: false,
+
       });
     }
   };
@@ -233,7 +239,9 @@ class Header extends Component {
         scrolled: true,
         showUserProfileModal: false,
         shortcutModal: false,
+
         showNotificationModal: false,
+
       });
     } else {
       this.setState({
@@ -254,7 +262,9 @@ class Header extends Component {
       showUserProfileModal: false,
       shortcutModal: false,
       showInnerModal: false,
+
       showNotificationModal: false,
+
     }));
   };
 
@@ -264,7 +274,9 @@ class Header extends Component {
       searchOpen: false,
       shortcutModal: false,
       showInnerModal: false,
+
       showNotificationModal: false,
+
     }));
   };
 
@@ -387,6 +399,7 @@ class Header extends Component {
 
   handleButtonClick = () => {
     this.props.onStartFetchingData();
+
   };
 
   handleNewNotification = (message) => {
@@ -410,6 +423,7 @@ class Header extends Component {
     window.location.href = "/allmerchant?showPending=true";
   };
 
+
   render() {
     const {
       theme,
@@ -426,6 +440,7 @@ class Header extends Component {
       userRole,
       showNotificationModal,
       notifications,
+
       userStatus
     } = this.state;
 
@@ -434,6 +449,7 @@ class Header extends Component {
 
     const isProfileVisible = userRole === 'merchant' && userStatus === 'Pending';
     const blurClass = isProfileVisible ? 'blur-effect' : '';
+
 
     return (
       <>
@@ -447,7 +463,9 @@ class Header extends Component {
 
         <div id="header" className={scrolled ? "scrolled" : ""}>
           <nav>
+
            <div className={blurClass}>
+
             <div className="header-left">
               <div className="Search-div" onClick={this.toggleSearch}>
                 <CustomTooltip title="Search Bar" leftMargin={25}>
@@ -466,10 +484,12 @@ class Header extends Component {
                 </CustomTooltip>
               </div>
             </div>
+
             </div>
 
             <div className="header-right">
             <div className={blurClass}>
+
               {currentPage === "dashboard" && (
                 <div className="custom-select-div">
                   <CustomSelect
@@ -487,8 +507,10 @@ class Header extends Component {
                   )}
                 </div>
               )}
+
               </div>
               <div className={blurClass}>
+
               {theme === "light" ? (
                 <CustomTooltip title="Light Mode">
                   <LightMode
@@ -504,8 +526,10 @@ class Header extends Component {
                   ></DarkMode>
                 </CustomTooltip>
               )}
+
               </div>
                <div className={blurClass}>
+
               <CustomTooltip title="Add shortcut">
                 <ShortCut
                   className="icon"
@@ -513,6 +537,7 @@ class Header extends Component {
                 ></ShortCut>
               </CustomTooltip>
               <CustomTooltip title="Notification">
+
                 <div
                   className="notification-icon-wrapper"
                   onClick={this.handleNotificationClick}
@@ -524,6 +549,7 @@ class Header extends Component {
                 </div>
               </CustomTooltip>
               </div>
+
               <div className="user-profile-div">
                 <CustomTooltip title="Your Profile" leftMargin={-25}>
                   <img
@@ -542,7 +568,9 @@ class Header extends Component {
 
           {showUserProfileModal && (
             <div className="search-window user-modal">
+
               <div className="modal-container-header">
+
                 <img
                   className="icon user-profile"
                   src={user}
@@ -558,7 +586,9 @@ class Header extends Component {
                 >
                   &times;
                 </span>
+
               </div>
+
 
               <div className="user-setting-options">
                 <div className="esc-div user">
@@ -591,6 +621,7 @@ class Header extends Component {
         </div>
 
         {showNotificationModal && (
+
           <div className="search-window notification-modal">
             <div className="modal-container-header">
               <h5>Notifications</h5>
@@ -664,6 +695,7 @@ class Header extends Component {
                           </div>
                         ))}
                     </div>
+
                   </div>
                 ))}
               </div>

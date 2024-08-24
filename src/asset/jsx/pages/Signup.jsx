@@ -28,6 +28,7 @@ class Signup extends Component {
       userSocial_id: "",
       userPassword: "",
       userConfirm_password: "",
+
     };
   }
 
@@ -35,7 +36,6 @@ class Signup extends Component {
     const { id, value } = event.target;
     this.setState({ [id]: value });
   };
-
   handleSignupSuccessModalToggle = (action) => {
     if (action === "open") {
       this.setState({ isSignupSuccessful: true });
@@ -62,7 +62,6 @@ class Signup extends Component {
       userPassword,
       userConfirm_password,
     } = this.state;
-
     if (userPassword !== userConfirm_password) {
       this.setState({
         errorMessage: "Passwords do not match. Please try again.",
@@ -356,6 +355,16 @@ class Signup extends Component {
                         >
                           privacy policy and terms
                         </Link>
+                      </label>
+                    </div>
+                    <div className="input-group-div">
+                      <label className="p2">
+                        <input
+                          type="checkbox"
+                          checked={this.state.isRootBehavior}
+                          onChange={this.handleRootBehaviorChange}
+                        />
+                        Root User
                       </label>
                     </div>
                   </div>

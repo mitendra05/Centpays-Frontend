@@ -28,12 +28,14 @@ class ListSettlement extends Component {
       errorMessage: "",
       messageType: "",
       loading: false,
+
     };
   }
 
   componentDidMount() {
     this.fetchData();
     this.fetchTempData();
+
     this.handleQueryParams();
   }
 
@@ -48,7 +50,6 @@ class ListSettlement extends Component {
     const backendURL = process.env.REACT_APP_BACKEND_URL;
     const { token } = this.state;
     this.setState({ loading: true });
-
     try {
       const response = await fetch(`${backendURL}/clients`, {
         method: "GET",
@@ -57,14 +58,13 @@ class ListSettlement extends Component {
           "Content-Type": "application/json",
         },
       });
-
+  
       if (response.ok) {
         let data = await response.json();
         this.setState({
           apiData: data,
           loading: false,
         });
-        console.log("api data", this.state.apiData)
       } else {
         console.error("Error fetching data:", response.statusText);
         this.setState({
@@ -81,6 +81,11 @@ class ListSettlement extends Component {
         loading: false,
       });
     }
+  };
+  
+  
+  handleTabClick = (status) => {
+    this.setState({ showMerchants: status });
   };
 
   fetchTempData = async () => {
@@ -153,6 +158,7 @@ class ListSettlement extends Component {
   handleQueryParams = () => {
     const query = new URLSearchParams(window.location.search);
     const showPending = query.get('showPending');
+
 
     if (showPending === 'true') {
       this.setState({ showMerchants: 'Pending' });
