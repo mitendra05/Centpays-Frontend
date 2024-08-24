@@ -51,6 +51,9 @@ import Setting from "./asset/jsx/pages/setting";
 
 import BankSettlement from "./asset/jsx/pages/Bank_Settlements";
 import LiveReport from "./asset/jsx/pages/LiveReport";
+import ViewUsers from "./asset/jsx/pages/ViewUsers";
+import DummyDash from "./asset/jsx/pages/Dummy_Dashboard";
+import Text from "./asset/jsx/pages/text"
 
 function App() {
   return (
@@ -64,6 +67,7 @@ function App() {
 
           {/* Dashboard Routes */}
           <Route path="/dashboard" element={<Dashboard />}></Route>
+          <Route path="/dummydashboard" element={<DummyDash />}></Route>
           <Route path="/livetransactiontable" element={<LiveTransactionTable />}></Route>
 
           {/* Settlement Routes */}
@@ -107,6 +111,9 @@ function App() {
 
           <Route path="/banksettle" element={<BankSettlement />}></Route>
           <Route path="/livereport" element={<LiveReport/>}></Route>
+          <Route path="/viewuser/:company_name"element={<ViewUsers />}></Route>
+
+          <Route path="/text" element={<Text/>}></Route>
 
         </Routes>
       </BrowserRouter>

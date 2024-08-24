@@ -449,7 +449,7 @@ class Table extends Component {
                                 <div>
                                   <Delete className="icon2" onClick={() => this.deleteRow(index)} />
                                   <Link
-                                    to={`/viewmerchant/${row.company_name}`}
+                                    to={`/viewuser/${row.company_name}`}
                                   >
                                     <Eye className="icon2" />
                                   </Link>
@@ -464,7 +464,7 @@ class Table extends Component {
                           ))}
                           {showMerchants && !forAllUser && (
                             <td>
-                              <Link to={`/viewmerchant/${row.company_name}`}>
+                              <Link to={`/viewmerchant/${row.company_name}?id=${row._id}`}>
                                 <RightSign
                                   className="icon2"
                                   title="View More"

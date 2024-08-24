@@ -61,12 +61,12 @@ class Modal extends Component {
   };
 
   render() {
-    const { enableDragging } = this.props;
+    const { enableDragging,showBackground} = this.props;
     const cursorStyle = enableDragging ? 'move' : 'auto';
 
     return (
       <>
-        <div className="modal">
+        <div className="modal" style={{ backgroundColor: showBackground ? "transparent":"#00000050" }}>
           <article
             className="modal-container"
             ref={this.modalRef}

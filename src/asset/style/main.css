@@ -44,13 +44,18 @@ body {
 	-moz-osx-font-smoothing: grayscale;
 	-webkit-font-smoothing: antialiased;
 	overflow-x: hidden;
+	-webkit-user-select: none; /* Chrome, Safari, Opera */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none;
+	
 }
 
 *::-webkit-scrollbar {
 	width: 5px !important;
 	height: 5px;
 	position: absolute;
-	right: 2rem;
+	right: 2px;
 }
 
 *::-webkit-scrollbar-thumb {
@@ -59,12 +64,16 @@ body {
 	border: 2px solid #ffffff00;
 }
 
-
 .menuitem-disable {
 	color: var(--secondary) !important;
 	pointer-events: none;
 	user-select: none;
 }
+
+.blur-effect {
+	filter: blur(5px); 
+	pointer-events: none;
+  }
 
 /* ------------------------------ Common Elements ------------------------------ */
 
@@ -332,7 +341,7 @@ p {
 }
 
 .scrolled .header-right {
-	margin-right: -6px !important;
+	margin-right: -7px !important;
 }
 
 nav {
@@ -348,7 +357,14 @@ nav {
 	display: flex;
 	align-items: center;
 	cursor: pointer;
-	padding: 2px 5px;
+	gap: 10px;
+	
+}
+
+.Search-div{
+	display: flex;
+	align-items: center;
+	padding: 5px 5px;
 	border-radius: 10px;
 }
 
@@ -426,7 +442,36 @@ nav {
 	padding: 0;
 }
 
+.notification-container {
+	position: relative;
+	display: inline-block;
+  }
+  
+  .notification-icon {
+	font-size: 24px;
+  }
+  
+  .notification-badge {
+	position: absolute;
+	top: 5%;
+	right: 5%;
+	width: 12px;
+	height: 12px;
+	background-color:var(--white);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+  }
 
+  .notification-badge::before {
+	content: '';
+	width: 8px;  
+	height: 8px; 
+	background-color: var(--red-color);
+	border-radius: 50%;
+  }
+  
 /*  ------------------------------ Sidebar  ------------------------------  */
 .sidebar {
 	width: 250px;
@@ -633,7 +678,6 @@ nav {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background-color: #00000050;
 	z-index: 999;
 }
 
@@ -691,15 +735,21 @@ nav {
 .custom-select-selected {
 	cursor: pointer;
 	padding: 9px;
-	width: 170px;
+	width: 180px;
 	border: 2px solid var(--border-gray);
 	border-radius: 0.25rem;
 	background-color: #fff;
-	white-space: nowrap;
 	display: flex;
 	align-items: center;
-	text-overflow: ellipsis;
+	justify-content: space-between;
 }
+
+.custom-select-selected span {
+	max-width: 130px; 
+	overflow: hidden; 
+	text-overflow: ellipsis;
+	white-space: nowrap; 
+  }
 
 .custom-select-options {
 	position: absolute;
@@ -749,6 +799,7 @@ nav {
 	right: 10px;
 	top: 50%;
 	transform: translateY(-50%);
+	margin-left: 8px;
 }
 
 input[type="checkbox"] {
@@ -865,9 +916,8 @@ input[type="checkbox"] {
 
 .auth-btn {
 	width: 100%;
-	margin: 40px 0 30px 0;
+	margin: 20px 0 20px 0;
 }
-
 
 .bottom-line a {
 	padding: 0 5px;
@@ -951,7 +1001,7 @@ input[type="checkbox"] {
 }
 
 .content-modal {
-	text-align: left;
+	text-align: center;
 	color: gray;
 }
 
@@ -1202,7 +1252,8 @@ input[type="checkbox"] {
 }
 
 .animate-region {
-	animation: scrollText 5s infinite linear;
+	display: inline-block;
+	animation: scrollText 5s linear infinite;
 }
 
 @keyframes scrollText {
@@ -1461,6 +1512,7 @@ input[type="checkbox"] {
 	max-height: 60vh;
 	overflow-y: auto;
 }
+
 
 .Table-container table {
 	width: 100%;
@@ -2632,7 +2684,7 @@ td {
 .txn-search-table-Body th {
 	background-color: var(--secondary);
 	text-wrap: nowrap;
-	padding: 15px 10px;
+	padding: 15px 8px;
 	text-align: center;
 	text-transform: uppercase;
 	font-weight: 550 !important;
@@ -2644,7 +2696,7 @@ td {
 
 .txn-search-table-Body td {
 	text-wrap: wrap;
-	padding: 15px 10px;
+	padding: 15px 8px;
 	text-align: center;
 	border-bottom: 1px solid #ddd;
 	color: var(--light-text);
@@ -2709,8 +2761,8 @@ td {
 }
 
 .no-border-bottom {
-	border-bottom: none !important;
-}
+	border-bottom: none;
+  }
 
  .coloumn-width{
 	display: flex;
@@ -2808,6 +2860,12 @@ td {
 	cursor: pointer;
   }
 
+  .word-wrap {
+	white-space: normal; 
+	word-break: break-word; 
+	overflow-wrap: break-word;
+  }
+  
 /* ..........................................search window ............................................................. */
 /* .search-window-overlay {
 	position: fixed;
@@ -3924,6 +3982,7 @@ hr {
 .merchant-card {
 	width: 25%;
 	padding: 15px 20px;
+	cursor: pointer;
 }
 
 .merchant-card-top {
@@ -3944,6 +4003,7 @@ hr {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	
 }
 
 .active-merchant {
@@ -4086,15 +4146,15 @@ hr {
 	overflow: hidden;
 
 }
-
-
 .approval-div-section {
 	display: flex;
 	align-items: center;
 	width: 70%;
 	height: 100%;
 	margin-left: 50px;
-	animation: scrollAnimation 5s linear;
+	animation: scrollAnimation 5s linear infinite;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 @keyframes scrollAnimation {
@@ -4937,23 +4997,6 @@ hr {
 	transform: translateX(-50%);
 }
 
-.paymentDetails {
-	text-align: left;
-	border: 1px solid var(--border-gray);
-	padding: 10px;
-	border-radius: 10px;
-}
-
-.paymentDetails p {
-	padding: 5px 0;
-}
-
-.paymentDetails .p2 {
-	padding: 0;
-	margin-top: -10px;
-	font-size: 12px;
-}
-
 .paymentDetails .paymentDetails-header {
 	display: flex;
 	justify-content: space-between;
@@ -5048,7 +5091,6 @@ hr {
 .preview-table {
 	height: 100%;
 	overflow-y: auto;
-	
 }
 
 .compare-line {
@@ -5135,7 +5177,6 @@ hr {
 	 overflow-y: auto;
 }
 	
-
 .preview-table table {
 	width: 100%;
 	font-size: 13px;
@@ -5150,7 +5191,7 @@ hr {
 	justify-content: space-between;
 	width: 100% !important;
 	border-bottom-left-radius: 10px;
-	border-bottom-right-radius: 10px;
+	border-bottom-right-radius: 10px;	
 }
 
 .preview-totals div {
@@ -5523,7 +5564,171 @@ hr {
 		margin-top: 120px;
 	}
 
+/* Modal Window */
+.notification-modal {
+    position: fixed;
+    top: 8%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+	right: 3%;
+}
 
+.modal-container-header h5 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
 
+.modal-container-header .close {
+    font-size: 24px;
+    color: #333;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
 
-	
+.modal-container-header .close:hover {
+    color: #e74c3c;
+}
+
+.notification-list {
+	padding: 10px;
+	max-height: 400px;
+	overflow-y: auto;
+}
+  
+.notification-div{
+	display: flex;
+	align-items: center;
+}
+
+.view-btn{
+	margin-top: -3px;
+	margin-left: 5px;
+	width: 25px;
+	height: 25px;
+	background-color: var(--secondary);
+}
+
+  /* .....Text.... */
+  .scroll-container {
+	position: relative;
+	margin: 50px auto;
+  }
+  
+  .scroll-inner {
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+  }
+  
+  .scroll-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	transition: transform 2s linear;
+	transform: translateY(0);
+	height: 100%;
+  }
+  
+  .scroll-item {
+	height: 50px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 16px;
+	transition: font-size 0.5s ease, transform 0.5s ease;
+  }
+  
+  .highlighted {
+	width: 70px;
+	height: 30px;
+	background-color:#9ddefe;
+	color: red;
+	font-size: 18px;
+  }
+  
+  /* Smooth scroll animation */
+  .scroll-list.animate {
+	animation: scroll 10s linear infinite;
+  }
+  
+  @keyframes scroll {
+	0% {
+	  transform: translateY(0);
+	}
+	100% {
+	  transform: translateY(-100%);
+	}
+  }
+
+  /* App.css */
+  .page-background {
+	background-color: black;
+	height: 100vh;
+	width: 100vw;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	color: white;
+	border-radius: 1%; /* Apply border-radius to the container */
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%); /* Center the container */
+  }
+  
+  .content-container {
+	background-color: white;
+	color: black;
+	width: 90%; /* Full width of the .page-background */
+	max-width: 90%;
+	height: 90%;
+	padding: 20px;
+	border-radius: 8px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	text-align: center; /* Center text inside the container */
+  }
+  
+  /* Optional styling for the navbar and other elements */
+  .navbar {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+  }
+  
+  .logo {
+	font-size: 24px;
+	margin-left: -20px;
+  }
+  
+  .search-bar {
+	width: 60%;
+	padding: 8px;
+	margin-right: 180px;
+  }
+  
+  .profile-icon {
+	font-size: 20px;
+  }
+  
+  .header {
+	margin-bottom: 20px;
+  }
+  
+  .screenshots {
+	text-align: center;
+  }
+  
+  .screenshot {
+	width: 60%;
+	position: absolute;
+	left: 22%;
+	height: 60%;
+	border-radius: 8px;
+  }

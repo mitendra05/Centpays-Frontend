@@ -163,10 +163,10 @@ class Table extends Component {
     const { headerLabels, onViewClick, shouldRenderRightSign } = this.props;
     const { expandedRows, currentPage, rowsPerPage, sortedData, isDescending } =
       this.state;
-  
+
     const startIndex = (currentPage - 1) * rowsPerPage;
     const currentData = sortedData.slice(startIndex, startIndex + rowsPerPage);
-  
+
     const totalRows = sortedData.length;
     const totalPages = Math.ceil(totalRows / rowsPerPage);
     const totalAmountCurrentPage = currentData.reduce(
@@ -178,7 +178,7 @@ class Table extends Component {
       0
     );
     const shouldShowTotal = totalPages === 1 || currentPage === totalPages;
-  
+
     return (
       <div className="txn-search-table-container">
         <div className="table-Header table-head-btn">
@@ -210,7 +210,7 @@ class Table extends Component {
             </div>
           )}
         </div>
-  
+
         <div className="txn-search-table-Body">
           <ScrollTopAndBottomButton />
           <table>
@@ -224,6 +224,7 @@ class Table extends Component {
                   </th>
                 ))}
                 <th></th>
+                {shouldRenderRightSign && <th></th>}
               </tr>
             </thead>
             <tbody>
@@ -250,6 +251,9 @@ class Table extends Component {
                           ) : (
                             <MailStatus className="creditcard-img primary-color-icon" />
                           )
+                        ) : collabel.label === "paymentgateway" &&
+                          row[collabel.label].length > 7 ? (
+                          <div className="word-wrap">{row[collabel.label]}</div>
                         ) : (
                           row[collabel.label]
                         )}
@@ -260,6 +264,7 @@ class Table extends Component {
                         <RightSign className="icon2" />
                       </td>
                     )}
+                    {shouldRenderRightSign && <td></td>}
                   </tr>
                   {expandedRows.includes(startIndex + index) && (
                     <tr className="p2">
@@ -278,6 +283,11 @@ class Table extends Component {
                                     ) : (
                                       <MailStatus className="creditcard-img primary-color-icon" />
                                     )
+                                  ) : collabel.label === "paymentgateway" &&
+                                    row[collabel.label].length > 7 ? (
+                                    <div className="word-wrap">
+                                      {row[collabel.label]}
+                                    </div>
                                   ) : (
                                     row[collabel.label]
                                   )}
@@ -291,7 +301,7 @@ class Table extends Component {
                   )}
                 </React.Fragment>
               ))}
-  
+
               <tr className="p2 total-amount-row">
                 <td className="txn-amount-blank" colSpan={4}></td>
                 <td className="txn-amount-head" colSpan={4}>
@@ -365,7 +375,7 @@ class Table extends Component {
         </div>
       </div>
     );
-  }  
+  }
 }
 
 export default Table;
